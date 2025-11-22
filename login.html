@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>De Anza Registration</title>
+    <title>De Anza Login</title>
     <style>
         /* Global Reset and Body Styling */
         body {
@@ -47,8 +47,8 @@
             align-items: center;
         }
 
-        /* Registration Card */
-        .registration-card {
+        /* Login Card */
+        .login-card {
             background-color: white;
             padding: 30px;
             border-radius: 15px;
@@ -95,7 +95,7 @@
         }
 
         /* Button Styling */
-        .register-button {
+        .login-button {
             background-color: #4f090c; /* Dark Red */
             color: white;
             padding: 15px 30px;
@@ -108,11 +108,11 @@
             transition: background-color 0.3s, transform 0.1s;
         }
 
-        .register-button:hover:not(:disabled) {
+        .login-button:hover:not(:disabled) {
             background-color: #6e0b0f; /* Slightly lighter red on hover */
         }
         
-        .register-button:disabled {
+        .login-button:disabled {
             background-color: #ccc;
             cursor: not-allowed;
         }
@@ -139,25 +139,25 @@
             border: 1px solid #f5c6cb;
         }
         
-        /* Link to Login */
-        .login-link {
+        /* Link to Registration */
+        .register-link {
             margin-top: 20px;
             font-size: 0.9em;
         }
         
-        .login-link a {
+        .register-link a {
             color: #4f090c;
             text-decoration: none;
             font-weight: bold;
         }
         
-        .login-link a:hover {
+        .register-link a:hover {
             text-decoration: underline;
         }
 
         /* Responsive Design */
         @media (max-width: 600px) {
-            .registration-card {
+            .login-card {
                 margin: 20px;
             }
         }
@@ -179,29 +179,29 @@
 
     <!-- Main Content -->
     <div class="main-content">
-        <div class="registration-card">
-            <h2 class="card-title">Create Student Account</h2>
+        <div class="login-card">
+            <h2 class="card-title">Student Login</h2>
             
-            <form id="registrationForm">
+            <form id="loginForm">
                 <div class="form-group">
-                    <label for="studentId">Student ID (De Anza Email)</label>
-                    <input type="email" id="studentId" placeholder="you@deanza.edu" required>
+                    <label for="studentId">Student ID</label>
+                    <input type="text" id="studentId" placeholder="20683637" maxlength="8" pattern="[0-9]{8}" required>
                 </div>
                 
                 <div class="form-group">
-                    <label for="password">Password (min 6 characters)</label>
+                    <label for="password">Password</label>
                     <input type="password" id="password" required>
                 </div>
                 
                 <div id="messageBox" class="message-box"></div>
                 
-                <button type="submit" id="registerButton" class="register-button" disabled>
-                    Register Account
+                <button type="submit" id="loginButton" class="login-button">
+                    Sign In
                 </button>
             </form>
             
-            <div class="login-link">
-                Already have an account? <a href="login.html">Sign in here</a>.
+            <div class="register-link">
+                Don't have an account? <a href="registration.html">Create one here</a>.
             </div>
         </div>
     </div>
@@ -214,17 +214,16 @@
   
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
         // --- DOM Elements ---
-        const registrationForm = document.getElementById('registrationForm');
-        const registerButton = document.getElementById('registerButton');
+        const loginForm = document.getElementById('loginForm');
+        const loginButton = document.getElementById('loginButton');
         const studentIdInput = document.getElementById('studentId');
         const passwordInput = document.getElementById('password');
         const messageBox = document.getElementById('messageBox');
 
         let auth = null;
-        let isAuthReady = false;
 
         // --- Utility Functions ---
         function displayMessage(type, message) {
@@ -234,61 +233,35 @@
             setTimeout(() => messageBox.style.display = 'none', 5000);
         }
 
-        function validateInputs() {
-            // Very basic validation - Firebase handles detailed validation
-            const isEmailValid = studentIdInput.value.length > 5 && studentIdInput.value.includes('@');
-            const isPasswordValid = passwordInput.value.length >= 6;
-            
-            // Only enable the button if Firebase is ready AND inputs are valid
-            registerButton.disabled = !(isAuthReady && isEmailValid && isPasswordValid);
-        }
+        // --- Firebase Configuration ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyBJJYUOM8EBEuT39DX2F_HtxgEbHDRH-Zc",
+            authDomain: "deanzahacks11-21-2025.firebaseapp.com",
+            projectId: "deanzahacks11-21-2025",
+            storageBucket: "deanzahacks11-21-2025.firebasestorage.app",
+            messagingSenderId: "253702257130",
+            appId: "1:253702257130:web:9ea8e3ee1bd291f1801a93",
+            measurementId: "G-5B84R81S31"
+        };
 
         // --- Firebase Setup and Authentication ---
         async function setupFirebase() {
             try {
-                const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-                const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-
-                if (!firebaseConfig) {
-                    throw new Error("Configuration data not available.");
-                }
-
                 const app = initializeApp(firebaseConfig);
-                auth = getAuth(app); 
+                auth = getAuth(app);
                 
-                // Authenticate the user for the Canvas environment
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                    console.log("Signed in with custom token.");
-                } else {
-                    await signInAnonymously(auth);
-                    console.log("Signed in anonymously.");
-                }
-                
-                // Set flag and check button state after successful init/auth
-                isAuthReady = true;
-                validateInputs(); 
-
-                // Monitor auth state to redirect users who are already logged in
-                onAuthStateChanged(auth, (user) => {
-                    if (user && user.email) {
-                        // User is signed in with a full account, automatically redirect
-                        console.log('User already logged in. Redirecting to homepage.html');
-                        setTimeout(() => {
-                            window.location.href = 'homepage.html';
-                        }, 500);
-                    }
-                });
+                // Sign in anonymously for basic access
+                await signInAnonymously(auth);
+                console.log("Signed in anonymously.");
 
             } catch (error) {
                 console.error("Critical Firebase Setup Error:", error);
-                displayMessage('error', `Registration system failed to load: ${error.message}`);
+                displayMessage('error', `Login system failed to load: ${error.message}`);
             }
         }
 
-
-        // --- Registration Handler ---
-        async function handleRegistration(event) {
+        // --- Login Handler ---
+        async function handleLogin(event) {
             event.preventDefault();
 
             if (!auth) {
@@ -296,57 +269,59 @@
                 return;
             }
             
-            const email = studentIdInput.value;
+            const studentId = studentIdInput.value;
             const password = passwordInput.value;
 
             try {
-                // Check if the email is a De Anza email (basic check)
-                if (!email.toLowerCase().endsWith('@deanza.edu')) {
-                    displayMessage('error', 'Registration requires a valid @deanza.edu email address.');
+                // Check if student ID is exactly 8 digits
+                if (!/^\d{8}$/.test(studentId)) {
+                    displayMessage('error', 'Student ID must be exactly 8 digits.');
                     return;
                 }
 
-                // Create user with email and password
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                console.log("User registered:", userCredential.user);
+                // Login with student ID as email (for Firebase Auth)
+                const email = `${studentId}@deanza.edu`;
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 
-                displayMessage('success', 'Registration successful! Redirecting to the homepage...');
+                console.log("User logged in:", userCredential.user);
                 
-                // Redirect after a short delay
+                displayMessage('success', 'Login successful! Redirecting...');
+                
+                // Redirect to homepage after successful login
                 setTimeout(() => {
                     window.location.href = 'homepage.html';
                 }, 1500);
 
             } catch (error) {
-                console.error("Registration failed:", error);
-                let errorMessage = 'Registration failed. Please try again.';
-                // Provide more user-friendly error messages
+                console.error("Login failed:", error);
+                let errorMessage = 'Login failed. Please check your credentials.';
+                
                 switch (error.code) {
-                    case 'auth/email-already-in-use':
-                        errorMessage = 'This email is already registered.';
+                    case 'auth/invalid-credential':
+                    case 'auth/user-not-found':
+                    case 'auth/wrong-password':
+                        errorMessage = 'Invalid student ID or password.';
                         break;
                     case 'auth/invalid-email':
-                        errorMessage = 'Invalid email format.';
-                        break;
-                    case 'auth/weak-password':
-                        errorMessage = 'Password should be at least 6 characters.';
+                        errorMessage = 'Invalid student ID format.';
                         break;
                     default:
-                        errorMessage = `Registration failed: ${error.message}`;
+                        errorMessage = `Login failed: ${error.message}`;
                         break;
                 }
                 displayMessage('error', errorMessage);
             }
         }
 
-        // --- Event Listeners ---\
-        registrationForm.addEventListener('submit', handleRegistration);
-        studentIdInput.addEventListener('input', validateInputs);
-        passwordInput.addEventListener('input', validateInputs);
+        // --- Event Listeners ---
+        loginForm.addEventListener('submit', handleLogin);
+        studentIdInput.addEventListener('input', function() {
+            // Only allow numbers and limit to 8 digits
+            this.value = this.value.replace(/\D/g, '').slice(0, 8);
+        });
         
         // Start the setup process
         setupFirebase();
-
     </script>
 </body>
 </html>

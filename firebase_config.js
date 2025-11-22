@@ -29,13 +29,14 @@ window.__app_id = 'default-app-id';
  * This file is imported by the HTML files.
  */
 export const firebaseConfig = {
-    apiKey: "YOUR_API_KEY", // <<< REPLACE WITH YOUR API KEY
-    authDomain: "your-project-id.firebaseapp.com",
-    projectId: "your-project-id",
-    storageBucket: "your-project-id.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
-};
+        apiKey: "AIzaSyBJJYUOM8EBEuT39DX2F_HtxhEbHDRH-Zc",
+        authDomain: "deanzahacks11-21-2025.firebaseapp.com",
+        projectId: "deanzahacks11-21-2025",
+        storageBucket: "deanzahacks11-21-2025.firebasestorage.app",
+        messagingSenderId: "253702257130",
+        appId: "1:253702257130:web:9ea8e3ee1bd291f1801a93",
+        measurementId: "G-5B84R81S31"
+    };
 
 // When running locally, the custom authentication token is not available,
 // so we set it to null and sign in anonymously.

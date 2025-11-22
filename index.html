@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase & Express Login</title>
+    <!-- We'll use Tailwind CSS for quick, modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* A simple Inter font, similar to Firebase's console */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+    <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg">
+        <h2 class="text-3xl font-bold text-center text-gray-900">Login & Sign Up</h2>
+        
+        <!-- Main Form -->
+        <div class="space-y-4">
+            <div>
+                <label for="email" class="text-sm font-medium text-gray-700">Email</label>
+                <input id="email" name="email" type="email" autocomplete="email" required
+                       class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+                <label for="password" class="text-sm font-medium text-gray-700">Password</label>
+                <input id="password" name="password" type="password" autocomplete="current-password" required
+                       class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4">
+            <button id="loginBtn" class="flex-1 px-4 py-2 font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                Login
+            </button>
+            <button id="signupBtn" class="flex-1 px-4 py-2 font-medium text-white bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                Sign Up
+            </button>
+        </div>
+
+        <!-- Spacer -->
+        <hr class="my-6 border-gray-300">
+
+        <!-- Protected Action -->
+        <div class="space-y-3">
+             <h3 class="text-xl font-medium text-gray-900">Server Test</h3>
+             <p class="text-sm text-gray-600">After logging in, you can test accessing a protected route on our Express server.</p>
+            <button id="protectedBtn" class="w-full px-4 py-2 font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2" disabled>
+                Access Protected Route
+            </button>
+            <button id="logoutBtn" class="w-full px-4 py-2 font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2" hidden>
+                Logout
+            </button>
+        </div>
+
+        <!-- Message Area -->
+        <div id="message" class="p-3 text-center rounded-md text-sm"></div>
+
+    </div>
+
+    <!-- Firebase Client SDK -->
+    <!-- We use type="module" to allow import statements -->
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { 
+            getAuth, 
+            createUserWithEmailAndPassword, 
+            signInWithEmailAndPassword,
+            onAuthStateChanged,
+            signOut,
+            getIdToken
+        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+        // --- IMPORTANT ---
+        // Replace this with your own Firebase project's config object
+        // Find this in your Firebase project console:
+        // Project Overview > Project settings > General > Your apps > Web app > SDK setup and configuration
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+        apiKey: "AIzaSyBJJYUOM8EBEuT39DX2F_HtxgEbHDRH-Zc",
+        authDomain: "deanzahacks11-21-2025.firebaseapp.com",
+        projectId: "deanzahacks11-21-2025",
+        storageBucket: "deanzahacks11-21-2025.firebasestorage.app",
+        messagingSenderId: "253702257130",
+        appId: "1:253702257130:web:9ea8e3ee1bd291f1801a93",
+        measurementId: "G-5B84R81S31"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // --- Element References ---
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const loginBtn = document.getElementById('loginBtn');
+        const signupBtn = document.getElementById('signupBtn');
+        const protectedBtn = document.getElementById('protectedBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const messageDiv = document.getElementById('message');
+
+        const expressServerUrl = 'http://localhost:3000'; // Your Express server URL
+
+        let currentIdToken = null; // Store the user's ID token
+
+        // --- Functions ---
+
+        // Show messages to the user
+        function showMessage(text, type = 'info') {
+            messageDiv.textContent = text;
+            messageDiv.classList.remove('bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700', 'bg-blue-100', 'text-blue-700');
+
+            if (type === 'error') {
+                messageDiv.classList.add('bg-red-100', 'text-red-700');
+            } else if (type === 'success') {
+                messageDiv.classList.add('bg-green-100', 'text-green-700');
+            } else {
+                 messageDiv.classList.add('bg-blue-100', 'text-blue-700');
+            }
+        }
+
+        // Handle Sign Up
+        async function handleSignUp() {
+            const email = emailInput.value;
+            const password = passwordInput.value;
+
+            if (!email || !password) {
+                showMessage('Please enter email and password', 'error');
+                return;
+            }
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                showMessage(`Successfully signed up as ${userCredential.user.email}! You are now logged in.`, 'success');
+            } catch (error) {
+                showMessage(`Error: ${error.message}`, 'error');
+                console.error('Sign up error:', error);
+            }
+        }
+
+        // Handle Login
+        async function handleLogin() {
+            const email = emailInput.value;
+            const password = passwordInput.value;
+
+            if (!email || !password) {
+                showMessage('Please enter email and password', 'error');
+                return;
+            }
+
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                showMessage(`Successfully logged in as ${userCredential.user.email}!`, 'success');
+            } catch (error) {
+                showMessage(`Error: ${error.message}`, 'error');
+                console.error('Login error:', error);
+            }
+        }
+
+        // Handle Logout
+        async function handleLogout() {
+            try {
+                await signOut(auth);
+                showMessage('You have been logged out.', 'info');
+            } catch (error) {
+                showMessage(`Error: ${error.message}`, 'error');
+                console.error('Logout error:', error);
+            }
+        }
+        
+        // Access Protected Route
+        async function accessProtected() {
+            if (!currentIdToken) {
+                showMessage('You must be logged in to do that.', 'error');
+                return;
+            }
+
+            showMessage('Accessing server... please wait.', 'info');
+
+            try {
+                const response = await fetch(`${expressServerUrl}/protected-route`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${currentIdToken}` // Send the token in the header
+                    }
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Server responded with an error');
+                }
+
+                showMessage(`Server says: "${data.message}"`, 'success');
+            } catch (error) {
+                showMessage(`Error: ${error.message}`, 'error');
+                console.error('Protected route error:', error);
+            }
+        }
+
+        // --- Auth State ---
+        // Listen for changes in authentication state (login, logout)
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // User is signed in
+                try {
+                    currentIdToken = await getIdToken(user); // Get the ID token
+                    protectedBtn.disabled = false;
+                    logoutBtn.hidden = false;
+                    loginBtn.disabled = true;
+                    signupBtn.disabled = true;
+                    loginBtn.classList.add('opacity-50');
+                    signupBtn.classList.add('opacity-50');
+                    if (messageDiv.textContent.includes('Error') || messageDiv.textContent === '') {
+                        showMessage(`Logged in as ${user.email}`, 'info');
+                    }
+                } catch (error) {
+                    console.error('Error getting ID token:', error);
+                    showMessage('Error getting user session. Please log out and log in again.', 'error');
+                }
+                
+            } else {
+                // User is signed out
+                currentIdToken = null;
+                protectedBtn.disabled = true;
+                logoutBtn.hidden = true;
+                loginBtn.disabled = false;
+                signupBtn.disabled = false;
+                loginBtn.classList.remove('opacity-50');
+                signupBtn.classList.remove('opacity-50');
+                // Don't clear a successful logout message
+                if (!messageDiv.textContent.includes('logged out')) {
+                    showMessage('You are not logged in.', 'info');
+                }
+            }
+        });
+
+        // --- Event Listeners ---
+        loginBtn.addEventListener('click', handleLogin);
+        signupBtn.addEventListener('click', handleSignUp);
+        logoutBtn.addEventListener('click', handleLogout);
+        protectedBtn.addEventListener('click', accessProtected);
+
+    </script>
+</body>
+</html>

@@ -1,204 +1,175 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Sell Item - De Anza Marketplace</title>
-  <link rel="icon" href="https://i.ibb.co/wNYjZG9k/Image-11-21-25-at-2-05-PM.png" type="image/png">
+  <meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Sell Item - De Anza</title>
+  <!-- Load FontAwesome for Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <style>
-    /* Custom styles defined using semantic class names to support the specified layout */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
-    
+    /* --- Styles for Sell Page --- */
     body {
-        background-color: #f8f9fa; /* Light grey background */
+        background-color: #f0ce55; /* Gold/Mustard background */
         margin: 0;
-        font-family: 'Inter', sans-serif;
+        font-family: Arial, Helvetica, sans-serif;
         display: flex;
         flex-direction: column;
         min-height: 100vh;
     }
 
-    .header {
-        background-color: #6e0b0f; /* De Anza Red */
-        padding: 1rem;
+    header {
+        background-color: #4f090c; /* Dark Red */
+        padding: 15px 20px;
         display: flex;
         justify-content: center;
         align-items: center;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        height: 60px;
+        height: 80px;
+        box-sizing: border-box;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     }
-    .header h1 {
+    header h1 {
         color: white;
-        font-size: 1.5rem;
-        font-weight: 700;
+        font-size: 1.8em;
         margin: 0;
     }
     
     .container {
         flex-grow: 1;
+        padding: 20px;
         max-width: 800px;
-        margin: 40px auto;
-        padding: 0 1rem;
         width: 100%;
+        margin: 20px auto;
     }
-
+    
     .form {
         background: white;
-        padding: 2rem;
-        border-radius: 1rem;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-        border: 1px solid #eee;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
     }
-
+    
     .row {
         display: flex;
-        gap: 1.5rem; /* Spacing between columns */
-        margin-bottom: 1.25rem; /* Spacing between rows/groups */
-    }
-    .row > div {
-        flex: 1;
+        gap: 15px;
+        margin-bottom: 15px;
     }
     
-    label.small {
-        display: block;
-        margin-bottom: 0.375rem; /* 6px */
-        font-weight: 600;
-        color: #444;
-        font-size: 0.9rem;
+    .row > div {
+        display: flex;
+        flex-direction: column;
     }
-
-    .input, textarea, select {
-        width: 100%;
-        padding: 0.75rem 1rem; /* 12px 16px */
+    
+    .small {
+        font-size: 0.9em;
+        font-weight: bold;
+        color: #4f090c;
+        margin-bottom: 5px;
+    }
+    
+    .input, textarea {
+        padding: 10px;
         border: 1px solid #ccc;
-        border-radius: 0.625rem; /* 10px */
+        border-radius: 8px;
         font-size: 1em;
-        transition: border-color 0.2s, box-shadow 0.2s;
         box-sizing: border-box;
-        background: #f9f9f9;
-        outline: none;
+        width: 100%;
+        font-family: inherit;
     }
-    .input:focus, textarea:focus, select:focus {
-        border-color: #ebc034; /* De Anza Gold Accent */
-        box-shadow: 0 0 0 2px rgba(235, 192, 52, 0.2);
-        background: white;
-    }
-
+    
     textarea {
         resize: vertical;
-        min-height: 120px;
-        margin-bottom: 1.25rem; 
+        min-height: 100px;
     }
-
-    /* Button Styling */
+    
     .btn {
-        padding: 0.75rem 1.5rem;
-        border: none;
-        border-radius: 0.625rem;
-        font-size: 1rem;
-        font-weight: 700;
+        padding: 10px 25px;
+        border-radius: 8px;
+        font-weight: bold;
         cursor: pointer;
-        transition: all 0.3s ease;
         text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
+        text-align: center;
+        transition: background-color 0.2s, transform 0.1s;
+        border: 2px solid transparent;
+        font-size: 1em;
+    }
+    
+    .btn[type="submit"] {
+        background-color: #4f090c; /* Dark Red */
+        color: white;
+        border-color: #4f090c;
+        flex-grow: 1;
+    }
+    
+    .btn[type="submit"]:hover:not(:disabled) {
+        background-color: #6e0b0f;
     }
 
-    .btn[type="submit"] {
-        background-color: #6e0b0f; /* De Anza Red */
-        color: white;
-        box-shadow: 0 4px 15px rgba(110, 11, 15, 0.3);
-    }
-    .btn[type="submit"]:hover:not(:disabled) {
-        background-color: #50080b;
-        transform: translateY(-2px);
-    }
-    .btn[type="submit"]:disabled {
-        background-color: #d1d5db; 
-        color: #6b7280; 
-        box-shadow: none;
+    .btn:disabled {
+        opacity: 0.5;
         cursor: not-allowed;
     }
-    
-    /* Cancel button style */
-    .btn.cancel { 
-        background:#f3f4f6;
-        color:#374151;
-        border: 1px solid #e5e7eb; 
+
+    .btn[href] {
+        background: #f0ce55; /* Gold */
+        color: #4f090c;
+        border-color: #4f090c;
+        flex-grow: 1;
     }
-    .btn.cancel:hover {
-        background: #e5e7eb;
-    }
-    
-    /* Media Preview */
-    .media-preview {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.625rem;
-        margin-top: -0.5rem; /* Adjusted for alignment */
-    }
-    .media-preview img {
-        width: 80px;
-        height: 80px;
-        object-fit: cover;
-        border-radius: 0.5rem;
-        border: 1px solid #eee;
-    }
-    
-    /* Message Box */
+
+    /* Message Box Styling */
     #message-box {
-        padding: 1rem;
-        margin-bottom: 1.25rem;
-        border-radius: 0.625rem;
-        font-weight: 600;
-        border: 1px solid transparent;
-        color: #333;
-    }
-    .info { background-color: #e6f7ff; border-color: #91d5ff; color: #0050b3; }
-    .success { background-color: #f6ffed; border-color: #b7eb8f; color: #389e0d; }
-    .error { background-color: #fff1f0; border-color: #ffa39e; color: #cf1322; }
-
-    /* Footer */
-    .site-footer {
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 20px;
         text-align: center;
-        padding: 1.25rem;
+        font-weight: bold;
+        display: none; /* Hidden by default */
+    }
+    .msg-success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    .msg-error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+    .msg-info {
+        background-color: #cce5ff;
+        color: #004085;
+        border: 1px solid #b8daff;
+    }
+    
+    .site-footer {
+        background-color: #4f090c;
+        color: white;
+        text-align: center;
+        padding: 10px 0;
         margin-top: auto;
-        border-top: 1px solid #eee;
     }
-    .site-footer img {
-        height: 30px;
-        opacity: 0.6;
-    }
-
-    /* Responsive adjustments */
+    
+    /* Responsive */
     @media (max-width: 600px) {
         .row {
             flex-direction: column;
-            gap: 0.75rem; 
-        }
-        .form {
-            padding: 1rem;
+            gap: 10px;
         }
         .row > div {
-            width: 100% !important;
+            width: 100%;
         }
     }
   </style>
 </head>
 <body data-page="sell">
-  <header class="header"><h1>Sell / Publish</h1></header>
+  <header>
+    <h1>Sell / Publish</h1>
+  </header>
 
   <div class="container">
-    <!-- Message Box for feedback -->
-    <div id="message-box" style="display:none;"></div> 
-    
+    <div id="message-box"></div>
     <div class="form">
       <form id="sell-form">
-        <!-- Title & Category Row -->
         <div class="row">
           <div style="flex:1">
             <label class="small">Title</label>
@@ -210,78 +181,65 @@
               <option value="textbooks">Textbooks</option>
               <option value="study-supplies">Study Supplies</option>
               <option value="electronics">Electronics</option>
-              <option value="bikes">Bikes</option>
-              <option value="housing">Housing</option>
-              <option value="services">Services</option>
-              <option value="jobs">Jobs</option>
-              <option value="events">Events</option>
-              <option value="misc">Other</option>
+              <option value="bikes">Bikes & Outdoors</option>
+              <option value="housing">Housing & Roommates</option>
+              <option value="services">Services & Rentals</option>
+              <option value="jobs">Student Jobs</option>
+              <option value="events">Events & Campus Activities</option>
+              <option value="misc">Other/Misc</option>
             </select>
           </div>
         </div>
 
-        <!-- Description -->
         <label class="small" style="margin-top:12px">Description</label>
         <textarea name="description" placeholder="Add details, condition, pickup info..." required></textarea>
 
-        <!-- Price & Photo Row -->
         <div class="row" style="margin-top:12px">
           <div style="flex:1">
             <label class="small">Price ($)</label>
-            <input class="input" type="number" name="price" step="0.01" placeholder="0" required />
+            <input class="input" type="number" name="price" step="0.01" placeholder="0 for free or job listing" min="0" required/>
           </div>
-          <div style="width:220px">
-            <!-- Image Link (URL) input -->
-            <label class="small">Image Link (URL)</label>
-            <input id="media" class="input" type="url" name="imageUrl" placeholder="E.g., https://placehold.co/400x300" />
+          <div style="flex:1">
+            <label class="small">Image URL (Optional)</label>
+            <input class="input" type="text" name="image" placeholder="URL for an image (e.g., from Placehold.co)" />
           </div>
         </div>
-        
-        <!-- Contact Info Row -->
-        <div class="row" style="margin-top:0.25rem"> 
-            <div style="flex:1">
-                <label class="small">Contact Email</label>
-                <input class="input" type="email" name="contactEmail" placeholder="student@fhda.edu" required />
-            </div>
-            <div style="flex:1">
-                <label class="small">Contact Phone (Optional)</label>
-                <input class="input" type="tel" name="contactPhone" placeholder="(555) 555-5555" />
-            </div>
-        </div>
-        
-        <!-- Media Preview Area -->
-        <div id="media-preview" class="media-preview"></div>
 
-        <!-- Action Buttons -->
-        <div style="margin-top:14px;display:flex;gap:12px">
-          <button id="publish-btn" class="btn" type="submit" disabled>Publish</button>
-          <a class="btn cancel" href="listings.html">Cancel</a>
+                <div class="row" style="margin-top:12px">
+                    <div style="flex:1">
+                        <label class="small">Contact Email</label>
+                        <input class="input" type="email" name="contactEmail" placeholder="Your contact email" required />
+                    </div>
+                    <div style="width:200px">
+                        <label class="small">Contact Phone</label>
+                        <input class="input" type="tel" name="contactPhone" placeholder="Phone number" required />
+                    </div>
+                </div>
+
+        <div style="margin-top:20px;display:flex;gap:12px">
+          <button id="publish-btn" class="btn" type="submit" disabled>Publish Listing</button>
+          <a class="btn" href="listings.html">View Listings</a>
         </div>
       </form>
     </div>
   </div>
 
   <footer class="site-footer">
-    <a href="marketplace.html"><img src="https://i.ibb.co/wNYjZG9k/Image-11-21-25-at-2-05-PM.png" alt="logo"></a>
+    De Anza Student Marketplace
   </footer>
 
-  <!--
-    NOTE: Firebase setup uses placeholder config and anonymous sign-in 
-    for compatibility with static hosting (VS Code / GitHub Pages).
-  -->
   <script type="module">
-    // Firebase imports (v11)
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc, serverTimestamp, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
     
-    // Global Firebase instances
-    let app, auth, db, userId = null;
+    // Set Firestore log level to debug for better console feedback
     setLogLevel('Debug');
 
-    // --- Firebase Configuration Setup ---
-    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-        apiKey: "AIzaSyBJJYUOM8EBEuT39DX2F_HtxhEbHDRH-Zc",
+    // --- Configuration and Global Variables ---
+    const explicitFirebaseConfig = {
+        apiKey: "AIzaSyBJJYUOM8EBEuT39DX2F_HtxgEbHDRH-Zc",
         authDomain: "deanzahacks11-21-2025.firebaseapp.com",
         projectId: "deanzahacks11-21-2025",
         storageBucket: "deanzahacks11-21-2025.firebasestorage.app",
@@ -289,137 +247,136 @@
         appId: "1:253702257130:web:9ea8e3ee1bd291f1801a93",
         measurementId: "G-5B84R81S31"
     };
+
+    let firebaseConfig = explicitFirebaseConfig;
+    try {
+        // Attempt to use the global configuration, which is the standard practice in this environment
+        const globalConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        if (globalConfig && Object.keys(globalConfig).length > 0) {
+            firebaseConfig = globalConfig;
+            console.log("Using global Firebase configuration.");
+        } else {
+            console.log("Global config missing or empty. Using provided explicit configuration.");
+        }
+    } catch (e) {
+        console.error("Error parsing global __firebase_config. Falling back to explicit config.", e);
+    }
+    
+    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
-    // --- DOM Elements ---
+    // --- State and DOM Elements ---
+    let app, auth, db, userId = null;
+    let isAuthReady = false;
     const sellForm = document.getElementById('sell-form');
-    const submitButton = document.getElementById('publish-btn');
     const messageBox = document.getElementById('message-box');
-    const mediaInput = document.getElementById('media'); 
-    const mediaPreview = document.getElementById('media-preview');
-
-    // --- Utility Functions ---
-
-    function showMessage(text, type = 'info') {
+    const submitButton = document.getElementById('publish-btn');
+    
+    // --- Utility Function ---
+    function showMessage(text, type) {
         messageBox.textContent = text;
-        messageBox.className = type;
+        messageBox.className = '';
+        messageBox.classList.add('msg-' + type);
         messageBox.style.display = 'block';
     }
 
-    /**
-     * Handles the form submission to create a new listing.
-     */
-    function handleSellForm(event) {
+    // --- Core Logic ---
+    
+    async function handleSellForm(event) {
         event.preventDefault();
         
-        if (!userId || !db) {
-            showMessage("Error: Authentication not complete. Please wait a moment or reload.", 'error');
+        if (!isAuthReady || !userId) {
+            showMessage('Authentication not ready. Please wait a moment or refresh.', 'error');
             return;
         }
 
-        const formData = new FormData(sellForm);
-        const title = formData.get('title').trim();
-        const description = formData.get('description').trim();
-        const category = formData.get('category');
-        const price = parseFloat(formData.get('price'));
-        const imageUrl = formData.get('imageUrl').trim(); 
-
-        const contactEmail = formData.get('contactEmail').trim();
-        const contactPhone = formData.get('contactPhone').trim();
-
         submitButton.disabled = true;
-        showMessage("Publishing listing, please wait...", 'info');
-        
-        // Prepare and save listing data to Firestore 
-        const listingData = {
-            userId: userId,
-            title: title,
-            description: description,
-            category: category,
-            price: price,
-            image: imageUrl, // Use the provided URL
-            contactEmail: contactEmail,
-            contactPhone: contactPhone,
-            createdAt: serverTimestamp()
-        };
+        showMessage('Publishing listing...', 'info');
 
-        // Public collection path: artifacts/{appId}/public/data/listings
-        const listingsRef = collection(db, `artifacts/${appId}/public/data/listings`);
-        
-        addDoc(listingsRef, listingData)
-            .then(() => {
-                showMessage("Listing successfully published! Redirecting to marketplace...", 'success');
-                sellForm.reset();
-                mediaPreview.innerHTML = '';
-                setTimeout(() => {
-                    window.location.href = 'listings.html';
-                }, 1500);
-            })
-            .catch(error => {
-                console.error("Error publishing listing:", error);
-                showMessage(`Publish failed: ${error.message}`, 'error');
-                submitButton.disabled = false;
-            });
-    }
-
-    /**
-     * Handles link input to display a quick image preview.
-     */
-    function handleMediaChange() {
-        mediaPreview.innerHTML = '';
-        const url = mediaInput.value.trim();
-        
-        if (url) {
-            const img = document.createElement('img');
-            img.src = url;
-            img.alt = 'Image Preview';
-            img.onerror = () => {
-                 // Fallback image if the provided link is broken
-                 img.src = 'https://placehold.co/80x80/6e0b0f/fff?text=Link+Error';
-                 img.alt = 'Image Link Error';
+        try {
+            // 1. Collect form data
+            const formData = new FormData(sellForm);
+            const listingData = {
+                title: formData.get('title').trim(),
+                description: formData.get('description').trim(),
+                price: parseFloat(formData.get('price')) || 0,
+                category: formData.get('category'),
+                image: formData.get('image').trim() || null,
+                contactEmail: formData.get('contactEmail') ? formData.get('contactEmail').trim() : null,
+                contactPhone: formData.get('contactPhone') ? formData.get('contactPhone').trim() : null,
+                // MANDATORY Firestore Fields
+                userId: userId,
+                createdAt: serverTimestamp()
             };
-            mediaPreview.appendChild(img);
+            
+            // 2. Define the public collection path
+            // Data is public, so we use the common /artifacts/{appId}/public/data/{collectionName} path
+            const listingsRef = collection(db, `artifacts/${appId}/public/data/listings`);
+
+            // 3. Save the document
+            const docRef = await addDoc(listingsRef, listingData);
+            
+            showMessage(`Success! Listing published with ID: ${docRef.id}`, 'success');
+            sellForm.reset(); // Clear the form
+            
+        } catch (error) {
+            console.error("Error publishing listing:", error);
+            showMessage(`Firebase write failed. Check console for details. Error: ${error.message.substring(0, 50)}...`, 'error');
+        } finally {
+            submitButton.disabled = false;
         }
     }
 
-    // --- Initialization ---
+    async function setupFirebase() {
+        if (!firebaseConfig || Object.keys(firebaseConfig).length === 0) {
+            console.error("Firebase Initialization Error: Configuration is missing or empty after fallback.");
+            showMessage('FATAL Error: Firebase configuration data not available.', 'error');
+            submitButton.disabled = true;
+            return;
+        }
 
-    function setupFirebase() {
         try {
-            // 1. Initialize Firebase services
+            // 1. Initialize Firebase
             app = initializeApp(firebaseConfig);
             auth = getAuth(app);
             db = getFirestore(app);
 
-            // 2. Authentication: Sign in anonymously immediately.
-            signInAnonymously(auth).then(userCredential => {
-                userId = userCredential.user.uid;
-                console.log("User authenticated anonymously. UID:", userId);
-                // Showing only the first few characters of UID for safety/brevity
-                showMessage(`Ready to publish. User ID: ${userId.substring(0, 8)}...`, 'info'); 
-                submitButton.disabled = false; // Enable form submission
-            }).catch(e => {
-                console.error("Authentication failed:", e);
-                showMessage('Authentication failed. Publishing is disabled.', 'error');
-                submitButton.disabled = true;
-            });
+            // 2. Attempt authentication using the provided token (or anonymously as a fallback)
+            try {
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                 console.error("Authentication failed:", error);
+                 // Do not return here, let onAuthStateChanged handle the final state.
+            }
 
-            // Optional: Listener to handle any later auth state changes
+            // 3. Set up auth state listener
             onAuthStateChanged(auth, (user) => {
+                isAuthReady = true;
                 if (user) {
                     userId = user.uid;
+                    console.log("User authenticated. UID:", userId);
+                    showMessage(`Ready to publish. Authenticated as user ${user.email || user.uid.substring(0, 8)}...`, 'info');
+                    submitButton.disabled = false; // Enable form submission
                 } else {
                     userId = null;
+                    console.error("Authentication listener found no user. User is Anonymous.");
+                    // Allow anonymous users to proceed if rules permit public/write access
+                    showMessage('Ready to publish. Signed in anonymously.', 'info');
+                    submitButton.disabled = false; 
                 }
             });
             
-            // 3. Attach event listeners
+            // 4. Attach form listener
             sellForm.addEventListener('submit', handleSellForm);
-            mediaInput.addEventListener('input', handleMediaChange); 
 
         } catch (error) {
+            // This catches errors specifically from initializeApp or getAuth/getFirestore
             console.error("FATAL Firebase Initialization Error:", error);
-            showMessage(`FATAL Firebase Error: Initialization failed. Check console.`, 'error');
+            showMessage(`FATAL Firebase Error: Initialization failed. See console for details.`, 'error');
             submitButton.disabled = true;
         }
     }

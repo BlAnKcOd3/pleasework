@@ -243,6 +243,56 @@
                 max-width: 100%;
             }
         }
+        /* Modal for enlarged listing view */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            padding: 20px;
+        }
+        .modal-content {
+            background: #fff;
+            border-radius: 10px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow: auto;
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .modal-image {
+            width: 45%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .modal-body {
+            width: 55%;
+            display: flex;
+            flex-direction: column;
+        }
+        .modal-title {
+            font-size: 1.6em;
+            color: #4f090c;
+            margin-bottom: 8px;
+        }
+        .modal-price { font-size: 1.4em; font-weight: bold; margin-top: auto; }
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 20px;
+            font-size: 1.8em;
+            color: white;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -292,16 +342,33 @@
         <div id="product-grid" class="listings-grid">
             <!-- Listings will be inserted here by JavaScript -->
         </div>
+        <!-- Modal for enlarged listing -->
+        <div id="listing-modal" class="modal" aria-hidden="true">
+            <div class="modal-close" id="listing-modal-close" title="Close">&times;</div>
+            <div class="modal-content">
+                <img src="" alt="Listing Image" id="modal-image" class="modal-image" />
+                <div class="modal-body">
+                    <div class="modal-title" id="modal-title"></div>
+                    <div id="modal-category" style="color:#666;margin-bottom:8px;"></div>
+                    <div id="modal-description" style="white-space:pre-wrap; color:#333;"> </div>
+                    <div class="modal-price" id="modal-price"></div>
+                    <div id="modal-seller" style="font-size:0.9em;color:#666;margin-top:8px"></div>
+                    <div style="margin-top:16px;"><button id="modal-action" class="pill">Contact / Buy</button></div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <footer class="site-footer">
         <a href="index.html" class="footer-link">Logout</a>
     </footer>
 
+    <script src="firebase_config.js"></script>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, query, where, onSnapshot, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, query, where, onSnapshot, orderBy, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
         // Global Firebase instances
@@ -310,16 +377,23 @@
         // Set Firestore log level to debug for better console feedback
         setLogLevel('Debug');
 
-        // --- Firebase Configuration ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyBJJYUOM8EBEuT39DX2F_HtxgEbHDRH-Zc",
-            authDomain: "deanzahacks11-21-2025.firebaseapp.com",
-            projectId: "deanzahacks11-21-2025",
-            storageBucket: "deanzahacks11-21-2025.firebasestorage.app",
-            messagingSenderId: "253702257130",
-            appId: "1:253702257130:web:9ea8e3ee1bd291f1801a93",
-            measurementId: "G-5B84R81S31"
-        };
+                // --- Firebase Configuration (prefer global `__firebase_config` if present) ---
+                let firebaseConfig = {};
+                try{
+                    const parsed = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+                    if(parsed && Object.keys(parsed).length) firebaseConfig = parsed;
+                }catch(e){ console.warn('Could not parse __firebase_config', e); }
+                if(!firebaseConfig || Object.keys(firebaseConfig).length === 0){
+                    firebaseConfig = {
+                        apiKey: "AIzaSyBJJYUOM8EBEuT39DX2F_HtxgEbHDRH-Zc",
+                        authDomain: "deanzahacks11-21-2025.firebaseapp.com",
+                        projectId: "deanzahacks11-21-2025",
+                        storageBucket: "deanzahacks11-21-2025.firebasestorage.app",
+                        messagingSenderId: "253702257130",
+                        appId: "1:253702257130:web:9ea8e3ee1bd291f1801a93",
+                        measurementId: "G-5B84R81S31"
+                    };
+                }
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
@@ -353,6 +427,7 @@
                 // Check if 'image' field exists and provide a default if not (it's optional from sell.html)
                 const imageUrl = listing.image || 'https://placehold.co/400x300/4f090c/f0ce55?text=No+Image';
 
+                card.dataset.id = listing.id;
                 card.innerHTML = `
                     <img src="${imageUrl}" class="listing-image" alt="${listing.title}" onerror="this.onerror=null;this.src='https://placehold.co/400x300/4f090c/f0ce55?text=Image+Unavailable';" />
                     <div class="listing-content">
@@ -364,6 +439,7 @@
                 `;
                 productGrid.appendChild(card);
             });
+            // end forEach
         }
         
         // --- Filter and Search Logic ---
@@ -425,6 +501,8 @@
                     );
                 }
                 
+                // Keep a reference to the latest listings so click handlers can look them up
+                window.currentListings = listings;
                 renderListings(listings);
             }, (error) => {
                 console.error("Error listening to listings:", error);
@@ -533,9 +611,112 @@
             });
         }
         
+        // --- Modal & Interaction Helpers ---
+        function getChatId(a,b){
+            const sorted = [String(a),String(b)].sort();
+            return sorted.join('_');
+        }
+
+        function openListingModal(listing) {
+            const modal = document.getElementById('listing-modal');
+            document.getElementById('modal-image').src = listing.image || 'https://placehold.co/800x600/4f090c/f0ce55?text=No+Image';
+            document.getElementById('modal-title').textContent = listing.title || '';
+            document.getElementById('modal-category').textContent = listing.category ? listing.category.charAt(0).toUpperCase() + listing.category.slice(1).replace('-', ' & ') : '';
+            document.getElementById('modal-description').textContent = listing.description || 'No description provided.';
+            document.getElementById('modal-price').textContent = listing.price === 0 ? 'FREE' : `$${(listing.price || 0).toFixed(2)}`;
+            document.getElementById('modal-seller').textContent = listing.userId ? `Seller: ${listing.userId}` : '';
+            document.getElementById('modal-action').dataset.id = listing.id;
+            modal.style.display = 'flex';
+            modal.setAttribute('aria-hidden', 'false');
+        }
+
+        function closeListingModal() {
+            const modal = document.getElementById('listing-modal');
+            modal.style.display = 'none';
+            modal.setAttribute('aria-hidden', 'true');
+        }
+
+        // Open modal when clicking anywhere on a listing card
+        productGrid.addEventListener('click', (e) => {
+            const card = e.target.closest && e.target.closest('.listing-card');
+            if (!card) return;
+            const id = card.dataset.id;
+            const listing = (window.currentListings || []).find(l => String(l.id) === String(id));
+            if (!listing) return;
+
+            // If user not signed in, prompt to sign in
+            if (!userId) {
+                const go = confirm('You must be signed in to view or buy items. Sign in now?');
+                if (go) {
+                    window.location.href = 'login.html';
+                }
+                return;
+            }
+
+            openListingModal(listing);
+        });
+
+        // Modal close handlers
+        document.addEventListener('click', (e) => {
+            const modal = document.getElementById('listing-modal');
+            if (!modal) return;
+            if (e.target.id === 'listing-modal-close') {
+                closeListingModal();
+            }
+            // close when clicking outside modal-content
+            if (e.target === modal) {
+                closeListingModal();
+            }
+        });
+
+        // Primary modal action (Contact / Buy)
+        document.getElementById('modal-action').addEventListener('click', async (e) => {
+            const id = e.target.dataset.id;
+            const listing = (window.currentListings || []).find(l => String(l.id) === String(id));
+            if (!listing) return;
+            if (!userId) {
+                const go = confirm('You must be signed in to contact the seller. Sign in now?');
+                if (go) window.location.href = 'login.html';
+                return;
+            }
+
+            const sellerUid = listing.userId;
+            if (!sellerUid) {
+                alert('Seller information is not available for this listing.');
+                return;
+            }
+
+            if (sellerUid === userId) {
+                alert('This is your listing. You cannot start a chat with yourself.');
+                return;
+            }
+
+            try {
+                const chatId = getChatId(userId, sellerUid);
+                // create/upsert a chat metadata document so other devices/users can discover it
+                const chatDocRef = doc(db, `artifacts/${appId}/public/data/chats`, chatId);
+                await setDoc(chatDocRef, {
+                    chatId: chatId,
+                    participants: [userId, sellerUid],
+                    listingId: listing.id || null,
+                    listingTitle: listing.title || null,
+                    lastUpdated: serverTimestamp()
+                }, { merge: true });
+
+                // Close modal and redirect to chats list with a prefilled auto-message so the chat opens and user can send quickly
+                closeListingModal();
+                const autoMsg = `Hi, I'm interested in your listing: "${listing.title}". Is it still available?`;
+                window.location.href = `chats_list.html?recipientUid=${encodeURIComponent(sellerUid)}&chatId=${encodeURIComponent(chatId)}&autoMessage=${encodeURIComponent(autoMsg)}`;
+            } catch (err) {
+                console.error('Error creating chat:', err);
+                alert('Could not create chat. Check console for details.');
+            }
+        });
+
         // --- Initialization ---
         window.onload = setupFirebaseAndListeners;
 
     </script>
 </body>
 </html>
+

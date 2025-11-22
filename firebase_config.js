@@ -1,3 +1,24 @@
+// Firebase configuration helper
+// Paste your Firebase Web SDK config values (from Firebase Console -> Project settings -> Your apps)
+// Example:
+// window.__firebase_config = JSON.stringify({ apiKey: "...", authDomain: "...", projectId: "...", ... });
+// window.__app_id = 'default-app-id';
+
+// --- EDIT THESE VALUES ---
+window.__firebase_config = JSON.stringify({
+  apiKey: "REPLACE_WITH_API_KEY",
+  authDomain: "REPLACE_WITH_PROJECT.firebaseapp.com",
+  projectId: "REPLACE_WITH_PROJECT_ID",
+  storageBucket: "REPLACE_WITH_PROJECT.appspot.com",
+  messagingSenderId: "REPLACE_WITH_SENDER_ID",
+  appId: "REPLACE_WITH_APP_ID",
+  measurementId: "REPLACE_WITH_MEASUREMENT_ID"
+});
+
+// Application identifier used by the app files. Keep as-is or change to your preferred namespace.
+window.__app_id = 'default-app-id';
+
+// End of firebase_config.js
 /**
  * Firebase Configuration for Local Development.
  *

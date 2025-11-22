@@ -79,11 +79,57 @@
     <a href="index.html" class="footer-link">Logout</a>
   </footer>
 
+  <!-- Centralized Firebase config (edit firebase_config.js with your project values) -->
+  <script src="firebase_config.js"></script>
+
+  <!-- Floating Chats button -->
+  <style>
+    .chat-launcher { position: fixed; right: 20px; bottom: 24px; z-index: 9999; }
+    .chat-btn { background:#4f090c;color:#fff;border-radius:50%;width:64px;height:64px;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(0,0,0,0.2);cursor:pointer;border:none }
+    .chat-badge { position:absolute; right:-6px; top:-6px; background:#f0ce55;color:#4f090c;border-radius:12px;padding:2px 6px;font-weight:bold;font-size:0.85em;border:2px solid #fff }
+  </style>
+  <div class="chat-launcher">
+    <button id="chatLauncher" class="chat-btn" title="Open Chats">
+      <i class="fas fa-comment-dots" style="font-size:22px"></i>
+    </button>
+    <div id="chatBadge" class="chat-badge" style="display:none">0</div>
+    <div id="unreadBadge" class="chat-badge" style="display:none;right:auto;left:-6px;top:-6px;background:#ff4d4f;color:#fff;border-color:#fff">0</div>
+    <div style="text-align:center;margin-top:8px;">
+      <label style="font-size:0.85em;color:#333"><input type="checkbox" id="openInModal" style="margin-right:6px">Open chats in modal</label>
+    </div>
+  </div>
+
+  <!-- Chats modal (loads chats_list.html inside iframe) -->
+  <div id="chatsModal" style="display:none;position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:99999;align-items:center;justify-content:center;">
+    <div style="width:95%;max-width:1000px;height:80vh;background:#fff;border-radius:10px;overflow:hidden;position:relative;display:flex;flex-direction:column;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #eee">
+        <strong style="font-size:1.1em">Your Chats</strong>
+        <div>
+          <button id="closeChatsModal" style="padding:8px 12px;border:none;background:#4f090c;color:#fff;border-radius:6px;cursor:pointer">Close</button>
+        </div>
+      </div>
+      <div id="chatsList" style="overflow:auto;flex:1;padding:12px;display:flex;flex-direction:column;gap:8px;background:#fafafa"></div>
+    </div>
+  </div>
+
+  <style>
+    /* Pulse animation when new unread arrives */
+    @keyframes pulse {
+      0% { transform: scale(1); box-shadow: 0 0 0 rgba(255,77,79,0.7); }
+      50% { transform: scale(1.06); box-shadow: 0 0 12px rgba(255,77,79,0.4); }
+      100% { transform: scale(1); box-shadow: 0 0 0 rgba(255,77,79,0); }
+    }
+    .pulse { animation: pulse 800ms ease-in-out; }
+    .chat-item { display:flex;gap:12px;align-items:center;padding:10px;border-radius:8px;background:#fff;border:1px solid #eee;cursor:pointer }
+    .chat-avatar { width:44px;height:44px;border-radius:8px;background:#4f090c;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold }
+    .chat-name { font-weight:600 }
+  </style>
+
   <script type="module">
     // Firebase imports
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, collection, query, where, getDocs, limit, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getFirestore, collection, collectionGroup, query, where, getDocs, limit, orderBy, onSnapshot, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
     import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
     
     // Global Firebase instances
@@ -91,8 +137,14 @@
     // Set Firestore log level to debug for better console feedback
     setLogLevel('Debug');
 
-    // --- Firebase Configuration ---
-        const firebaseConfig = {
+        // --- Firebase Configuration (prefer global `__firebase_config` if present) ---
+        let firebaseConfig = {};
+        try{
+          const parsed = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+          if(parsed && Object.keys(parsed).length) firebaseConfig = parsed;
+        }catch(e){ console.warn('Could not parse __firebase_config', e); }
+        if(!firebaseConfig || Object.keys(firebaseConfig).length === 0){
+          firebaseConfig = {
             apiKey: "AIzaSyBJJYUOM8EBEuT39DX2F_HtxgEbHDRH-Zc",
             authDomain: "deanzahacks11-21-2025.firebaseapp.com",
             projectId: "deanzahacks11-21-2025",
@@ -100,7 +152,8 @@
             messagingSenderId: "253702257130",
             appId: "1:253702257130:web:9ea8e3ee1bd291f1801a93",
             measurementId: "G-5B84R81S31"
-        };
+          };
+        }
 
     const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
@@ -114,12 +167,104 @@
         
         // Ensure user is signed in, if not, sign in anonymously
         onAuthStateChanged(auth, (user) => {
-            if (!user) {
-                signInAnonymously(auth).catch(e => {
+                if (!user) {
+                  signInAnonymously(auth).catch(e => {
                     console.error("Anonymous Sign-In failed:", e);
-                });
-            }
+                  });
+                }
+                else {
+                  // If signed in, start chat badge listener
+                  currentUser = user;
+                  startChatBadgeListener(user.uid);
+                  startUnreadListener(user.uid);
+                }
         });
+    }
+
+    // Chat badge/listener: show number of chats for the current user and redirect to chats_list.html
+    const chatBadgeEl = document.getElementById('chatBadge');
+    const chatLauncherBtn = document.getElementById('chatLauncher');
+    let chatUnsub = null;
+    let currentUser = null;
+
+    function startChatBadgeListener(uid){
+      try{
+        const chatsRef = collection(db, `artifacts/${typeof __app_id !== 'undefined' ? __app_id : 'default-app-id'}/public/data/chats`);
+        const q = query(chatsRef, where('participants','array-contains', uid));
+        if(chatUnsub) chatUnsub();
+        chatUnsub = onSnapshot(q, (snap)=>{
+          const count = snap ? snap.size : 0;
+          if(count > 0){ chatBadgeEl.style.display = 'inline-block'; chatBadgeEl.textContent = String(count); }
+          else { chatBadgeEl.style.display = 'none'; }
+        }, (err)=>{
+          console.warn('Chat badge listener error', err);
+          // hide badge on error
+          chatBadgeEl.style.display = 'none';
+        });
+      }catch(e){ console.warn('startChatBadgeListener failed', e); chatBadgeEl.style.display = 'none'; }
+    }
+
+    chatLauncherBtn.addEventListener('click', ()=>{
+      // If not signed in, prompt to sign in first (onAuthStateChanged will handle redirect target)
+      onAuthStateChanged(auth, (user)=>{
+        if(user){
+          const openInModal = document.getElementById('openInModal');
+          if(openInModal && openInModal.checked){
+            // open modal
+            const modal = document.getElementById('chatsModal');
+            if(modal) modal.style.display = 'flex';
+            // start/refresh modal chat list
+            if(currentUser) setupModalChatsListener(currentUser.uid);
+          }else{
+            window.location.href = 'chats_list.html';
+          }
+        }else{
+          const go = confirm('You must sign in to use chat. Sign in now?');
+          if(go) window.location.href = 'login.html';
+        }
+      }, { once: true });
+    });
+
+    // Modal close handler
+    const closeChatsModalBtn = document.getElementById('closeChatsModal');
+    if(closeChatsModalBtn){ closeChatsModalBtn.addEventListener('click', ()=>{ const modal=document.getElementById('chatsModal'); if(modal) modal.style.display='none'; }); }
+
+    // Unread message listener: count messages where recipientId == current user and timestamp > user's lastSeen
+    let unreadUnsub = null;
+    let previousUnreadCount = 0;
+    async function startUnreadListener(uid){
+      try{
+        // fetch user's lastSeen
+        const userDocRef = doc(db, `artifacts/${typeof __app_id !== 'undefined' ? __app_id : 'default-app-id'}/public/data/users`, uid);
+        let lastSeen = null;
+        try{ const ud = await getDoc(userDocRef); if(ud && ud.exists()) lastSeen = ud.data().lastSeen; }catch(e){}
+
+        // Build collectionGroup query for messages addressed to this user
+        let msgsQuery;
+        if(lastSeen && lastSeen.toDate){
+          msgsQuery = query(collectionGroup(db, 'messages'), where('recipientId','==', uid), where('timestamp','>', lastSeen), orderBy('timestamp','desc'));
+        }else{
+          msgsQuery = query(collectionGroup(db, 'messages'), where('recipientId','==', uid), orderBy('timestamp','desc'));
+        }
+
+        if(unreadUnsub) unreadUnsub();
+        unreadUnsub = onSnapshot(msgsQuery, (snap)=>{
+          const unreadCount = snap ? snap.size : 0;
+          const unreadEl = document.getElementById('unreadBadge');
+          if(unreadCount>0){ unreadEl.style.display='inline-block'; unreadEl.textContent = String(unreadCount); }
+          else { unreadEl.style.display='none'; }
+          // animate on increase
+          if(unreadCount > previousUnreadCount){
+            chatLauncherBtn.classList.add('pulse');
+            setTimeout(()=> chatLauncherBtn.classList.remove('pulse'), 900);
+          }
+          previousUnreadCount = unreadCount;
+        }, (err)=>{
+          console.warn('Unread messages listener error', err);
+          // fallback: hide unread
+          const unreadEl = document.getElementById('unreadBadge'); if(unreadEl) unreadEl.style.display='none';
+        });
+      }catch(e){ console.warn('startUnreadListener failed', e); const unreadEl = document.getElementById('unreadBadge'); if(unreadEl) unreadEl.style.display='none'; }
     }
 
     // --- Search functionality ---
@@ -162,6 +307,52 @@
             window.location.href = user && user.email ? 'dashboard.html' : 'login.html';
         }, { once: true });
     });
+
+    // --- Modal Chats: render chat list inline when modal is opened ---
+    let modalChatsUnsub = null;
+    function renderChatItem(chat){
+      const other = (chat.participants || []).find(p => p !== currentUser.uid) || chat.participants[0] || 'Unknown';
+      const a = document.createElement('div');
+      a.className = 'chat-item';
+      a.addEventListener('click', ()=>{
+        // go to message view
+        const params = new URLSearchParams();
+        params.set('chatId', chat.chatId);
+        params.set('recipientUid', other);
+        window.location.href = `message_view.html?${params.toString()}`;
+      });
+      const avatar = document.createElement('div'); avatar.className = 'chat-avatar'; avatar.textContent = (chat.listingTitle || other).charAt(0).toUpperCase();
+      const meta = document.createElement('div');
+      const name = document.createElement('div'); name.className = 'chat-name'; name.textContent = chat.listingTitle || other;
+      const when = document.createElement('div'); when.className = 'small'; when.textContent = `Updated: ${chat.lastUpdated ? new Date(chat.lastUpdated.seconds*1000).toLocaleString() : 'now'}`;
+      meta.appendChild(name); meta.appendChild(when);
+      a.appendChild(avatar); a.appendChild(meta);
+      return a;
+    }
+
+    function setupModalChatsListener(uid){
+      try{
+        const container = document.getElementById('chatsList');
+        if(!container) return;
+        const chatsRef = collection(db, `artifacts/${typeof __app_id !== 'undefined' ? __app_id : 'default-app-id'}/public/data/chats`);
+        if(modalChatsUnsub) modalChatsUnsub();
+        // try ordered query first
+        let q;
+        try{ q = query(chatsRef, where('participants','array-contains', uid), orderBy('lastUpdated','desc')); }
+        catch(e){ q = query(chatsRef, where('participants','array-contains', uid)); }
+        modalChatsUnsub = onSnapshot(q, (snapshot)=>{
+          const chats = [];
+          snapshot.forEach(s=> chats.push(s.data()));
+          // if unordered, sort client-side
+          if(!q._queryOptions || !q._queryOptions.orderBy){
+            chats.sort((a,b)=>{ const ta = a.lastUpdated && a.lastUpdated.seconds? a.lastUpdated.seconds:0; const tb = b.lastUpdated && b.lastUpdated.seconds? b.lastUpdated.seconds:0; return tb-ta; });
+          }
+          container.innerHTML='';
+          if(chats.length===0){ container.innerHTML='<div class="small">No chats yet.</div>'; return; }
+          chats.forEach(c=> container.appendChild(renderChatItem(c)));
+        }, (err)=>{ console.error('Modal chats listener failed', err); container.innerHTML = `<div class="small">Failed to load chats: ${err && err.message?err.message:'error'}</div>`; });
+      }catch(e){ console.warn('setupModalChatsListener failed', e); }
+    }
 
   </script>
 </body>

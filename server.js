@@ -106,3 +106,28 @@ app.listen(PORT, () => {
   console.log('Try accessing /public-route');
   console.log('Try accessing /protected-route (will fail without a token)');
 });
+
+// Public listing endpoint for demo (no auth required)
+app.post('/public-listings', express.json({limit: '6mb'}), async (req, res) => {
+  const { title, description, price, category, image } = req.body;
+  if (!title || !description || typeof price === 'undefined' || !category) {
+    return res.status(400).json({ message: 'Missing required fields.' });
+  }
+  try {
+    const docRef = await admin.firestore().collection('listings').add({
+      title,
+      description,
+      price,
+      category,
+      image,
+      userId: null,
+      userEmail: 'public',
+      createdAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+    console.log('Public listing saved:', docRef.id);
+    res.json({ message: 'Listing saved (public)!', id: docRef.id });
+  } catch (error) {
+    console.error('Error saving public listing:', error);
+    res.status(500).json({ message: 'Error saving listing.' });
+  }
+});

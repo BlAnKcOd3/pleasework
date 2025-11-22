@@ -121,15 +121,28 @@ function renderListingsPage(){
       const desc = escapeHtml(it.desc || '');
       const priceHtml = it.price>0?('$'+it.price):'Free/Job';
 
-      card.innerHTML = `
-        <img src="${imgSrc}" alt="${title}" />
-        <h3>${title}</h3>
-        <p>${desc}</p>
-        <div class="meta">
-          <div class="price">${priceHtml}</div>
-          <div><button class="view-btn" data-id="${String(it.id).replace(/"/g,'')}">View</button></div>
-        </div>
-      `;
+      const imgEl = document.createElement('img');
+      imgEl.src = imgSrc;
+      imgEl.alt = title;
+      imgEl.onerror = function(){
+        console.error('Image failed to load:', imgSrc);
+        this.onerror = null;
+        this.src = 'https://via.placeholder.com/400x300?text=No+Image';
+      };
+
+      const h3 = document.createElement('h3'); h3.innerText = it.title || '';
+      const p = document.createElement('p'); p.innerText = it.desc || '';
+      const meta = document.createElement('div'); meta.className = 'meta';
+      const priceDiv = document.createElement('div'); priceDiv.className='price'; priceDiv.innerText = priceHtml;
+      const btnWrap = document.createElement('div');
+      const btn = document.createElement('button'); btn.className='view-btn'; btn.setAttribute('data-id', String(it.id)); btn.innerText='View';
+      btnWrap.appendChild(btn);
+      meta.appendChild(priceDiv); meta.appendChild(btnWrap);
+
+      card.appendChild(imgEl);
+      card.appendChild(h3);
+      card.appendChild(p);
+      card.appendChild(meta);
       grid.appendChild(card);
     });
 
@@ -194,6 +207,15 @@ function showItemOverlay(item){
     </div>
   `;
   document.body.appendChild(overlay);
+  // attach image error handler inside overlay
+  const overlayImgEl = overlay.querySelector('img');
+  if(overlayImgEl){
+    overlayImgEl.onerror = function(){
+      console.error('Overlay image failed to load:', this.src);
+      this.onerror = null;
+      this.src = 'https://via.placeholder.com/400x300?text=No+Image';
+    };
+  }
   overlay.addEventListener('click', e=>{ if(e.target===overlay) overlay.remove(); });
   document.getElementById('close-overlay')?.addEventListener('click', ()=> overlay.remove());
 }
@@ -248,12 +270,36 @@ function handlePublishForm(evt){
       if(imgFile){
         img = await readFileAsDataURL(imgFile);
       }
+      // Try to send to backend public endpoint first (demo) so listings persist in Firestore
+      try{
+        const res = await fetch('http://localhost:3000/public-listings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, description: desc, price, category, image: img })
+        });
+        if(res.ok){
+          const data = await res.json();
+          console.log('Published to backend, id=', data.id);
+          alert('Published! The listing was saved to the backend.');
+          form.reset();
+          const preview = document.getElementById('media-preview');
+          if(preview) preview.innerHTML='';
+          if(document.body.getAttribute('data-page') === 'listings') renderListingsPage();
+          return;
+        } else {
+          const txt = await res.text();
+          console.warn('Backend publish failed:', txt);
+          // fallback to localStorage
+        }
+      } catch(err){
+        console.warn('Could not reach backend to publish, falling back to localStorage:', err);
+      }
+      // fallback: store locally for demo
       addListing({ title, desc, price, category, img });
-      alert('Published! The listing will appear in Listings.');
+      alert('Published locally! The listing will appear in Listings.');
       form.reset();
       const preview = document.getElementById('media-preview');
       if(preview) preview.innerHTML='';
-      // if on listings page, optionally refresh
       if(document.body.getAttribute('data-page') === 'listings') renderListingsPage();
     } catch(err){
       console.error('Error publishing listing:', err);

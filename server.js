@@ -27,6 +27,7 @@ async function checkAuth(req, res, next) {
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(403).json({ message: 'Forbidden: No token provided or invalid format.' });
   }
+  
 
   // Extract the token from 'Bearer <token>'
   const idToken = authHeader.split(' ')[1];

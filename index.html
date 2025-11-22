@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>De Anza Student Marketplace</title>
+    <style>
+        /* Base styles */
+        body {
+            background-color: #6e0b0f; /* Maroon color */
+            margin: 0;
+            padding: 0;
+            font-family: helvetica, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top and Bottom Bars (Consistent style) */
+        .bar-black {
+            background-color: black;
+            height: 20px;
+        }
+
+        .bar-gold {
+            background-color: #ebc034; 
+            height: 80px; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        /* Main Content Container */
+        .main-content {
+            flex-grow: 1; /* Allows content to push footer down */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+        }
+
+        /* Main Title Style */
+        .main-title {
+            color: white; 
+            font-size: 4.5em; 
+            margin-top: 50px;
+            margin-bottom: 50px;
+            line-height: 1.1;
+        }
+
+        /* Button Container */
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        /* Auth Button Styles */
+        .auth-button {
+            background-color: #ebc034; 
+            color: black; 
+            height: 80px; 
+            border: 2px solid #333333;
+            border-radius: 15px; 
+            font-size: 2em; 
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+        
+        .auth-button:hover {
+            background-color: #f0d588;
+        }
+
+        .auth-button:active {
+            transform: scale(0.98);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .main-title {
+                font-size: 3em;
+                margin-top: 20px;
+                margin-bottom: 30px;
+            }
+            .auth-button {
+                width: 100%; 
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Black Bar -->
+    <div class="bar-black"></div>
+
+    <!-- Gold Bar with Logo -->
+    <header class="bar-gold">
+        <img src="https://i.ibb.co/wNYjZG9k/Image-11-21-25-at-2-05-PM.png" 
+             alt="De Anza Logo" 
+             style="height: 60px;">
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <h1 class="main-title">
+            De Anza Student <br> Marketplace 
+        </h1>
+
+        <div class="button-container">
+            
+            <!-- Log In Button -->
+            <button id="loginButton" class="auth-button"> 
+               Sign in
+            </button>
+            
+            <!-- Create Account Button -->
+            <button id="signupButton" class="auth-button"> 
+               Create account
+            </button>
+            
+        </div>
+    </div>
+
+    <!-- Bottom Gold Bar -->
+    <div class="bar-gold"></div>
+    
+    <!-- Bottom Black Bar -->
+    <div class="bar-black"></div>
+  
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signOut, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        
+        // --- Firebase Initialization ---
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+
+        if (!firebaseConfig) {
+            console.error("Firebase configuration is missing.");
+        } else {
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            
+            // 1. MANDATE: Clear the custom application session (Student ID)
+            localStorage.removeItem('authenticatedStudentId');
+            
+            // 2. MANDATE: Sign out any Firebase session to default to a clean state
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    signOut(auth).then(() => {
+                        console.log("Existing user session signed out on entry page.");
+                    }).catch((error) => {
+                        console.error("Error signing out existing session:", error);
+                    });
+                }
+            });
+
+            // Ensure the application has a valid auth state for security rules
+            // This will typically result in an Anonymous user after the sign out above
+            signInAnonymously(auth).catch(e => {
+                console.error("Anonymous Sign-In failed:", e);
+            });
+        }
+
+
+        // --- Button Redirects (Existing logic) ---
+        document.getElementById('loginButton').addEventListener('click', () => {
+            window.location.href = 'login.html';
+        });
+
+        document.getElementById('signupButton').addEventListener('click', () => {
+            window.location.href = 'registration.html';
+        });
+    </script>
+</body>
+</html>

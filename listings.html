@@ -49,6 +49,17 @@
             margin: 0;
         }
 
+        header h1 a {
+            color: white;
+            text-decoration: none;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        header h1 a:hover {
+            opacity: 0.8;
+        }
+
         .icon {
             position: absolute;
             right: 20px;
@@ -297,7 +308,7 @@
 </head>
 <body>
     <header>
-        <h1>De Anza Listings</h1>
+        <h1><a href="marketplace.html">De Anza Listings</a></h1>
         <div class="icon" id="userIcon" title="Your account"><i class="fas fa-user-circle"></i></div>
     </header>
 

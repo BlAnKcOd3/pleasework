@@ -2,3 +2,6 @@
 .kluster
 .vscode
 serviceAccountKey.json
+
+
+.cursor/rules/kluster-code-verify.mdc

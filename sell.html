@@ -205,17 +205,6 @@
           </div>
         </div>
 
-                <div class="row" style="margin-top:12px">
-                    <div style="flex:1">
-                        <label class="small">Contact Email</label>
-                        <input class="input" type="email" name="contactEmail" placeholder="Your contact email" required />
-                    </div>
-                    <div style="width:200px">
-                        <label class="small">Contact Phone</label>
-                        <input class="input" type="tel" name="contactPhone" placeholder="Phone number" required />
-                    </div>
-                </div>
-
         <div style="margin-top:20px;display:flex;gap:12px">
           <button id="publish-btn" class="btn" type="submit" disabled>Publish Listing</button>
           <a class="btn" href="listings.html">View Listings</a>
@@ -302,8 +291,7 @@
                 price: parseFloat(formData.get('price')) || 0,
                 category: formData.get('category'),
                 image: formData.get('image').trim() || null,
-                contactEmail: formData.get('contactEmail') ? formData.get('contactEmail').trim() : null,
-                contactPhone: formData.get('contactPhone') ? formData.get('contactPhone').trim() : null,
+                
                 // MANDATORY Firestore Fields
                 userId: userId,
                 createdAt: serverTimestamp()

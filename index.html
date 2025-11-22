@@ -138,6 +138,10 @@
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 showMessage(`Successfully signed up as ${userCredential.user.email}! You are now logged in.`, 'success');
+                
+                // --- ADD THIS LINE ---
+                window.location.href = 'dashboard.html';
+
             } catch (error) {
                 showMessage(`Error: ${error.message}`, 'error');
                 console.error('Sign up error:', error);
@@ -157,6 +161,10 @@
             try {
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 showMessage(`Successfully logged in as ${userCredential.user.email}!`, 'success');
+                
+                // --- ADD THIS LINE ---
+                window.location.href = 'dashboard.html';
+
             } catch (error) {
                 showMessage(`Error: ${error.message}`, 'error');
                 console.error('Login error:', error);
@@ -246,7 +254,7 @@
         signupBtn.addEventListener('click', handleSignUp);
         logoutBtn.addEventListener('click', handleLogout);
         protectedBtn.addEventListener('click', accessProtected);
-
+        
     </script>
 </body>
 </html>

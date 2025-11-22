@@ -204,7 +204,7 @@
             color: #4f090c;
         }
         
-        /* FIX: Style for the "No listings found" message to ensure centering */
+        /* Style for the "No listings found" message to ensure centering */
         .centered-message {
             text-align: center;
             font-size: 1.1em;
@@ -301,7 +301,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, query, where, getDocs, onSnapshot, orderBy, startAt, endAt, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, query, where, onSnapshot, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
         // Global Firebase instances
@@ -310,16 +310,8 @@
         // Set Firestore log level to debug for better console feedback
         setLogLevel('Debug');
 
-// --- Firebase Configuration ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyBJJYUOM8EBEuT39DX2F_HtxgEbHDRH-Zc",
-            authDomain: "deanzahacks11-21-2025.firebaseapp.com",
-            projectId: "deanzahacks11-21-2025",
-            storageBucket: "deanzahacks11-21-2025.firebasestorage.app",
-            messagingSenderId: "253702257130",
-            appId: "1:253702257130:web:9ea8e3ee1bd291f1801a93",
-            measurementId: "G-5B84R81S31"
-        };        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
         const productGrid = document.getElementById('product-grid');
@@ -341,7 +333,7 @@
             loadingIndicator.style.display = 'none';
 
             if (listings.length === 0) {
-                // FIX: Use the 'centered-message' class for centering the error message
+                // Use the 'centered-message' class for centering the error message
                 productGrid.innerHTML = '<p class="centered-message">No listings found matching your criteria.</p>';
                 return;
             }
@@ -349,13 +341,16 @@
             listings.forEach(listing => {
                 const card = document.createElement('div');
                 card.className = 'listing-card';
+                // Check if 'image' field exists and provide a default if not (it's optional from sell.html)
+                const imageUrl = listing.image || 'https://placehold.co/400x300/4f090c/f0ce55?text=No+Image';
+
                 card.innerHTML = `
-                    <img src="${listing.image}" class="listing-image" alt="${listing.title}" onerror="this.onerror=null;this.src='https://placehold.co/400x300/4f090c/f0ce55?text=Image+Unavailable';" />
+                    <img src="${imageUrl}" class="listing-image" alt="${listing.title}" onerror="this.onerror=null;this.src='https://placehold.co/400x300/4f090c/f0ce55?text=Image+Unavailable';" />
                     <div class="listing-content">
                         <div class="listing-category">${listing.category.charAt(0).toUpperCase() + listing.category.slice(1).replace('-', ' & ')}</div>
                         <div class="listing-title">${listing.title}</div>
-                        <div class="listing-seller">Seller: ${listing.userId.substring(0, 8)}...</div>
-                        <div class="listing-price">${listing.price === 0 ? 'FREE' : `$${listing.price.toFixed(2)}`}</div>
+                        <div class="listing-seller">Seller: ${listing.userId ? listing.userId.substring(0, 8) + '...' : 'N/A'}</div>
+                        <div class="listing-price">${listing.price === 0 ? 'FREE' : `$${(listing.price || 0).toFixed(2)}`}</div>
                     </div>
                 `;
                 productGrid.appendChild(card);
@@ -372,49 +367,52 @@
             loadingIndicator.style.display = 'block';
             productGrid.innerHTML = '';
             
+            // NOTE: Firestore queries can only use one field for range comparisons unless that field is the one specified in the orderBy clause.
+            // Since we must order by `createdAt` to get the latest items, we must perform multi-property filtering (like price range) client-side.
+            // We only use the single `where` clause for the category filter, which is an equality check.
+            
             const listingsRef = collection(db, `artifacts/${appId}/public/data/listings`);
-            let q = listingsRef;
+            let q;
             let conditions = [];
             
-            // 1. Category Filter
+            // 1. Category Filter (Equality check, safe to use with orderBy)
             if (currentCategory) {
                 conditions.push(where('category', '==', currentCategory));
             }
             
-            // 2. Price Filter
-            let minPrice = null;
-            let maxPrice = null;
-            
-            if (currentPriceRange) {
-                if (currentPriceRange === 'free') {
-                    conditions.push(where('price', '==', 0));
-                } else {
-                    const [min, max] = currentPriceRange.split('-');
-                    minPrice = parseFloat(min);
-                    maxPrice = max === 'inf' ? null : parseFloat(max);
-
-                    // Add price range conditions
-                    if (minPrice !== null && minPrice > 0) {
-                        conditions.push(where('price', '>=', minPrice));
-                    }
-                    if (maxPrice !== null) {
-                        conditions.push(where('price', '<=', maxPrice));
-                    }
-                }
-            }
-            
-            // We use orderBy on creation date (mandatory for collection queries)
+            // 2. Combine conditions and order by creation date
+            // The query will fetch all data matching the category, ordered by date.
+            // Other filters (price, search) will be applied after the data is received.
             q = query(listingsRef, ...conditions, orderBy('createdAt', 'desc'));
             
             const unsubscribe = onSnapshot(q, (snapshot) => {
                 let listings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-                // 3. Client-Side Search Filter (Applied last)
+                // 3. Client-Side Price Filter
+                if (currentPriceRange) {
+                    const [min, max] = currentPriceRange.split('-');
+                    const minPrice = parseFloat(min);
+                    const maxPrice = max === 'inf' ? Infinity : parseFloat(max);
+                    
+                    listings = listings.filter(listing => {
+                        const price = listing.price || 0; // Default to 0 if price is missing/null
+
+                        if (currentPriceRange === 'free') {
+                            return price === 0;
+                        }
+                        
+                        // Apply range filter
+                        return price >= minPrice && price <= maxPrice;
+                    });
+                }
+
+
+                // 4. Client-Side Search Filter
                 if (currentSearchTerm) {
                     const searchLower = currentSearchTerm.toLowerCase();
                     listings = listings.filter(listing => 
-                        listing.title.toLowerCase().includes(searchLower) || 
-                        listing.description.toLowerCase().includes(searchLower)
+                        (listing.title && listing.title.toLowerCase().includes(searchLower)) || 
+                        (listing.description && listing.description.toLowerCase().includes(searchLower))
                     );
                 }
                 
@@ -424,8 +422,11 @@
                 loadingIndicator.textContent = `Error loading listings: ${error.message}`;
             });
             
-            // Note: In a real app, you would manage this subscription (unsubscribe) properly.
-            window.unsubscribeListings = unsubscribe; // Expose globally for simplicity
+            // Clean up old subscription if it exists
+            if (window.unsubscribeListings) {
+                window.unsubscribeListings();
+            }
+            window.unsubscribeListings = unsubscribe; // Store new unsubscribe function
         }
         
         function handleFilterChange() {
@@ -503,6 +504,7 @@
             // --- Event Listeners for Navigation ---
             document.getElementById('userIcon').addEventListener('click', () => {
                  onAuthStateChanged(auth, (user) => {
+                    // Redirect to dashboard if logged in (by email/password), or login page otherwise
                     window.location.href = user && user.email ? 'dashboard.html' : 'login.html';
                 }, { once: true });
             });

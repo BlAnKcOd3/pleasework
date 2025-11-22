@@ -10,6 +10,14 @@
     <style>
         /* --- CSS START: Reusing Homepage Style for Consistency --- */
         
+        /* FIX: Box sizing fix to prevent width overflow issues and ensure padding/border don't cause horizontal scrolling */
+        html {
+            box-sizing: border-box;
+        }
+        *, *::before, *::after {
+            box-sizing: inherit;
+        }
+        
         /* General Page Reset */
         body {
             margin: 0;
@@ -19,6 +27,7 @@
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            overflow-x: hidden; /* Prevents layout shift from unexpected horizontal scrolling */
         }
 
         /* Header Section */
@@ -55,11 +64,10 @@
             flex-grow: 1;
             padding: 20px;
             max-width: 1200px;
-            width: 100%;
             margin: 0 auto;
         }
 
-        /* Action Bar */
+        /* Action Bar - The filter and search controls area */
         .action-bar {
             display: flex;
             gap: 10px;
@@ -77,6 +85,8 @@
             font-size: 0.9em;
             transition: background-color 0.2s;
             border: 2px solid #4f090c;
+            /* Ensure fixed width for these buttons */
+            flex-shrink: 0;
         }
         
         .action-bar .pill:hover {
@@ -93,11 +103,12 @@
         .search-container {
             display: flex;
             align-items: center;
-            flex-grow: 1;
+            flex-grow: 1; /* Allow search bar to take up remaining space */
             max-width: 400px;
             position: relative;
         }
         
+        /* Input and Select Styles */
         #search-input, #filter-category, #filter-price {
             padding: 10px 15px;
             border: 2px solid #4f090c;
@@ -105,6 +116,12 @@
             font-size: 1em;
             box-sizing: border-box;
             width: 100%;
+            flex-shrink: 0; /* Prevents stretching */
+        }
+        
+        /* FIX: Give filters a max width so they don't stretch excessively */
+        #filter-category, #filter-price {
+            max-width: 200px; 
         }
 
         /* Listing Grid */
@@ -187,6 +204,16 @@
             color: #4f090c;
         }
         
+        /* FIX: Style for the "No listings found" message to ensure centering */
+        .centered-message {
+            text-align: center;
+            font-size: 1.1em;
+            color: #666;
+            padding: 40px;
+            /* IMPORTANT: Override grid behavior when this is the only content */
+            grid-column: 1 / -1; /* Make it span all columns */
+        }
+        
         /* Footer */
         .site-footer {
             background-color: #4f090c;
@@ -203,13 +230,14 @@
         }
         
         /* Responsive Adjustments */
-        @media (max-width: 150px) {
+        @media (max-width: 600px) {
             .action-bar {
                 flex-direction: column;
                 align-items: stretch;
             }
             .action-bar > * {
                 width: 100%;
+                max-width: none !important; /* Allow all elements to stretch on mobile */
             }
             .search-container {
                 max-width: 100%;
@@ -230,7 +258,7 @@
             <div id="sellButton" class="pill">Sell Item</div>
             <div id="buyButton" class="pill active">Categories</div>
 
-            <!-- Category Filter Dropdown (Restored Misc) -->
+            <!-- Category Filter Dropdown -->
             <select id="filter-category">
                 <option value="">All Categories</option>
                 <option value="textbooks">Textbooks</option>
@@ -256,7 +284,6 @@
             <!-- Search Bar -->
             <div class="search-container">
                 <input id="search-input" placeholder="Search title or description..." />
-                <!-- Search is triggered on filter change or explicitly on keypress/button -->
             </div>
             
         </div>
@@ -283,7 +310,16 @@
         // Set Firestore log level to debug for better console feedback
         setLogLevel('Debug');
 
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+// --- Firebase Configuration ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyBJJYUOM8EBEuT39DX2F_HtxgEbHDRH-Zc",
+            authDomain: "deanzahacks11-21-2025.firebaseapp.com",
+            projectId: "deanzahacks11-21-2025",
+            storageBucket: "deanzahacks11-21-2025.firebasestorage.app",
+            messagingSenderId: "253702257130",
+            appId: "1:253702257130:web:9ea8e3ee1bd291f1801a93",
+            measurementId: "G-5B84R81S31"
+        };        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
         const productGrid = document.getElementById('product-grid');
@@ -300,23 +336,13 @@
         
         // --- Utility Functions ---
 
-// --- Firebase Configuration ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyBJJYUOM8EBEuT39DX2F_HtxgEbHDRH-Zc",
-            authDomain: "deanzahacks11-21-2025.firebaseapp.com",
-            projectId: "deanzahacks11-21-2025",
-            storageBucket: "deanzahacks11-21-2025.firebasestorage.app",
-            messagingSenderId: "253702257130",
-            appId: "1:253702257130:web:9ea8e3ee1bd291f1801a93",
-            measurementId: "G-5B84R81S31"
-        };
-
         function renderListings(listings) {
             productGrid.innerHTML = ''; // Clear previous listings
             loadingIndicator.style.display = 'none';
 
             if (listings.length === 0) {
-                productGrid.innerHTML = '<p style="text-align: center; font-size: 1.1em; color: #666; padding: 20px;">No listings found matching your criteria.</p>';
+                // FIX: Use the 'centered-message' class for centering the error message
+                productGrid.innerHTML = '<p class="centered-message">No listings found matching your criteria.</p>';
                 return;
             }
 
@@ -377,12 +403,7 @@
                 }
             }
             
-            // If we use multiple 'where' clauses, Firestore requires an index, 
-            // but for this demo, we'll keep it simple and rely on client-side filtering 
-            // for search terms, as orderBy and where on different fields can conflict.
-            
-            // For now, we only use orderBy on creation date (mandatory for collection queries)
-            // and apply category and price filters via 'where'.
+            // We use orderBy on creation date (mandatory for collection queries)
             q = query(listingsRef, ...conditions, orderBy('createdAt', 'desc'));
             
             const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -501,7 +522,7 @@
             });
         }
         
-        // --- Initialization ---\r\n
+        // --- Initialization ---
         window.onload = setupFirebaseAndListeners;
 
     </script>

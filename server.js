@@ -52,6 +52,42 @@ app.get('/public-route', (req, res) => {
   res.json({ message: 'This is a public route. Anyone can see this!' });
 });
 
+// Save a new listing (protected)
+app.post('/listings', checkAuth, express.json({limit: '2mb'}), async (req, res) => {
+  const { title, description, price, category, image } = req.body;
+  if (!title || !description || !price || !category) {
+    return res.status(400).json({ message: 'Missing required fields.' });
+  }
+  try {
+    const docRef = await admin.firestore().collection('listings').add({
+      title,
+      description,
+      price,
+      category,
+      image,
+      userId: req.user.uid,
+      userEmail: req.user.email,
+      createdAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+    res.json({ message: 'Listing saved!', id: docRef.id });
+  } catch (error) {
+    console.error('Error saving listing:', error);
+    res.status(500).json({ message: 'Error saving listing.' });
+  }
+});
+
+// Get all listings (public)
+app.get('/listings', async (req, res) => {
+  try {
+    const snapshot = await admin.firestore().collection('listings').orderBy('createdAt', 'desc').get();
+    const listings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    res.json({ listings });
+  } catch (error) {
+    console.error('Error fetching listings:', error);
+    res.status(500).json({ message: 'Error fetching listings.' });
+  }
+});
+
 // A protected route that requires a valid token
 // We apply our 'checkAuth' middleware here
 app.get('/protected-route', checkAuth, (req, res) => {

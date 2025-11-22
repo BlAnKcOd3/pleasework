@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse Listings by Category</title>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f7f7f7; margin: 0; padding: 0; }
+        .container { max-width: 700px; margin: 40px auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 30px; }
+        h2 { text-align: center; color: #222; }
+        .category-btn { background: #007bff; color: #fff; border: none; padding: 10px 20px; border-radius: 5px; font-size: 1em; cursor: pointer; margin: 5px; }
+        .category-btn.active { background: #ff595e; }
+        .listing { background:#fff; border:1px solid #eee; border-radius:8px; margin-bottom:15px; padding:15px; box-shadow:0 1px 4px rgba(0,0,0,0.05); }
+        .listing img { max-width:100%; max-height:150px; margin-top:8px; border-radius:5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Browse Listings by Category</h2>
+        <div style="text-align:center; margin-bottom:20px;">
+            <button class="category-btn" data-category="all">All</button>
+            <button class="category-btn" data-category="clothing">Clothing</button>
+            <button class="category-btn" data-category="shoes">Shoes</button>
+            <button class="category-btn" data-category="accessories">Accessories</button>
+            <button class="category-btn" data-category="other">Other</button>
+        </div>
+        <div id="listingsContainer"></div>
+        <div style="text-align:center; margin-top:20px;">
+            <button onclick="window.location.href='postlistingpage.html'" style="background:#ff595e; color:#fff; border:none; padding:10px 20px; border-radius:5px; font-size:1em; cursor:pointer;">Back to Post Listing</button>
+        </div>
+    </div>
+    <script>
+        // --- Firebase Setup ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyBJJYUOM8EBEuT39DX2F_HtxgEbHDRH-Zc",
+            authDomain: "deanzahacks11-21-2025.firebaseapp.com",
+            projectId: "deanzahacks11-21-2025",
+            storageBucket: "deanzahacks11-21-2025.firebasestorage.app",
+            messagingSenderId: "253702257130",
+            appId: "1:253702257130:web:9ea8e3ee1bd291f1801a93",
+            measurementId: "G-5B84R81S31"
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        const listingsContainer = document.getElementById('listingsContainer');
+        const categoryBtns = document.querySelectorAll('.category-btn');
+
+        let allListings = [];
+
+        async function fetchListings(category = 'all') {
+            listingsContainer.innerHTML = '<p style="color:#888;">Loading listings...</p>';
+            try {
+                const res = await fetch('http://localhost:3000/listings');
+                const data = await res.json();
+                allListings = data.listings || [];
+                renderListings(category);
+            } catch (err) {
+                listingsContainer.innerHTML = '<p style="color:#c00;">Error loading listings.</p>';
+            }
+        }
+
+        function renderListings(category = 'all') {
+            let filtered = allListings;
+            if (category !== 'all') {
+                filtered = allListings.filter(l => l.category === category);
+            }
+            listingsContainer.innerHTML = '';
+            if (filtered.length === 0) {
+                listingsContainer.innerHTML = '<p style="color:#888;">No listings found for this category.</p>';
+                return;
+            }
+            filtered.forEach(listing => {
+                const div = document.createElement('div');
+                div.className = 'listing';
+                div.innerHTML = `
+                    <h3 style='margin:0 0 8px 0;'>${listing.title}</h3>
+                    <p style='margin:0 0 8px 0;'>${listing.description}</p>
+                    <strong>Price:</strong> $${listing.price}<br>
+                    <strong>Category:</strong> ${listing.category}<br>
+                    ${listing.image ? `<img src='${listing.image}' />` : ''}
+                `;
+                listingsContainer.appendChild(div);
+            });
+        }
+
+        categoryBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                categoryBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                renderListings(this.dataset.category);
+            });
+        });
+
+        // Initial fetch
+        fetchListings();
+        categoryBtns[0].classList.add('active');
+    </script>
+</body>
+</html>

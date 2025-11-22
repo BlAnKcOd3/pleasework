@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Depop-Style Listing Post</title>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f7f7f7;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 500px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        h2 {
+            text-align: center;
+            color: #222;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        label {
+            font-weight: bold;
+        }
+        input, textarea, select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+        button {
+            background: #ff595e;
+            color: #fff;
+            border: none;
+            padding: 12px;
+            border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #ff363a;
+        }
+        .image-preview {
+            width: 100%;
+            max-height: 200px;
+            object-fit: cover;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Create a Listing</h2>
+        <form id="listingForm">
+            <label for="title">Title</label>
+            <input type="text" id="title" name="title" required>
+
+            <label for="description">Description</label>
+            <textarea id="description" name="description" rows="4" required></textarea>
+
+            <label for="price">Price ($)</label>
+            <input type="number" id="price" name="price" min="0" step="0.01" required>
+
+            <label for="category">Category</label>
+            <select id="category" name="category" required>
+                <option value="">Select a category</option>
+                <option value="clothing">Clothing</option>
+                <option value="shoes">Shoes</option>
+                <option value="accessories">Accessories</option>
+                <option value="other">Other</option>
+            </select>
+
+            <label for="image">Image</label>
+            <input type="file" id="image" name="image" accept="image/*">
+            <img id="preview" class="image-preview" style="display:none;" />
+
+            <button type="submit">Post Listing</button>
+        </form>
+        <div id="notification" style="display:none; margin-top:15px; padding:10px; background:#d4edda; color:#155724; border-radius:5px; text-align:center;"></div>
+        <div style="margin-top:30px; text-align:center;">
+            <button id="myListingsBtn" style="background:#007bff; color:#fff; border:none; padding:10px 20px; border-radius:5px; font-size:1em; cursor:pointer; margin-bottom:10px;">My Listings</button>
+            <button onclick="window.location.href='listings.html'" style="background:#6c757d; color:#fff; border:none; padding:10px 20px; border-radius:5px; font-size:1em; cursor:pointer; margin-left:10px;">Listings by Category</button>
+        </div>
+        <div id="listingsContainer" style="margin-top:20px;"></div>
+    </div>
+    <script>
+        // --- Firebase Setup ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyBJJYUOM8EBEuT39DX2F_HtxgEbHDRH-Zc",
+            authDomain: "deanzahacks11-21-2025.firebaseapp.com",
+            projectId: "deanzahacks11-21-2025",
+            storageBucket: "deanzahacks11-21-2025.firebasestorage.app",
+            messagingSenderId: "253702257130",
+            appId: "1:253702257130:web:9ea8e3ee1bd291f1801a93",
+            measurementId: "G-5B84R81S31"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        const imageInput = document.getElementById('image');
+        const preview = document.getElementById('preview');
+        const form = document.getElementById('listingForm');
+        const notification = document.getElementById('notification');
+        const listingsContainer = document.getElementById('listingsContainer');
+        const myListingsBtn = document.getElementById('myListingsBtn');
+
+        let currentUser = null;
+        let currentIdToken = null;
+
+        function showNotification(msg) {
+            notification.textContent = msg;
+            notification.style.display = 'block';
+            setTimeout(() => { notification.style.display = 'none'; }, 2500);
+        }
+
+        async function fetchListings(filterMy = false) {
+            listingsContainer.innerHTML = '<p style="color:#888;">Loading listings...</p>';
+            try {
+                const res = await fetch('http://localhost:3000/listings');
+                const data = await res.json();
+                let listings = data.listings || [];
+                if (filterMy && currentUser) {
+                    listings = listings.filter(l => l.userId === currentUser.uid);
+                }
+                if (listings.length === 0) {
+                    listingsContainer.innerHTML = '<p style="color:#888;">No listings yet.</p>';
+                    return;
+                }
+                listingsContainer.innerHTML = '';
+                listings.forEach(listing => {
+                    const div = document.createElement('div');
+                    div.style = 'background:#fff; border:1px solid #eee; border-radius:8px; margin-bottom:15px; padding:15px; box-shadow:0 1px 4px rgba(0,0,0,0.05);';
+                    div.innerHTML = `
+                        <h3 style='margin:0 0 8px 0;'>${listing.title}</h3>
+                        <p style='margin:0 0 8px 0;'>${listing.description}</p>
+                        <strong>Price:</strong> $${listing.price}<br>
+                        <strong>Category:</strong> ${listing.category}<br>
+                        ${listing.image ? `<img src='${listing.image}' style='max-width:100%;max-height:150px;margin-top:8px;border-radius:5px;' />` : ''}
+                    `;
+                    listingsContainer.appendChild(div);
+                });
+            } catch (err) {
+                listingsContainer.innerHTML = '<p style="color:#c00;">Error loading listings.</p>';
+            }
+        }
+
+        imageInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            } else {
+                preview.style.display = 'none';
+            }
+        });
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            if (!currentIdToken) {
+                showNotification('You must be logged in to post listings.');
+                return;
+            }
+            const title = document.getElementById('title').value;
+            const description = document.getElementById('description').value;
+            const price = document.getElementById('price').value;
+            const category = document.getElementById('category').value;
+            let imageData = '';
+            if (imageInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = async function(ev) {
+                    imageData = ev.target.result;
+                    await postListing({ title, description, price, category, image: imageData });
+                };
+                reader.readAsDataURL(imageInput.files[0]);
+            } else {
+                await postListing({ title, description, price, category, image: '' });
+            }
+        });
+
+        async function postListing(listing) {
+            try {
+                const res = await fetch('http://localhost:3000/listings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + currentIdToken
+                    },
+                    body: JSON.stringify(listing)
+                });
+                if (!res.ok) throw new Error('Failed to upload listing');
+                showNotification('Listing uploaded successfully!');
+                form.reset();
+                preview.style.display = 'none';
+                fetchListings();
+            } catch (err) {
+                showNotification('Error uploading listing.');
+            }
+        }
+
+        myListingsBtn.addEventListener('click', function() {
+            fetchListings(true);
+        });
+
+        // Firebase Auth state
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                currentUser = user;
+                currentIdToken = await user.getIdToken();
+                fetchListings();
+            } else {
+                currentUser = null;
+                currentIdToken = null;
+                listingsContainer.innerHTML = '<p style="color:#888;">Please log in to view and post listings.</p>';
+            }
+        });
+    </script>
+</body>
+</html>

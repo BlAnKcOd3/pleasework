@@ -1,247 +1,247 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>De Anza Registration</title>
-    <style>
-        /* Global Reset and Body Styling */
-        body {
-            background-color: #6e0b0f; /* Maroon color */
-            margin: 0;
-            font-family: 'Helvetica', sans-serif;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>De Anza Registration</title>
+    <style>
+        /* Global Reset and Body Styling */
+        body {
+            background-color: #6e0b0f; /* Maroon color */
+            margin: 0;
+            font-family: 'Helvetica', sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
 
-        /* Top and Bottom Bars */
-        .bar-black {
-            background-color: black;
-            height: 20px;
-        }
+        /* Top and Bottom Bars */
+        .bar-black {
+            background-color: black;
+            height: 20px;
+        }
 
-        .bar-gold {
-            background-color: #ebc034;
-            height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative; 
-        }
+        .bar-gold {
+            background-color: #ebc034;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative; 
+        }
 
-        /* Logo Positioning */
-        .logo-image {
-            height: 60px;
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-        }
+        /* Logo Positioning */
+        .logo-image {
+            height: 60px;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
 
-        /* Main Content Container */
-        .main-content {
-            flex-grow: 1; 
-            padding: 50px 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+        /* Main Content Container */
+        .main-content {
+            flex-grow: 1; 
+            padding: 50px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-        /* Registration Card */
-        .registration-card {
-            background-color: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-            border: 4px solid #ebc034; /* Gold border */
-        }
-        
-        .card-title {
-            color: #4f090c; /* Dark Red */
-            margin-bottom: 20px;
-            font-size: 2em;
-            font-weight: bold;
-        }
+        /* Registration Card */
+        .registration-card {
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            border: 4px solid #ebc034; /* Gold border */
+        }
+        
+        .card-title {
+            color: #4f090c; /* Dark Red */
+            margin-bottom: 20px;
+            font-size: 2em;
+            font-weight: bold;
+        }
 
-        /* Form Styling */
-        .form-group {
-            margin-bottom: 20px;
-            text-align: left;
-        }
+        /* Form Styling */
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
 
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #333;
-        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
 
-        .form-group input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #ccc;
-            border-radius: 8px;
-            box-sizing: border-box;
-            font-size: 1em;
-            transition: border-color 0.3s;
-        }
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
 
-        .form-group input:focus {
-            border-color: #ebc034; /* Gold focus */
-            outline: none;
-        }
+        .form-group input:focus {
+            border-color: #ebc034; /* Gold focus */
+            outline: none;
+        }
 
-        /* Button Styling */
-        .register-button {
-            background-color: #4f090c; /* Dark Red */
-            color: white;
-            padding: 15px 30px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1.1em;
-            font-weight: bold;
-            width: 100%;
-            transition: background-color 0.3s, transform 0.1s;
-        }
+        /* Button Styling */
+        .register-button {
+            background-color: #4f090c; /* Dark Red */
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            width: 100%;
+            transition: background-color 0.3s, transform 0.1s;
+        }
 
-        .register-button:hover:not(:disabled) {
-            background-color: #6e0b0f; /* Slightly lighter red on hover */
-        }
-        
-        .register-button:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-        }
-        
-        /* Message Box */
-        .message-box {
-            margin-top: 15px;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 0.9em;
-            font-weight: bold;
-            display: none; /* Hidden by default */
-            text-align: left;
-        }
+        .register-button:hover:not(:disabled) {
+            background-color: #6e0b0f; /* Slightly lighter red on hover */
+        }
+        
+        .register-button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        /* Message Box */
+        .message-box {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            font-weight: bold;
+            display: none; /* Hidden by default */
+            text-align: left;
+        }
 
-        .message-success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
+        .message-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
 
-        .message-error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
-        /* Link to Login */
-        .login-link {
-            margin-top: 20px;
-            font-size: 0.9em;
-        }
-        
-        .login-link a {
-            color: #4f090c;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        
-        .login-link a:hover {
-            text-decoration: underline;
-        }
+        .message-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        /* Link to Login */
+        .login-link {
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+        
+        .login-link a {
+            color: #4f090c;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .login-link a:hover {
+            text-decoration: underline;
+        }
 
-        /* Responsive Design */
-        @media (max-width: 600px) {
-            .registration-card {
-                margin: 20px;
-            }
-        }
-    </style>
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .registration-card {
+                margin: 20px;
+            }
+        }
+    </style>
 </head>
 <body>
 
-    <!-- Top Black Bar -->
-    <div class="bar-black"></div>
+    <!-- Top Black Bar -->
+    <div class="bar-black"></div>
 
-    <!-- Gold Bar with Logo -->
-    <div class="bar-gold">
-        <a href="index.html">
-            <img src="https://i.ibb.co/wNYjZG9k/Image-11-21-25-at-2-05-PM.png" 
-                 alt="De Anza Logo" 
-                 class="logo-image" 
+    <!-- Gold Bar with Logo -->
+    <div class="bar-gold">
+        <a href="index.html">
+            <img src="https://i.ibb.co/wNYjZG9k/Image-11-21-25-at-2-05-PM.png" 
+                 alt="De Anza Logo" 
+                 class="logo-image" 
                    onerror="this.onerror=null; this.src='https://placehold.co/120x60/4f090c/FFFFFF?text=D+A';"
                 >
-        </a>
-    </div>
+        </a>
+    </div>
 
-    <!-- Main Content -->
-    <div class="main-content">
-        <div class="registration-card">
-            <h2 class="card-title">Create Student Account</h2>
-            
-            <!-- NOTE: Form ID changed to registrationForm for clarity -->
-            <form id="registrationForm">
-                <div class="form-group">
-                    <label for="studentId">Student ID (8 digits)</label>
-                    <input type="text" id="studentId" placeholder="20683637" maxlength="8" pattern="[0-9]{8}" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="password">Password (min 6 characters)</label>
-                    <input type="password" id="password" minlength="6" required>
-                </div>
-                
-                <div id="messageBox" class="message-box"></div>
-                
-                <button type="submit" id="registerButton" class="register-button" disabled>
-                    Register Account
-                </button>
-            </form>
-            
-            <div class="login-link">
-                Already have an account? <a href="login.html">Sign in here</a>.
-            </div>
-        </div>
-    </div>
-    
-    <!-- Bottom Gold Bar -->
-    <div class="bar-gold"></div>
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="registration-card">
+            <h2 class="card-title">Create Student Account</h2>
+            
+            <!-- NOTE: Form ID changed to registrationForm for clarity -->
+            <form id="registrationForm">
+                <div class="form-group">
+                    <label for="studentId">Student ID (8 digits)</label>
+                    <input type="text" id="studentId" placeholder="20683637" maxlength="8" pattern="[0-9]{8}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password (min 6 characters)</label>
+                    <input type="password" id="password" minlength="6" required>
+                </div>
+                
+                <div id="messageBox" class="message-box"></div>
+                
+                <button type="submit" id="registerButton" class="register-button" disabled>
+                    Register Account
+                </button>
+            </form>
+            
+            <div class="login-link">
+                Already have an account? <a href="login.html">Sign in here</a>.
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bottom Gold Bar -->
+    <div class="bar-gold"></div>
 
-    <!-- Bottom Black Bar -->
-    <div class="bar-black"></div>
-  
-    <script type="module">
+    <!-- Bottom Black Bar -->
+    <div class="bar-black"></div>
+  
+    <script type="module">
         // Import Firebase Modules
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { 
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { 
             getAuth, 
             createUserWithEmailAndPassword, // Added registration function
             signInAnonymously 
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // --- DOM Elements ---
-        const registrationForm = document.getElementById('registrationForm'); // Correct ID
-        const registerButton = document.getElementById('registerButton'); // Correct ID
-        const studentIdInput = document.getElementById('studentId');
-        const passwordInput = document.getElementById('password');
-        const messageBox = document.getElementById('messageBox');
+        // --- DOM Elements ---
+        const registrationForm = document.getElementById('registrationForm'); // Correct ID
+        const registerButton = document.getElementById('registerButton'); // Correct ID
+        const studentIdInput = document.getElementById('studentId');
+        const passwordInput = document.getElementById('password');
+        const messageBox = document.getElementById('messageBox');
 
-        let auth = null;
+        let auth = null;
 
-        // --- Utility Functions ---
-        function displayMessage(type, message) {
-            messageBox.textContent = message;
-            messageBox.className = `message-box message-${type}`;
-            messageBox.style.display = 'block';
-            // Optional: Clear message after a delay
-            // setTimeout(() => messageBox.style.display = 'none', 5000); 
-        }
+        // --- Utility Functions ---
+        function displayMessage(type, message) {
+            messageBox.textContent = message;
+            messageBox.className = `message-box message-${type}`;
+            messageBox.style.display = 'block';
+            // Optional: Clear message after a delay
+            // setTimeout(() => messageBox.style.display = 'none', 5000); 
+        }
         
         // --- Validation Logic (To enable/disable button) ---
         function validateInputs() {
@@ -268,45 +268,45 @@
         }
 
 
-        // --- Firebase Configuration ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyBJJYUOM8EBEuT39DX2F_HtxgEbHDRH-Zc",
-            authDomain: "deanzahacks11-21-2025.firebaseapp.com",
-            projectId: "deanzahacks11-21-2025",
-            storageBucket: "deanzahacks11-21-2025.firebasestorage.app",
-            messagingSenderId: "253702257130",
-            appId: "1:253702257130:web:9ea8e3ee1bd291f1801a93",
-            measurementId: "G-5B84R81S31"
-        };
+        // --- Firebase Configuration ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyBJJYUOM8EBEuT39DX2F_HtxgEbHDRH-Zc",
+            authDomain: "deanzahacks11-21-2025.firebaseapp.com",
+            projectId: "deanzahacks11-21-2025",
+            storageBucket: "deanzahacks11-21-2025.firebasestorage.app",
+            messagingSenderId: "253702257130",
+            appId: "1:253702257130:web:9ea8e3ee1bd291f1801a93",
+            measurementId: "G-5B84R81S31"
+        };
 
-        // --- Firebase Setup and Authentication ---
-        async function setupFirebase() {
-            try {
-                const app = initializeApp(firebaseConfig);
-                auth = getAuth(app);
-                
-                // Sign in anonymously for basic access, if needed
-                await signInAnonymously(auth);
-                console.log("Signed in anonymously.");
+        // --- Firebase Setup and Authentication ---
+        async function setupFirebase() {
+            try {
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                
+                // Sign in anonymously for basic access, if needed
+                await signInAnonymously(auth);
+                console.log("Signed in anonymously.");
 
-            } catch (error) {
-                console.error("Critical Firebase Setup Error:", error);
-                displayMessage('error', `Registration system failed to load: ${error.message}`);
-            }
-        }
+            } catch (error) {
+                console.error("Critical Firebase Setup Error:", error);
+                displayMessage('error', `Registration system failed to load: ${error.message}`);
+            }
+        }
 
-        // --- Registration Handler (UPDATED) ---
-        async function handleRegistration(event) {
-            event.preventDefault();
+        // --- Registration Handler (UPDATED) ---
+        async function handleRegistration(event) {
+            event.preventDefault();
             messageBox.style.display = 'none'; // Clear previous messages
 
-            if (!auth) {
-                displayMessage('error', 'Firebase not initialized. Please refresh the page.');
-                return;
-            }
-            
-            const studentId = studentIdInput.value.trim();
-            const password = passwordInput.value;
+            if (!auth) {
+                displayMessage('error', 'Firebase not initialized. Please refresh the page.');
+                return;
+            }
+            
+            const studentId = studentIdInput.value.trim();
+            const password = passwordInput.value;
 
             // Final client-side check
             if (!/^\d{8}$/.test(studentId) || password.length < 6) {
@@ -314,53 +314,53 @@
                 return;
             }
 
-            try {
-                // Use student ID as email (for Firebase Auth)
-                const email = `${studentId}@deanza.edu`; // Standard format for Firebase
-                
-                // Use the registration function
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                
-                console.log("User registered and logged in:", userCredential.user);
-                
-                displayMessage('success', 'Registration successful! Redirecting to the Marketplace...');
-                
-                // Redirect to homepage after successful registration
-                setTimeout(() => {
-                    window.location.href = 'marketplace.html';
-                }, 1500);
+            try {
+                // Use student ID as email (for Firebase Auth)
+                const email = `${studentId}@deanza.edu`; // Standard format for Firebase
+                
+                // Use the registration function
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                
+                console.log("User registered and logged in:", userCredential.user);
+                
+                displayMessage('success', 'Registration successful! Redirecting to the Marketplace...');
+                
+                // Redirect to homepage after successful registration
+                setTimeout(() => {
+                    window.location.href = 'marketplace.html';
+                }, 1500);
 
-            } catch (error) {
-                console.error("Registration failed:", error);
-                let errorMessage = 'Registration failed. Please try again.';
-                
-                switch (error.code) {
-                    case 'auth/email-already-in-use':
-                        errorMessage = 'This Student ID is already registered. Please sign in.';
-                        break;
-                    case 'auth/weak-password':
-                        errorMessage = 'Password is too weak. Please use at least 6 characters.';
-                        break;
-                    default:
-                        errorMessage = `Registration failed: ${error.message}`;
-                        break;
-                }
-                displayMessage('error', errorMessage);
-            }
-        }
+            } catch (error) {
+                console.error("Registration failed:", error);
+                let errorMessage = 'Registration failed. Please try again.';
+                
+                switch (error.code) {
+                    case 'auth/email-already-in-use':
+                        errorMessage = 'This Student ID is already registered. Please sign in.';
+                        break;
+                    case 'auth/weak-password':
+                        errorMessage = 'Password is too weak. Please use at least 6 characters.';
+                        break;
+                    default:
+                        errorMessage = `Registration failed: ${error.message}`;
+                        break;
+                }
+                displayMessage('error', errorMessage);
+            }
+        }
 
-        // --- Event Listeners ---
-        registrationForm.addEventListener('submit', handleRegistration); // Correct form listener
-        
-        // Add validation listeners to enable the button when inputs are correct
-        studentIdInput.addEventListener('input', validateInputs);
-        passwordInput.addEventListener('input', validateInputs);
+        // --- Event Listeners ---
+        registrationForm.addEventListener('submit', handleRegistration); // Correct form listener
+        
+        // Add validation listeners to enable the button when inputs are correct
+        studentIdInput.addEventListener('input', validateInputs);
+        passwordInput.addEventListener('input', validateInputs);
 
         // Run validation once on load to disable the button initially
         validateInputs();
-        
-        // Start the setup process
-        setupFirebase();
-    </script>
+        
+        // Start the setup process
+        setupFirebase();
+    </script>
 </body>
 </html>

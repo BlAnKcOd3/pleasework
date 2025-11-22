@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>De Anza Logout</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom Styles to match the De Anza Marketplace theme */
+        @import url('https://fonts.googleapis.com/css2?family=Helvetica:wght@400;700&display=swap');
+        body {
+            background-color: #333333; /* Dark background */
+            font-family: 'Helvetica', sans-serif;
+            color: black;
+        }
+
+        .header-bar {
+            background-color: #ebc034; /* Custom yellow */
+            height: 80px;
+        }
+
+        .marketplace-title {
+            color: white;
+            font-size: clamp(2.5rem, 8vw, 4.5rem);
+            text-align: center;
+            padding-top: 20px;
+            padding-bottom: 20px;
+            line-height: 1.1;
+        }
+
+        .auth-container {
+            background-color: #ebc034;
+            max-width: 380px;
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid #333333;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        .auth-button {
+            width: 100%;
+            padding: 15px 0;
+            border-radius: 10px;
+            font-size: 1.5em;
+            font-weight: bold;
+            border: 2px solid #333333;
+            transition: transform 0.1s ease, background-color 0.1s ease;
+        }
+
+        .auth-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center min-h-screen">
+
+    <!-- Top Black Bar -->
+    <div class="w-full bg-black h-5"></div>
+
+    <!-- Yellow Header Bar -->
+    <div class="header-bar w-full flex items-center justify-center relative">
+        <!-- Logo Placeholder -->
+        <img src="https://placehold.co/80x80/ebc034/000?text=LOGO" 
+             onerror="this.src='https://i.ibb.co/wNYjZG9k/Image-11-21-25-at-2-05-PM.png'"
+             alt="De Anza Logo" 
+             class="absolute left-1/2 -translate-x-1/2 h-full py-1 hidden sm:block" style="width: 10%;">
+    </div>
+
+    <!-- Marketplace Title -->
+    <h1 class="marketplace-title px-4">De Anza Student <br> Marketplace</h1>
+
+    <!-- Logout Container -->
+    <div class="auth-container mx-auto mt-4 w-11/12 md:w-full text-center">
+        <h2 class="text-3xl font-bold mb-6">Confirm Logout</h2>
+        
+        <div id="messageDiv" class="text-center p-3 mb-4 rounded-lg text-sm font-medium border border-black hidden" role="alert"></div>
+
+        <p class="mb-6 text-lg font-semibold">
+            You are currently logged in. Click the button below to sign out.
+        </p>
+
+        <button id="logoutBtn" 
+                class="auth-button bg-red-600 text-white hover:bg-red-700">
+            Log Out Now
+        </button>
+    </div>
+
+    <!-- Firebase SDKs and Logic -->
+    <script type="module">
+        // Import Firebase functions from CDN
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { 
+            getAuth, 
+            signOut,
+            onAuthStateChanged
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        
+        // --- Globals & Setup ---
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // --- DOM Elements ---
+        const logoutBtn = document.getElementById('logoutBtn');
+        const messageDiv = document.getElementById('messageDiv');
+        
+        // --- Utility Functions ---
+        function showMessage(message, type) {
+            messageDiv.textContent = message;
+            messageDiv.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700', 'bg-blue-100', 'text-blue-700');
+            
+            if (type === 'success') {
+                messageDiv.classList.add('bg-green-100', 'text-green-700');
+            } else if (type === 'error') {
+                messageDiv.classList.add('bg-red-100', 'text-red-700');
+            } else { // info
+                messageDiv.classList.add('bg-blue-100', 'text-blue-700');
+            }
+            messageDiv.classList.remove('hidden');
+        }
+
+        /**
+         * Signs the user out and redirects to the login page.
+         */
+        async function handleLogout() {
+            showMessage('Signing out...', 'info');
+            logoutBtn.disabled = true;
+            try {
+                await signOut(auth);
+                
+                // Sign out successful, redirect to the login page
+                showMessage('Signed out successfully! Redirecting...', 'success');
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1000); // Wait 1 second before redirecting
+            } catch (error) {
+                console.error('Logout error:', error);
+                showMessage(`Logout Failed: ${error.message}`, 'error');
+                logoutBtn.disabled = false;
+            }
+        }
+
+        // Check if the user is signed in on load
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                // If not signed in, redirect them back to the login page
+                window.location.href = 'index.html';
+            } else {
+                logoutBtn.addEventListener('click', handleLogout);
+                logoutBtn.disabled = false;
+            }
+        });
+        
+    </script>
+</body>
+</html>

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>De Anza Marketplace</title>
+    <!-- Load FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* --- CSS START --- */
+        
+        /* General Page Reset */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f0ce55; /* Gold/Mustard background */
+            font-family: Arial, Helvetica, sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Header Section */
+        header {
+            background-color: #4f090c; /* Dark Red */
+            padding: 15px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            height: 80px;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            color: white;
+            font-size: 3rem;
+            margin: 0;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .logo-image {
+            height: 60px;
+        }
+
+        /* User Icon in Header */
+        #userIcon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #f0ce55; /* Gold/Mustard */
+            font-size: 2em;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        #userIcon:hover {
+            color: white;
+        }
+        
+        /* Main Content */
+        main {
+            flex-grow: 1;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: #4f090c; 
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            font-size: 0.8em;
+        }
+        
+        /* Error Message Box */
+        .error-message {
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #dc3545;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: none; /* Hidden by default */
+            font-weight: bold;
+        }
+        /* --- CSS END --- */
+    </style>
+</head>
+<body>
+
+    <div id="errorMessage" class="error-message"></div>
+
+    <header>
+        <img src="https://i.ibb.co/wNYjZG9k/Image-11-21-25-at-2-05-PM.png" 
+             alt="De Anza Logo" 
+             class="logo-image">
+        
+        <i id="userIcon" class="fa-solid fa-circle-user"></i>
+    </header>
+
+    <main>
+        <h1>Welcome to the De Anza Marketplace!</h1>
+        <p>Find great deals on textbooks, supplies, and more from your fellow students.</p>
+        
+        <!-- Placeholder for marketplace items -->
+        <div id="marketplace-listings" class="mt-4">
+            <!-- Listings will be loaded here -->
+            <p>Loading listings...</p>
+        </div>
+    </main>
+
+    <footer>
+        &copy; 2025 De Anza Student Marketplace
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        
+        // Function to display non-alert error messages
+        function displayErrorMessage(title, detail) {
+            const errorBox = document.getElementById('errorMessage');
+            errorBox.textContent = `${title} (${detail})`;
+            errorBox.style.display = 'block';
+            setTimeout(() => {
+                errorBox.style.display = 'none';
+            }, 5000);
+        }
+
+        let auth = null;
+
+        // --- Robust Firebase Setup and Authentication ---
+        async function setupFirebase() {
+            try {
+                const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+                const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+
+                if (!firebaseConfig) {
+                    throw new Error("Configuration data not available.");
+                }
+
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app); // Assign to script-scoped variable
+
+                // Authenticate the user
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                    console.log("Signed in with custom token.");
+                } else {
+                    await signInAnonymously(auth);
+                    console.log("Signed in anonymously.");
+                }
+
+                // Setup successful, proceed with application logic
+                setupApplicationListeners();
+
+            } catch (error) {
+                console.error("Critical Firebase Setup Error:", error);
+                displayErrorMessage("Firebase Setup Failed", error.message || "Check console for details.");
+            }
+        }
+        
+        // Function to set up event listeners after Firebase is ready
+        function setupApplicationListeners() {
+            if (!auth) {
+                console.error("Auth is not initialized. Cannot set up listeners.");
+                return;
+            }
+
+            const userIcon = document.getElementById('userIcon');
+            
+            // Handle user icon click
+            userIcon.addEventListener('click', () => {
+                 // Check if the user is currently signed in
+                 const user = auth.currentUser;
+                 // Since we force sign-in (anonymous or custom), we check for the email property to distinguish between a
+                 // full user account and an anonymous guest.
+                 if (user && user.email) {
+                    // Full user is signed in, redirect to dashboard/account management
+                    window.location.href = 'dashboard.html';
+                 } else {
+                    // Anonymous user (or not fully signed in yet), redirect to the login page
+                    window.location.href = 'login.html';
+                 }
+            });
+        }
+
+        // Start the setup process
+        setupFirebase();
+        
+    </script>
+
+</body>
+</html>

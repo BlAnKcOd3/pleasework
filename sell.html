@@ -3,7 +3,154 @@
 <head>
   <meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Sell Item - De Anza</title>
-  <link rel="stylesheet" href="styles.css" />
+  <!-- Load FontAwesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Combined Styles (Assuming styles.css content is in the snippet below for single-file mandate) -->
+  <style>
+    /* Reusing Styles from other pages for consistency */
+    body {
+        background-color: #6e0b0f; /* Maroon color */
+        margin: 0;
+        font-family: 'Helvetica', sans-serif;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+
+    .header {
+        background-color: #ebc034; /* Gold */
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        color: #6e0b0f; /* Maroon text */
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    }
+    .header h1 {
+        margin: 0;
+        font-size: 2.5rem;
+    }
+
+    .container {
+        flex-grow: 1;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        background-color: #f0ce55; /* Gold/Mustard background */
+    }
+
+    .form {
+        background-color: white;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        max-width: 600px;
+        width: 100%;
+        border: 3px solid black;
+    }
+
+    .row {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .row > div {
+        flex: 1;
+        min-width: 150px;
+    }
+
+    label.small {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #4f090c;
+        font-size: 0.9rem;
+    }
+
+    .input, textarea {
+        width: 100%;
+        padding: 10px;
+        border: 2px solid #ccc;
+        border-radius: 8px;
+        box-sizing: border-box;
+        margin-bottom: 10px;
+        font-size: 1rem;
+    }
+
+    textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .btn {
+        padding: 12px 25px;
+        border: 3px solid black;
+        border-radius: 25px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        cursor: pointer;
+        text-decoration: none;
+        text-align: center;
+        transition: background-color 0.2s, transform 0.1s;
+        box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        flex: 1;
+        background-color: #6e0b0f;
+        color: white;
+    }
+    
+    .btn:active {
+        transform: translateY(1px);
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    }
+    
+    .btn.secondary {
+        background: #fff;
+        color: #000;
+    }
+
+    .media-preview {
+        margin-top: 10px;
+        border: 1px dashed #ccc;
+        padding: 10px;
+        min-height: 50px;
+        text-align: center;
+        color: #666;
+    }
+    
+    /* Message Box Styling */
+    #message-box {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background-color: #3b82f6;
+        color: white;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        display: none; /* Hidden by default */
+        z-index: 1000;
+        min-width: 250px;
+        text-align: center;
+    }
+    
+    #message-box.error {
+        background-color: #dc2626;
+    }
+    
+    @media (max-width: 600px) {
+        .row {
+            flex-direction: column;
+            gap: 0;
+        }
+        .row > div {
+            min-width: 100%;
+        }
+    }
+  </style>
 </head>
 <body data-page="sell">
   <header class="header"><h1>Sell / Publish</h1></header>
@@ -19,6 +166,7 @@
           <div style="width:160px">
             <label class="small">Category</label>
             <select class="input" name="category" required>
+              <!-- These values match the data-cat attributes in marketplace.html -->
               <option value="textbooks">Textbooks</option>
               <option value="study-supplies">Study Supplies</option>
               <option value="electronics">Electronics</option>
@@ -33,34 +181,147 @@
         </div>
 
         <label class="small" style="margin-top:12px">Description</label>
-        <textarea name="description" placeholder="Add details, condition, pickup info..."></textarea>
+        <textarea name="description" placeholder="Add details, condition, pickup info..." required></textarea>
 
         <div class="row" style="margin-top:12px">
           <div style="flex:1">
             <label class="small">Price ($)</label>
-            <input class="input" type="number" name="price" step="0.01" placeholder="0 for free or job listing" />
+            <input class="input" type="number" name="price" step="0.01" min="0" placeholder="0 for free or job listing" required />
           </div>
           <div style="width:220px">
-            <label class="small">Add photos & videos</label>
-            <input id="media" class="input" type="file" name="media" accept="image/*,video/*" multiple />
+            <label class="small">Image URL (Optional)</label>
+            <input class="input" type="url" name="image-url" placeholder="Paste a public image link" />
           </div>
         </div>
-
-        <div id="media-preview" class="media-preview"></div>
-
+        
         <div style="margin-top:14px;display:flex;gap:12px">
-          <button class="btn" type="submit">Publish</button>
-          <a class="btn" href="listings.html" style="background:#fff;color:#000">View listings</a>
+          <button class="btn" type="submit" id="publish-btn">Publish</button>
+          <a class="btn secondary" href="marketplace.html">Back to Marketplace</a>
         </div>
       </form>
     </div>
   </div>
 
-  <footer class="site-footer">
-    <a href="index.html"><img src="https://i.ibb.co/wNYjZG9k/Image-11-21-25-at-2-05-PM.png" alt="logo"></a>
-  </footer>
+  <div id="message-box"></div>
+  
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-  <script src="script.js"></script>
-  <script>initSell()</script>
+    // Global variables for Firebase
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+    
+    let auth, db, userId;
+    const form = document.getElementById('sell-form');
+    const publishBtn = document.getElementById('publish-btn');
+    const messageBox = document.getElementById('message-box');
+
+    // --- Utility Functions ---
+
+    function showMessage(message, type = 'info') {
+        messageBox.textContent = message;
+        messageBox.className = type === 'error' ? 'error' : 'info';
+        messageBox.style.display = 'block';
+        setTimeout(() => {
+            messageBox.style.display = 'none';
+        }, 3000);
+    }
+
+    // --- Firebase Setup ---
+    
+    function setupFirebase() {
+        if (!firebaseConfig) {
+            console.error("Firebase configuration is missing.");
+            showMessage("Application error: Firebase not configured.", 'error');
+            return;
+        }
+
+        const app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        auth = getAuth(app);
+        
+        // Ensure authentication before allowing listing creation
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                userId = user.uid;
+                console.log("User authenticated:", userId);
+            } else {
+                 // Sign in anonymously if not already signed in
+                 signInAnonymously(auth).then(anonUser => {
+                    userId = anonUser.user.uid;
+                    console.log("Signed in anonymously:", userId);
+                 }).catch(e => {
+                    console.error("Anonymous Sign-In failed:", e);
+                    showMessage("Cannot authenticate for publishing.", 'error');
+                    publishBtn.disabled = true;
+                 });
+            }
+        });
+
+        // Initial custom token sign-in if available (Canvas environment)
+        if (initialAuthToken) {
+            signInWithCustomToken(auth, initialAuthToken).catch(e => {
+                console.error("Custom Auth Token Sign-In failed:", e);
+            });
+        }
+    }
+
+
+    // --- Form Submission Handler ---
+
+    async function handleSubmit(event) {
+        event.preventDefault();
+        
+        if (!userId) {
+            showMessage("Please wait for user authentication to complete.", 'error');
+            return;
+        }
+
+        publishBtn.disabled = true;
+        publishBtn.textContent = 'Publishing...';
+        
+        const formData = new FormData(form);
+        const listingData = {
+            title: formData.get('title'),
+            category: formData.get('category'),
+            description: formData.get('description'),
+            // Convert price to number
+            price: parseFloat(formData.get('price')),
+            // Use provided URL or a placeholder
+            imageUrl: formData.get('image-url') || 'https://placehold.co/400x200/ccc/000?text=No+Image',
+            sellerId: userId,
+            // Use serverTimestamp for consistent creation time
+            createdAt: serverTimestamp(), 
+            // Add a friendly version of price for display (optional)
+            priceDisplay: `$${parseFloat(formData.get('price')).toFixed(2)}`
+        };
+
+        try {
+            // Firestore path: /artifacts/{appId}/public/data/listings
+            const collectionPath = `artifacts/${appId}/public/data/listings`;
+            
+            // Add the document to the 'listings' collection
+            const docRef = await addDoc(collection(db, collectionPath), listingData);
+
+            showMessage(`Success! Listing published. ID: ${docRef.id}`, 'info');
+            form.reset(); // Clear the form on success
+
+        } catch (error) {
+            console.error("Error adding document:", error);
+            showMessage(`Error publishing listing: ${error.message}`, 'error');
+        } finally {
+            publishBtn.disabled = false;
+            publishBtn.textContent = 'Publish';
+        }
+    }
+
+    // --- Initialization ---
+    form.addEventListener('submit', handleSubmit);
+    setupFirebase();
+
+  </script>
 </body>
 </html>

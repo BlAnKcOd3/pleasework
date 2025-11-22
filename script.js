@@ -171,15 +171,34 @@ function handlePublishForm(evt){
   const price = Number(form.price.value) || 0;
   const category = form.category.value || 'misc';
   const imgFile = form.media.files[0];
-  // for demo we store a blob url as image; backend should upload real file
-  let img = '';
-  if(imgFile) img = URL.createObjectURL(imgFile);
-  addListing({ title, desc, price, category, img });
-  alert('Published! The listing will appear in Listings.');
-  form.reset();
-  const preview = document.getElementById('media-preview');
-  if(preview) preview.innerHTML='';
-  // if on listings page, optionally refresh
+  // For demo, convert image to a persistent Data URL before storing
+  function readFileAsDataURL(file){
+    return new Promise((resolve, reject)=>{
+      const reader = new FileReader();
+      reader.onload = ()=> resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  (async ()=>{
+    try {
+      let img = '';
+      if(imgFile){
+        img = await readFileAsDataURL(imgFile);
+      }
+      addListing({ title, desc, price, category, img });
+      alert('Published! The listing will appear in Listings.');
+      form.reset();
+      const preview = document.getElementById('media-preview');
+      if(preview) preview.innerHTML='';
+      // if on listings page, optionally refresh
+      if(document.body.getAttribute('data-page') === 'listings') renderListingsPage();
+    } catch(err){
+      console.error('Error publishing listing:', err);
+      alert('There was an error uploading your image. Try a smaller file or different image.');
+    }
+  })();
 }
 
 // --- simple page init helpers for pages

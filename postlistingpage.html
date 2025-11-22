@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Depop-Style Listing Post</title>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -102,13 +103,14 @@
             apiKey: "AIzaSyBJJYUOM8EBEuT39DX2F_HtxgEbHDRH-Zc",
             authDomain: "deanzahacks11-21-2025.firebaseapp.com",
             projectId: "deanzahacks11-21-2025",
-            storageBucket: "deanzahacks11-21-2025.firebasestorage.app",
+            storageBucket: "deanzahacks11-21-2025.appspot.com",
             messagingSenderId: "253702257130",
             appId: "1:253702257130:web:9ea8e3ee1bd291f1801a93",
             measurementId: "G-5B84R81S31"
         };
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
+        const storage = firebase.storage();
 
         const imageInput = document.getElementById('image');
         const preview = document.getElementById('preview');
@@ -190,12 +192,25 @@
             const category = document.getElementById('category').value;
             let imageData = '';
             if (imageInput.files[0]) {
-                const reader = new FileReader();
-                reader.onload = async function(ev) {
-                    imageData = ev.target.result;
-                    await postListing({ title, description, price, category, image: imageData });
-                };
-                reader.readAsDataURL(imageInput.files[0]);
+                // Upload image to Firebase Storage first
+                const file = imageInput.files[0];
+                const storagePath = `listings/${currentUser.uid}/${Date.now()}_${file.name}`;
+                const storageRef = storage.ref().child(storagePath);
+                try {
+                    const uploadTask = storageRef.put(file);
+                    uploadTask.on('state_changed', snapshot => {
+                        // optional: could show progress
+                    }, err => {
+                        console.error('Storage upload error:', err);
+                        showNotification('Error uploading image.');
+                    }, async () => {
+                        const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+                        await postListing({ title, description, price, category, image: downloadURL });
+                    });
+                } catch (err) {
+                    console.error('Upload error:', err);
+                    showNotification('Error uploading image.');
+                }
             } else {
                 await postListing({ title, description, price, category, image: '' });
             }

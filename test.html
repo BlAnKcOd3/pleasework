@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>De Anza Student Marketplace</title>
+    <!-- Tailwind CSS is not linked here, so we will use inline styles and a <style> block -->
+    <style>
+        /* Base styles */
+        body {
+            background-color: black;
+            margin: 0;
+            padding: 0;
+            font-family: helvetica, sans-serif;
+            min-height: 100vh;
+        }
+
+        /* Top Banner Style */
+        .top-banner {
+            background-color: #ebc034; 
+            height: 80px; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Main Title Style */
+        .main-title {
+            color: white; 
+            font-size: 4.5em; 
+            text-align: center;
+            margin-top: 50px;
+            margin-bottom: 50px;
+            line-height: 1.1;
+        }
+
+        /* Button Container Styling (to center the buttons) */
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px; /* Space between buttons */
+            margin-top: 50px;
+        }
+
+        /* Button Base Style */
+        .auth-button {
+            /* Preserves your original look */
+            background-color: #ebc034; 
+            color: black; 
+            font-size: 2em; 
+            font-weight: bold;
+            text-align: center;
+            cursor: pointer;
+            
+            /* Dimensions and Border */
+            height: 80px; 
+            width: 300px;
+            border-radius: 15px; 
+            border: 2px solid #333333;
+            
+            /* Flex properties for centering text inside button */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            /* Hover and Transition for modern feel */
+            transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Button Hover Effect */
+        .auth-button:hover {
+            background-color: #fdd835; /* Slightly lighter yellow on hover */
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Button Active/Click Effect */
+        .auth-button:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Responsive adjustments for the main title */
+        @media (max-width: 600px) {
+            .main-title {
+                font-size: 3em;
+            }
+            .auth-button {
+                width: 80%; /* Make buttons wider on small screens */
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div style="background-color: black; height:20px;"></div>
+
+    <!-- Top Header/Banner -->
+    <header class="top-banner">
+        <img src="https://i.ibb.co/wNYjZG9k/Image-11-21-25-at-2-05-PM.png" 
+             alt="De Anza Logo" 
+             style="width: 10%; max-width: 80px; height: auto;">
+    </header>
+
+    <!-- Main Content -->
+    <div class="p-4">
+        <h1 class="main-title">
+            De Anza Student <br> Marketplace 
+        </h1>
+
+        <div class="button-container">
+            
+            <!-- Log In Button -->
+            <button id="loginButton" class="auth-button"> 
+               Log in 
+            </button>
+            
+            <!-- Create Account Button -->
+            <button id="signupButton" class="auth-button"> 
+               Create account
+            </button>
+            
+        </div>
+    </div>
+
+    <!-- Bottom Footer -->
+    <div style="margin-top: auto; padding-top: 250px;">
+        <div style="background-color: #ebc034; height:80px;"></div>
+        <div style="background-color: black; height:20px;"></div>
+    </div>
+  
+    <script>
+        // UPDATED: Now redirects to auth_form.html
+        document.getElementById('loginButton').addEventListener('click', () => {
+            window.location.href = 'auth_form.html';
+        });
+
+        // UPDATED: Now redirects to auth_form.html
+        document.getElementById('signupButton').addEventListener('click', () => {
+            window.location.href = 'auth_form.html';
+        });
+    </script>
+</body>
+</html>

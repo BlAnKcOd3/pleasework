@@ -10,13 +10,13 @@
 <body data-page="marketplace">
   <header class="header">
     <h1>De Anza Marketplace</h1>
-    <div id="userIcon" class="icon" title="Your account"><i class="fas fa-user-circle"></i></div>
+    <div class="icon" id="userIcon" title="Your account"><i class="fas fa-user-circle"></i></div>
   </header>
 
   <div class="container">
     <div class="action-bar">
-      <div id="sellButton" class="pill" onclick="location.href='sell.html'">Sell</div>
-      <div id="buyButton" class="pill" onclick="location.href='listings.html'">Buy</div>
+      <div class="pill" onclick="location.href='sell.html'">Sell</div>
+      <div class="pill" onclick="location.href='listings.html'">Buy</div>
 
       <div class="search-container" style="margin-left:10px;">
         <input id="search-input" placeholder="Search items..." />
@@ -31,7 +31,7 @@
       </div>
 
       <div class="category-item" data-cat="study-supplies">
-        <div class="icon-box" data-cat="study-supplies"><i class="fas fa-pencil-ruler color-red"></i></div>
+        <div class="icon-box" data-cat="study-supplies"><i class="fas fa-pen-fancy color-red"></i></div>
         <div class="cat-label">Study Supplies</div>
       </div>
 
@@ -64,25 +64,34 @@
         <div class="icon-box" data-cat="events"><i class="fas fa-bell color-gold"></i></div>
         <div class="cat-label">Events & Campus Activities</div>
       </div>
+
+      <!-- Restored Misc/Other Category -->
+      <div class="category-item" data-cat="misc">
+        <div class="icon-box" data-cat="misc"><i class="fas fa-cubes color-brown"></i></div>
+        <div class="cat-label">Other/Misc</div>
+      </div>
+      
     </div>
   </div>
 
   <footer class="site-footer">
-    <p>&copy; 2025 De Anza Marketplace</p>
+    <!-- Footer content here if needed -->
+    <a href="index.html" class="footer-link">Logout</a>
   </footer>
 
   <script type="module">
+    // Firebase imports
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, collection, query, where, getDocs, limit, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
     
-    // Global variables (provided by Canvas environment)
-    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-    
-    let auth;
+    // Global Firebase instances
+    let app, auth, db;
+    // Set Firestore log level to debug for better console feedback
+    setLogLevel('Debug');
 
-    // --- Firebase Setup ---
-
-// --- Firebase Configuration ---
+    // --- Firebase Configuration ---
         const firebaseConfig = {
             apiKey: "AIzaSyBJJYUOM8EBEuT39DX2F_HtxgEbHDRH-Zc",
             authDomain: "deanzahacks11-21-2025.firebaseapp.com",
@@ -93,59 +102,66 @@
             measurementId: "G-5B84R81S31"
         };
 
-    function setupFirebase() {
-        if (!firebaseConfig) {
-            console.error("Firebase configuration is missing. Cannot initialize app.");
-            return;
-        }
-        const app = initializeApp(firebaseConfig);
-        auth = getAuth(app);
+    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-        // Initial sign-in for Canvas environment
-        if (initialAuthToken) {
-            signInWithCustomToken(auth, initialAuthToken).catch(e => {
-                console.error("Custom Auth Token Sign-In failed:", e);
+    if (!firebaseConfig) {
+        console.error("Firebase configuration is missing.");
+    } else {
+        // Initialize Firebase
+        app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
+        
+        // Ensure user is signed in, if not, sign in anonymously
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
                 signInAnonymously(auth).catch(e => {
                     console.error("Anonymous Sign-In failed:", e);
                 });
-            });
-        } else {
-            signInAnonymously(auth).catch(e => {
-                console.error("Anonymous Sign-In failed:", e);
-            });
-        }
-    }
-
-    // --- Event Handlers ---
-    window.toggleSearch = function() {
-        var searchInput = document.getElementById("search-input");
-        searchInput.classList.toggle('visible');
-        if (searchInput.classList.contains('visible')) {
-            searchInput.focus();
-        }
-    }
-    
-    // Event listener for user icon click
-    document.getElementById('userIcon').addEventListener('click', () => {
-         onAuthStateChanged(auth, (user) => {
-            window.location.href = user ? 'dashboard.html' : 'login.html';
-        }, { once: true });
-    });
-
-    // --- NEW: Category Click Handler ---
-    document.querySelectorAll('.category-item').forEach(item => {
-        item.addEventListener('click', (event) => {
-            // Find the data-cat attribute on the item itself or its icon-box child
-            const category = item.getAttribute('data-cat');
-            if (category) {
-                // Redirect to listings.html and pass the category as a query parameter
-                window.location.href = `listings.html?category=${category}`;
             }
+        });
+    }
+
+    // --- Search functionality ---
+    
+    // Handle the category click to navigate to listings with a filter
+    document.querySelectorAll('.category-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            const category = item.getAttribute('data-cat');
+            // Redirect to listings.html with the category as a query parameter
+            window.location.href = `listings.html?category=${category}`;
         });
     });
 
-    // --- Initialization ---
-    window.onload = setupFirebase;
+    // Handle search input and icon click
+    const searchInput = document.getElementById('search-input');
+    const searchIcon = document.getElementById('search-toggle');
+    
+    window.toggleSearch = function() {
+        // The search icon on this page now always triggers a search and redirection
+        // to the listings page with the search term.
+        const searchTerm = searchInput.value.trim();
+        if (searchTerm) {
+            window.location.href = `listings.html?search=${encodeURIComponent(searchTerm)}`;
+        } else {
+            // Optional: just focus if empty, or keep as is. Let's just focus.
+            searchInput.focus();
+        }
+    }
+
+    // Also trigger search on 'Enter' key press
+    searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            window.toggleSearch();
+        }
+    });
+
+    // Handle User Icon click for Dashboard/Login
+    document.getElementById('userIcon').addEventListener('click', () => {
+        onAuthStateChanged(auth, (user) => {
+            window.location.href = user && user.email ? 'dashboard.html' : 'login.html';
+        }, { once: true });
+    });
 
   </script>
 </body>

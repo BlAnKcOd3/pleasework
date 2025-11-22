@@ -4,15 +4,15 @@
   <meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Sell Item - De Anza</title>
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body data-page="sell">
   <header class="header"><h1>Sell / Publish</h1></header>
 
   <div class="container">
+    <div id="message-box" class="message-box hidden"></div>
+
     <div class="form">
-      <!-- Success/Error Message Box -->
-      <div id="message-box" class="message-box" style="display: none;"></div>
-      
       <form id="sell-form">
         <div class="row">
           <div style="flex:1">
@@ -21,8 +21,8 @@
           </div>
           <div style="width:160px">
             <label class="small">Category</label>
+            <!-- Restored the 'Other/Misc' option -->
             <select class="input" name="category" required>
-              <option value="" disabled selected>Select a category</option>
               <option value="textbooks">Textbooks</option>
               <option value="study-supplies">Study Supplies</option>
               <option value="electronics">Electronics</option>
@@ -31,6 +31,7 @@
               <option value="services">Services & Rentals</option>
               <option value="jobs">Student Jobs</option>
               <option value="events">Events & Campus Activities</option>
+              <option value="misc">Other/Misc</option>
             </select>
           </div>
         </div>
@@ -44,9 +45,8 @@
             <input class="input" type="number" name="price" step="0.01" placeholder="0 for free or job listing" />
           </div>
           <div style="width:220px">
-            <!-- UPDATED: Input changed from type="file" to type="url" -->
-            <label class="small">Image URL (Optional)</label>
-            <input id="imageUrlInput" class="input" type="url" name="imageUrl" placeholder="Public image URL (e.g., https://i.imgur.com/photo.jpg)" />
+            <label class="small">Add photos & videos</label>
+            <input id="media" class="input" type="file" name="media" accept="image/*,video/*" multiple />
           </div>
         </div>
 
@@ -61,176 +61,172 @@
   </div>
 
   <footer class="site-footer">
-    <p>&copy; 2025 De Anza Marketplace</p>
+    <!-- Footer content here if needed -->
+    <a href="index.html" class="footer-link">Logout</a>
   </footer>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-    // REMOVED: Firebase Storage imports are no longer needed.
+    import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    
+    // Global Firebase instances
+    let app, auth, db, userId = null;
+    // Set Firestore log level to debug for better console feedback
+    setLogLevel('Debug');
 
-    // Global variables (provided by Canvas environment)
-    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
     const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
-    let auth;
-    let db;
-    let userId = null;
-
-    const sellForm = document.getElementById('sell-form');
-    const imageUrlInput = document.getElementById('imageUrlInput'); // UPDATED: Changed variable name
-    const mediaPreview = document.getElementById('media-preview');
     const messageBox = document.getElementById('message-box');
-    const publishButton = sellForm.querySelector('button[type="submit"]');
+    const sellForm = document.getElementById('sell-form');
 
-    // --- Utility Functions ---
-
+    // --- Firebase Configuration ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyBJJYUOM8EBEuT39DX2F_HtxgEbHDRH-Zc",
+            authDomain: "deanzahacks11-21-2025.firebaseapp.com",
+            projectId: "deanzahacks11-21-2025",
+            storageBucket: "deanzahacks11-21-2025.firebasestorage.app",
+            messagingSenderId: "253702257130",
+            appId: "1:253702257130:web:9ea8e3ee1bd291f1801a93",
+            measurementId: "G-5B84R81S31"
+        };
+    // Utility function to display messages
     function displayMessage(type, message) {
+        messageBox.className = 'message-box';
         messageBox.textContent = message;
-        messageBox.style.display = 'block';
-        messageBox.style.backgroundColor = type === 'success' ? '#4CAF50' : '#f44336';
-        messageBox.style.color = 'white';
-        messageBox.style.padding = '10px';
-        messageBox.style.borderRadius = '8px';
-        messageBox.style.marginBottom = '20px';
-        // Hide after 5 seconds
-        setTimeout(() => {
-            messageBox.style.display = 'none';
-        }, 5000);
+        if (type === 'success') {
+            messageBox.classList.add('success');
+        } else if (type === 'error') {
+            messageBox.classList.add('error');
+        }
+        messageBox.classList.remove('hidden');
+        setTimeout(() => messageBox.classList.add('hidden'), 5000);
     }
 
-    // --- Firebase Setup ---
-
-    function setupFirebase() {
+    async function setupFirebaseAndListeners() {
         if (!firebaseConfig) {
-            console.error("Firebase configuration is missing. Cannot initialize app.");
-            displayMessage('error', 'App configuration error. Cannot publish.');
+            console.error("Firebase configuration is missing.");
+            displayMessage('error', 'App configuration error. Cannot connect to services.');
             return;
         }
-        const app = initializeApp(firebaseConfig);
-        auth = getAuth(app);
-        db = getFirestore(app);
 
-        // Initial sign-in for Canvas environment
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                userId = user.uid;
-                console.log(`User authenticated. UID: ${userId}`);
+        try {
+            // Initialize Firebase
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+
+            // Authentication setup
+            if (initialAuthToken) {
+                await signInWithCustomToken(auth, initialAuthToken);
             } else {
-                // If the user isn't logged in, sign in anonymously
-                try {
-                    if (initialAuthToken) {
-                        await signInWithCustomToken(auth, initialAuthToken);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-                    userId = auth.currentUser.uid;
-                } catch (e) {
-                    console.error("Authentication failed:", e);
-                    displayMessage('error', 'Could not authenticate user. Please refresh.');
-                }
+                await signInAnonymously(auth);
             }
+
+            // After sign-in, set the userId
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    userId = user.uid;
+                    console.log("User authenticated:", userId);
+                    // Enable the form once we have a user ID
+                    sellForm.style.pointerEvents = 'auto';
+                    sellForm.style.opacity = '1';
+                } else {
+                    userId = null;
+                    console.log("No user authenticated. Form disabled.");
+                    displayMessage('error', 'Please log in to publish a listing.');
+                    sellForm.style.pointerEvents = 'none';
+                    sellForm.style.opacity = '0.5';
+                    // Redirect to login if user is not authenticated and not anonymous (i.e. if token existed but failed)
+                    if (initialAuthToken) {
+                       window.location.href = 'login.html';
+                    }
+                }
+            });
+
+            // Set up form submission listener
+            sellForm.addEventListener('submit', handleSellFormSubmit);
+            
+            // Set up media preview listener
+            document.getElementById('media').addEventListener('change', previewMedia);
+            
+        } catch (error) {
+            console.error("Firebase setup failed:", error);
+            displayMessage('error', 'Firebase connection error.');
+        }
+    }
+
+    function previewMedia(event) {
+        const previewContainer = document.getElementById('media-preview');
+        previewContainer.innerHTML = '';
+        const files = event.target.files;
+
+        if (files.length > 0) {
+            displayMessage('success', `Added ${files.length} file(s) for preview. Note: Image storage is mocked for this demo.`);
+        }
+        
+        Array.from(files).forEach(file => {
+            const fileUrl = URL.createObjectURL(file);
+            const mediaElement = document.createElement(file.type.startsWith('video') ? 'video' : 'img');
+            mediaElement.src = fileUrl;
+            mediaElement.alt = "Preview";
+            mediaElement.controls = file.type.startsWith('video');
+            mediaElement.style.maxWidth = '100px';
+            mediaElement.style.maxHeight = '100px';
+            mediaElement.style.marginRight = '10px';
+            mediaElement.style.borderRadius = '6px';
+            mediaElement.style.objectFit = 'cover';
+            
+            previewContainer.appendChild(mediaElement);
         });
     }
-    
-    // --- Save Logic (Storage removed) ---
 
-    async function handleFormSubmit(event) {
+    async function handleSellFormSubmit(event) {
         event.preventDefault();
         
         if (!userId) {
-            displayMessage('error', 'Authentication in progress. Please wait a moment and try again.');
+            displayMessage('error', 'Authentication failed. Please log in.');
             return;
         }
 
-        publishButton.disabled = true;
-        publishButton.textContent = 'Publishing...';
-        messageBox.style.display = 'none';
-
         const formData = new FormData(sellForm);
-        const title = formData.get('title').trim();
-        const description = formData.get('description').trim();
-        const category = formData.get('category').trim();
-        const price = parseFloat(formData.get('price')) || 0;
-        // UPDATED: Get the URL directly from the input
-        const imageUrl = formData.get('imageUrl').trim() || null; 
+        const listingData = {
+            title: formData.get('title'),
+            category: formData.get('category'),
+            description: formData.get('description'),
+            price: parseFloat(formData.get('price') || 0),
+            // Mock image URL since we cannot upload files to cloud storage in this environment
+            image: 'https://placehold.co/400x300/4f090c/f0ce55?text=De+Anza+Item',
+            userId: userId,
+            createdAt: serverTimestamp()
+        };
 
-        try {
-            // 1. Validation (Optional but recommended for URL)
-            if (imageUrl && !imageUrl.startsWith('http')) {
-                throw new Error("Image URL must be a valid public link starting with http/https.");
-            }
+        // Get the public listings collection reference
+        const listingsRef = collection(db, `artifacts/${appId}/public/data/listings`);
 
-            // 2. Save the listing data to Firestore
-            const listingsCollection = collection(db, `artifacts/${appId}/public/data/listings`);
-
-            await addDoc(listingsCollection, {
-                title: title,
-                description: description,
-                category: category,
-                price: price,
-                imageUrl: imageUrl, // Store the provided URL
-                sellerId: userId,
-                createdAt: serverTimestamp()
-            });
-
-            // 3. Success Feedback
-            displayMessage('success', 'Listing published successfully! Redirecting to marketplace...');
-            sellForm.reset();
-            mediaPreview.innerHTML = ''; // Clear preview
-            
-            // Redirect after success
-            setTimeout(() => {
-                window.location.href = 'listings.html';
-            }, 1500);
-
-        } catch (error) {
-            console.error("Error publishing listing:", error);
-            displayMessage('error', `Failed to publish listing: ${error.message}`);
-        } finally {
-            publishButton.disabled = false;
-            publishButton.textContent = 'Publish';
-        }
-    }
-    
-    // --- Live URL Preview Logic ---
-
-    function handleUrlChange() {
-        mediaPreview.innerHTML = ''; // Clear previous previews
-        const url = imageUrlInput.value.trim();
+        displayMessage('success', 'Publishing listing...');
         
-        if (url) {
-            // Simple validation check before creating the image element
-            if (url.startsWith('http') && (url.endsWith('.jpg') || url.endsWith('.png') || url.endsWith('.jpeg') || url.endsWith('.gif'))) {
-                const element = document.createElement('img');
-                element.src = url;
-                element.alt = "Image Preview";
-                element.style.maxHeight = '150px';
-                element.style.objectFit = 'cover';
-                element.style.borderRadius = '8px';
-                element.style.marginTop = '10px';
-                element.style.maxWidth = '100%';
-                
-                // Add a basic error handler in case the image doesn't load
-                element.onerror = () => {
-                    mediaPreview.innerHTML = '<p style="color: red; margin-top: 10px;">Warning: Could not load image from this URL. Check the link.</p>';
-                };
-                
-                mediaPreview.appendChild(element);
-            } else {
-                 mediaPreview.innerHTML = '<p style="color: #777; margin-top: 10px; font-size:0.9em;">Enter a valid image URL for preview.</p>';
-            }
+        try {
+            // Add the new document to the 'listings' collection
+            const docRef = await addDoc(listingsRef, listingData);
+            console.log("Document written with ID: ", docRef.id);
+            
+            displayMessage('success', 'Listing successfully published!');
+            
+            // Clear the form after success
+            sellForm.reset();
+            document.getElementById('media-preview').innerHTML = '';
+            
+        } catch (e) {
+            console.error("Error adding document: ", e);
+            displayMessage('error', 'Failed to publish listing. Please check the console for details.');
         }
     }
 
-    // --- Initialization & Event Listeners ---
-    sellForm.addEventListener('submit', handleFormSubmit);
-    // UPDATED: Listen to input changes on the URL field
-    imageUrlInput.addEventListener('input', handleUrlChange); 
-
-    window.onload = setupFirebase;
+    // Initialize Firebase and listeners on window load
+    window.onload = setupFirebaseAndListeners;
   </script>
 </body>
 </html>

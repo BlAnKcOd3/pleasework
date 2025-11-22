@@ -26,224 +26,212 @@
             background-color: #4f090c; /* Dark Red */
             padding: 15px 20px;
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
             position: relative;
             height: 80px;
             box-sizing: border-box;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
         }
-        
+
         header h1 {
             color: white;
             font-size: 1.8em;
             margin: 0;
-            text-align: center;
-            flex-grow: 1;
         }
 
         .icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
             color: #f0ce55;
+            cursor: pointer;
             font-size: 1.8em;
-            cursor: pointer;
-            transition: color 0.2s;
         }
 
-        .icon:hover {
-            color: #fff;
-        }
-
-        .pill {
-            background-color: #4f090c;
-            color: white;
-            padding: 10px 18px;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: background-color 0.2s, transform 0.1s;
-            font-weight: bold;
-            text-align: center;
-            border: none;
-            flex-shrink: 0;
-        }
-
-        .pill:hover {
-            background-color: #6e0b0f;
-            transform: translateY(-1px);
-        }
-        
-        .pill:active {
-            transform: translateY(0);
-        }
-
-        /* Listing Specific Styles */
-        
+        /* Main Content Container */
         .container {
-            width: 90%;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px 0;
             flex-grow: 1;
+            padding: 20px;
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
         }
 
+        /* Action Bar */
+        .action-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: center;
+            flex-wrap: wrap; /* Allows wrapping on small screens */
+        }
+        
+        .action-bar .pill {
+            cursor: pointer;
+            padding: 8px 15px;
+            border-radius: 20px;
+            background-color: #4f090c; /* Dark Red */
+            color: white;
+            font-size: 0.9em;
+            transition: background-color 0.2s;
+            border: 2px solid #4f090c;
+        }
+        
+        .action-bar .pill:hover {
+            background-color: #6e0b0f; /* Lighter Dark Red */
+        }
+        
+        .action-bar .pill.active {
+             background-color: #f0ce55; /* Gold */
+             color: #4f090c; /* Dark Red */
+             border-color: #4f090c;
+        }
+
+        /* Search & Filters */
+        .search-container {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+            max-width: 400px;
+            position: relative;
+        }
+        
+        #search-input, #filter-category, #filter-price {
+            padding: 10px 15px;
+            border: 2px solid #4f090c;
+            border-radius: 8px;
+            font-size: 1em;
+            box-sizing: border-box;
+            width: 100%;
+        }
+
+        /* Listing Grid */
         .listings-grid {
             display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             gap: 20px;
-            padding: 20px 0;
-            /* Responsive grid */
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            padding-top: 10px;
         }
 
-        .product-card {
-            background: #fff;
+        .listing-card {
+            background-color: white;
             border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .product-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-        }
-
-        .product-image {
-            height: 200px;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #f8f8f8;
+            cursor: pointer;
         }
         
-        .product-image img {
+        .listing-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .listing-image {
             width: 100%;
-            height: 100%;
+            height: 180px;
             object-fit: cover;
-            transition: transform 0.5s ease;
+            border-bottom: 2px solid #ddd;
         }
 
-        .product-card:hover .product-image img {
-            transform: scale(1.05);
-        }
-
-        .product-details {
+        .listing-content {
             padding: 15px;
             flex-grow: 1;
             display: flex;
             flex-direction: column;
         }
 
-        .product-details h2 {
-            margin: 0 0 5px 0;
-            font-size: 1.3em;
-            color: #4f090c;
-            overflow: hidden;
+        .listing-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #4f090c; /* Dark Red */
+            margin-bottom: 5px;
             white-space: nowrap;
+            overflow: hidden;
             text-overflow: ellipsis;
         }
 
-        .product-details p {
-            margin: 0 0 10px 0;
-            color: #555;
-            font-size: 0.9em;
-            line-height: 1.4;
-            /* Limit description to 2 lines */
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .price-tag {
-            font-size: 1.5em;
+        .listing-price {
+            font-size: 1.4em;
             font-weight: bold;
-            color: #4CAF50; /* Green for price */
-            margin-top: auto; /* Push to the bottom */
+            color: #000;
+            margin-top: auto; /* Pushes price to the bottom */
+            padding-top: 10px;
         }
         
-        .input {
-            padding: 10px 15px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-size: 1em;
-            box-sizing: border-box;
-            background-color: white; /* Ensure dropdowns look clean */
-            cursor: pointer;
+        .listing-category {
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 10px;
+            background-color: #eee;
+            align-self: flex-start;
+            padding: 3px 8px;
+            border-radius: 5px;
         }
 
-        .site-footer {
-            text-align: center;
-            padding: 20px;
-            color: #4f090c;
-            background-color: #fff;
-            margin-top: auto;
-            border-top: 2px solid #ebc034;
+        .listing-seller {
+            font-size: 0.75em;
+            color: #888;
+            margin-top: 5px;
         }
         
-        /* Mobile adjustments */
+        /* Message/Loading Indicator */
+        #loading-indicator {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2em;
+            color: #4f090c;
+        }
+        
+        /* Footer */
+        .site-footer {
+            background-color: #4f090c;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            margin-top: auto;
+        }
+        
+        .footer-link {
+            color: #f0ce55;
+            text-decoration: none;
+            font-size: 0.9em;
+        }
+        
+        /* Responsive Adjustments */
         @media (max-width: 600px) {
-            header h1 {
-                font-size: 1.4em;
-            }
-            .filter-row {
+            .action-bar {
                 flex-direction: column;
                 align-items: stretch;
             }
-            /* Make all filter controls take full width on mobile */
-            .filter-row > * {
-                flex-grow: 1 !important;
-                max-width: none !important;
+            .action-bar > * {
+                width: 100%;
+            }
+            .search-container {
+                max-width: 100%;
             }
         }
-        
-        /* Message Box */
-        #loading-indicator, #no-results {
-            text-align: center;
-            padding: 40px 0;
-            font-size: 1.2em;
-            color: #4f090c;
-            font-weight: bold;
-        }
-
-        /* Filter Row Styling */
-        .filter-row {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            flex-wrap: wrap;
-            padding-bottom: 20px;
-        }
-        
-        .filter-row .input:not(#filter-search) {
-            width: 160px;
-            flex-grow: 0;
-        }
-
-        .filter-row #filter-search {
-            flex-grow: 1;
-            max-width: 360px;
-        }
-
-        /* --- CSS END --- */
     </style>
 </head>
-<body data-page="listings">
+<body>
     <header>
-        <div style="width: 30px;"></div>
         <h1>De Anza Listings</h1>
-        <div id="userIcon" class="icon" title="Your account"><i class="fas fa-user-circle"></i></div>
+        <div class="icon" id="userIcon" title="Your account"><i class="fas fa-user-circle"></i></div>
     </header>
 
     <div class="container">
-        <!-- Filter & Search Controls - Instant Apply -->
-        <div class="filter-row">
-            <input id="filter-search" class="input" placeholder="Search title or description..." />
-            
-            <!-- NEW CATEGORY DROPDOWN -->
-            <select id="filter-category" class="input">
+        <!-- Filter and Search Bar -->
+        <div class="action-bar">
+            <!-- Sell/Buy Buttons -->
+            <div id="sellButton" class="pill">Sell Item</div>
+            <div id="buyButton" class="pill active">Categories</div>
+
+            <!-- Category Filter Dropdown (Restored Misc) -->
+            <select id="filter-category">
                 <option value="">All Categories</option>
                 <option value="textbooks">Textbooks</option>
                 <option value="study-supplies">Study Supplies</option>
@@ -252,62 +240,67 @@
                 <option value="housing">Housing & Roommates</option>
                 <option value="services">Services & Rentals</option>
                 <option value="jobs">Student Jobs</option>
-                <option value="events">Events & Activities</option>
-                <option value="misc">Miscellaneous</option>
+                <option value="events">Events & Campus Activities</option>
+                <option value="misc">Other/Misc</option>
             </select>
             
-            <select id="filter-price" class="input">
-                <option value="">Any price</option>
+            <!-- Price Filter Dropdown -->
+            <select id="filter-price">
+                <option value="">Any Price</option>
                 <option value="0-50">$0 - $50</option>
                 <option value="51-200">$51 - $200</option>
-                <option value="201-">$201+</option>
+                <option value="201-inf">$201+</option>
+                <option value="free">Free</option>
             </select>
             
-            <!-- Removed 'Apply' button for better instant UX -->
-
-            <div style="margin-left:auto; display:flex; gap: 12px;">
-                <button id="sellButton" class="pill" onclick="location.href='sell.html'">Sell Item</button>
+            <!-- Search Bar -->
+            <div class="search-container">
+                <input id="search-input" placeholder="Search title or description..." />
+                <!-- Search is triggered on filter change or explicitly on keypress/button -->
             </div>
+            
         </div>
-
-        <!-- Product Grid -->
+        
         <div id="loading-indicator">Loading listings...</div>
-        <div id="no-results" style="display: none;">No listings match your search criteria.</div>
         <div id="product-grid" class="listings-grid">
             <!-- Listings will be inserted here by JavaScript -->
         </div>
     </div>
 
     <footer class="site-footer">
-        <p>&copy; 2025 De Anza Marketplace</p>
+        <a href="index.html" class="footer-link">Logout</a>
     </footer>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, query, onSnapshot, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, query, where, getDocs, onSnapshot, orderBy, startAt, endAt, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // Global Firebase instances
+        let app, auth, db, userId = null;
+        let isAuthReady = false;
+        // Set Firestore log level to debug for better console feedback
+        setLogLevel('Debug');
 
-        // Global variables (provided by Canvas environment)
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
-        let auth;
-        let db;
-        let userId = null;
-        let isAuthReady = false;
-        
-        // Storage for all fetched listings
-        let allListings = []; 
-
-        // DOM elements
         const productGrid = document.getElementById('product-grid');
         const loadingIndicator = document.getElementById('loading-indicator');
-        const noResultsMessage = document.getElementById('no-results');
-        const filterSearchInput = document.getElementById('filter-search');
-        const filterPriceSelect = document.getElementById('filter-price');
-        const filterCategorySelect = document.getElementById('filter-category'); // New reference
+        const filterCategory = document.getElementById('filter-category');
+        const filterPrice = document.getElementById('filter-price');
+        const searchInput = document.getElementById('search-input');
+        const pageTitle = document.getElementById('pageTitle');
+        
+        // State for current filters
+        let currentCategory = '';
+        let currentPriceRange = '';
+        let currentSearchTerm = '';
+        
+        // --- Utility Functions ---
 
-        // --- Firebase Configuration ---
+// --- Firebase Configuration ---
         const firebaseConfig = {
             apiKey: "AIzaSyBJJYUOM8EBEuT39DX2F_HtxgEbHDRH-Zc",
             authDomain: "deanzahacks11-21-2025.firebaseapp.com",
@@ -317,178 +310,198 @@
             appId: "1:253702257130:web:9ea8e3ee1bd291f1801a93",
             measurementId: "G-5B84R81S31"
         };
-        // Function to create a single product card HTML
-        function createProductCard(listing) {
-            const card = document.createElement('div');
-            card.className = 'product-card';
-            
-            const imageUrl = listing.imageUrl || `https://placehold.co/600x400/800000/FFFFFF?text=${encodeURIComponent('No Image')}`;
-            const priceText = listing.price > 0 ? `$${listing.price.toFixed(2)}` : 'Free / Negotiable';
 
-            card.innerHTML = `
-                <div class="product-image">
-                    <img src="${imageUrl}" alt="${listing.title}" onerror="this.onerror=null;this.src='https://placehold.co/600x400/800000/FFFFFF?text=${encodeURIComponent('Image Not Found')}'"/>
-                </div>
-                <div class="product-details">
-                    <h2>${listing.title}</h2>
-                    <p>${listing.description}</p>
-                    <div class="price-tag">${priceText}</div>
-                </div>
-            `;
-            // Add an event listener for viewing details later if needed
-            // card.addEventListener('click', () => { /* Logic to show details */ }); 
-            return card;
-        }
-        
-        // Function to render the filtered list
         function renderListings(listings) {
-            productGrid.innerHTML = '';
+            productGrid.innerHTML = ''; // Clear previous listings
             loadingIndicator.style.display = 'none';
 
             if (listings.length === 0) {
-                noResultsMessage.style.display = 'block';
-            } else {
-                noResultsMessage.style.display = 'none';
-                listings.forEach(listing => {
-                    productGrid.appendChild(createProductCard(listing));
-                });
-            }
-        }
-        
-        /**
-         * Applies the search, price, and category filters to the list of listings.
-         * @param {Array} listingsToFilter - The full list of listings (usually allListings).
-         */
-        function applyFiltersAndRender(listingsToFilter = allListings) {
-            const searchTerm = filterSearchInput.value.toLowerCase().trim();
-            const priceRangeValue = filterPriceSelect.value;
-            const categoryValue = filterCategorySelect.value; // Get selected category
-            
-            let filteredListings = listingsToFilter;
-
-            // 1. Search Filter (by title and description)
-            if (searchTerm) {
-                filteredListings = filteredListings.filter(listing => 
-                    listing.title.toLowerCase().includes(searchTerm) || 
-                    listing.description.toLowerCase().includes(searchTerm)
-                );
-            }
-            
-            // 2. Category Filter
-            if (categoryValue) {
-                filteredListings = filteredListings.filter(listing => 
-                    listing.category === categoryValue
-                );
-            }
-            
-            // 3. Price Filter
-            if (priceRangeValue) {
-                filteredListings = filteredListings.filter(listing => {
-                    const price = listing.price || 0;
-                    
-                    if (priceRangeValue === '0-50') {
-                        return price >= 0 && price <= 50;
-                    } else if (priceRangeValue === '51-200') {
-                        return price >= 51 && price <= 200;
-                    } else if (priceRangeValue === '201-') {
-                        return price > 200;
-                    }
-                    return true; // Should not happen if priceRangeValue is valid, but safe default
-                });
-            }
-            
-            renderListings(filteredListings);
-        }
-
-
-        // --- Firebase Setup and Real-time Listener ---
-
-        function setupFirebaseAndListeners() {
-            if (!firebaseConfig) {
-                console.error("Firebase configuration is missing.");
-                loadingIndicator.textContent = "Error: App configuration is missing.";
+                productGrid.innerHTML = '<p style="text-align: center; font-size: 1.1em; color: #666; padding: 20px;">No listings found matching your criteria.</p>';
                 return;
             }
 
-            const app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app);
-
-            // 1. Authentication Listener
-            onAuthStateChanged(auth, async (user) => {
-                if (!user) {
-                    // Ensure a user is signed in (either real or anonymous)
-                    try {
-                        if (initialAuthToken) {
-                            await signInWithCustomToken(auth, initialAuthToken);
-                        } else {
-                            await signInAnonymously(auth);
-                        }
-                    } catch (e) {
-                        console.error("Authentication failed:", e);
-                    }
-                }
-                userId = auth.currentUser?.uid;
-                isAuthReady = true;
-                
-                // Once Auth is ready, start listening for data
-                startListingsListener();
-            }, { once: false });
+            listings.forEach(listing => {
+                const card = document.createElement('div');
+                card.className = 'listing-card';
+                card.innerHTML = `
+                    <img src="${listing.image}" class="listing-image" alt="${listing.title}" onerror="this.onerror=null;this.src='https://placehold.co/400x300/4f090c/f0ce55?text=Image+Unavailable';" />
+                    <div class="listing-content">
+                        <div class="listing-category">${listing.category.charAt(0).toUpperCase() + listing.category.slice(1).replace('-', ' & ')}</div>
+                        <div class="listing-title">${listing.title}</div>
+                        <div class="listing-seller">Seller: ${listing.userId.substring(0, 8)}...</div>
+                        <div class="listing-price">${listing.price === 0 ? 'FREE' : `$${listing.price.toFixed(2)}`}</div>
+                    </div>
+                `;
+                productGrid.appendChild(card);
+            });
         }
-
-        function startListingsListener() {
+        
+        // --- Filter and Search Logic ---
+        
+        // Function to create and run the Firestore query based on current filters
+        function fetchListings() {
             if (!isAuthReady || !db) return;
 
-            // Get all listings from the public collection
-            const listingsCollectionRef = collection(db, `artifacts/${appId}/public/data/listings`);
+            loadingIndicator.textContent = 'Loading listings...';
+            loadingIndicator.style.display = 'block';
+            productGrid.innerHTML = '';
             
-            // Query: Get all listings ordered by creation time (newest first)
-            // Note: We avoid orderBy() here as recommended, and rely on client-side sorting/filtering
-            const listingsQuery = query(listingsCollectionRef); 
+            const listingsRef = collection(db, `artifacts/${appId}/public/data/listings`);
+            let q = listingsRef;
+            let conditions = [];
+            
+            // 1. Category Filter
+            if (currentCategory) {
+                conditions.push(where('category', '==', currentCategory));
+            }
+            
+            // 2. Price Filter
+            let minPrice = null;
+            let maxPrice = null;
+            
+            if (currentPriceRange) {
+                if (currentPriceRange === 'free') {
+                    conditions.push(where('price', '==', 0));
+                } else {
+                    const [min, max] = currentPriceRange.split('-');
+                    minPrice = parseFloat(min);
+                    maxPrice = max === 'inf' ? null : parseFloat(max);
 
-            // Set up the real-time listener (onSnapshot)
-            const unsubscribe = onSnapshot(listingsQuery, (snapshot) => {
-                // 1. Map the new data
-                allListings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    // Add price range conditions
+                    if (minPrice !== null && minPrice > 0) {
+                        conditions.push(where('price', '>=', minPrice));
+                    }
+                    if (maxPrice !== null) {
+                        conditions.push(where('price', '<=', maxPrice));
+                    }
+                }
+            }
+            
+            // If we use multiple 'where' clauses, Firestore requires an index, 
+            // but for this demo, we'll keep it simple and rely on client-side filtering 
+            // for search terms, as orderBy and where on different fields can conflict.
+            
+            // For now, we only use orderBy on creation date (mandatory for collection queries)
+            // and apply category and price filters via 'where'.
+            q = query(listingsRef, ...conditions, orderBy('createdAt', 'desc'));
+            
+            const unsubscribe = onSnapshot(q, (snapshot) => {
+                let listings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+                // 3. Client-Side Search Filter (Applied last)
+                if (currentSearchTerm) {
+                    const searchLower = currentSearchTerm.toLowerCase();
+                    listings = listings.filter(listing => 
+                        listing.title.toLowerCase().includes(searchLower) || 
+                        listing.description.toLowerCase().includes(searchLower)
+                    );
+                }
                 
-                // 2. Client-side sort by newest first (since we removed the Firestore orderBy for stability)
-                allListings.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
-
-                // 3. Filter and Render the list using the updated data
-                applyFiltersAndRender(allListings);
-
+                renderListings(listings);
             }, (error) => {
                 console.error("Error listening to listings:", error);
                 loadingIndicator.textContent = `Error loading listings: ${error.message}`;
             });
             
-            window.addEventListener('beforeunload', unsubscribe);
+            // Note: In a real app, you would manage this subscription (unsubscribe) properly.
+            window.unsubscribeListings = unsubscribe; // Expose globally for simplicity
         }
         
-        // --- Event Listeners for Filtering and Navigation ---
-        
-        // 1. Live search filter on input change
-        filterSearchInput.addEventListener('input', () => applyFiltersAndRender());
-        
-        // 2. Instant price filter on change
-        filterPriceSelect.addEventListener('change', () => applyFiltersAndRender());
-        
-        // 3. Instant category filter on change (NEW)
-        filterCategorySelect.addEventListener('change', () => applyFiltersAndRender());
+        function handleFilterChange() {
+            currentCategory = filterCategory.value;
+            currentPriceRange = filterPrice.value;
+            currentSearchTerm = searchInput.value.trim();
+            fetchListings();
+        }
 
-
-        // 4. Navigation
-        document.getElementById('userIcon').addEventListener('click', () => {
-             onAuthStateChanged(auth, (user) => {
-                window.location.href = user ? 'dashboard.html' : 'login.html';
-            }, { once: true });
-        });
-        
-        document.getElementById('sellButton').addEventListener('click', () => {
-            window.location.href = 'sell.html'; 
-        });
-        
         // --- Initialization ---
+        
+        // Parse URL parameters for initial filter
+        function getInitialFilters() {
+            const params = new URLSearchParams(window.location.search);
+            const categoryParam = params.get('category');
+            const searchParam = params.get('search');
+
+            if (categoryParam) {
+                currentCategory = categoryParam;
+                filterCategory.value = categoryParam;
+                pageTitle.textContent = `De Anza Listings - ${categoryParam.charAt(0).toUpperCase() + categoryParam.slice(1).replace('-', ' & ')}`;
+            }
+            if (searchParam) {
+                currentSearchTerm = searchParam;
+                searchInput.value = searchParam;
+            }
+        }
+        
+        async function setupFirebaseAndListeners() {
+            getInitialFilters();
+
+            if (!firebaseConfig) {
+                console.error("Firebase configuration is missing.");
+                loadingIndicator.textContent = 'App configuration error. Cannot connect to services.';
+                return;
+            }
+
+            // Initialize Firebase
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+
+            // Authentication setup
+            try {
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                 console.error("Authentication setup failed:", error);
+                 loadingIndicator.textContent = 'Authentication failed. Please check the console.';
+            }
+
+
+            // Set up auth state listener to ensure we only fetch data when ready
+            onAuthStateChanged(auth, (user) => {
+                isAuthReady = true;
+                if (user) {
+                    userId = user.uid;
+                    console.log("User authenticated:", userId);
+                } else {
+                    userId = null;
+                    console.log("No user authenticated.");
+                }
+                // Call fetchListings only after the initial auth check is complete
+                fetchListings(); 
+            });
+            
+            // --- Event Listeners for Filters/Search ---
+            filterCategory.addEventListener('change', handleFilterChange);
+            filterPrice.addEventListener('change', handleFilterChange);
+            searchInput.addEventListener('input', handleFilterChange); // Real-time search/filter
+
+            // --- Event Listeners for Navigation ---
+            document.getElementById('userIcon').addEventListener('click', () => {
+                 onAuthStateChanged(auth, (user) => {
+                    window.location.href = user && user.email ? 'dashboard.html' : 'login.html';
+                }, { once: true });
+            });
+            
+            document.getElementById('sellButton').addEventListener('click', () => {
+                window.location.href = 'sell.html'; 
+            });
+            
+            document.getElementById('buyButton').addEventListener('click', () => {
+                window.location.href = 'marketplace.html'; // Go back to category selection
+            });
+            
+            window.addEventListener('beforeunload', () => {
+                if (window.unsubscribeListings) {
+                    window.unsubscribeListings();
+                }
+            });
+        }
+        
+        // --- Initialization ---\r\n
         window.onload = setupFirebaseAndListeners;
 
     </script>

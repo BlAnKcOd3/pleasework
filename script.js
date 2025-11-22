@@ -66,49 +66,109 @@ function toggleSearch(){
 
 // --- listings rendering page
 function renderListingsPage(){
-  seedListings();
+  // Prefer backend listings (Firestore) but fall back to localStorage seed if backend unavailable.
   const grid = document.getElementById('product-grid');
   if(!grid) return;
   const q = new URLSearchParams(location.search);
   const category = q.get('cat') || '';
-  const mode = q.get('mode') || ''; // buy all, or category
   const searchVal = document.getElementById('filter-search') ? document.getElementById('filter-search').value.toLowerCase() : '';
   const priceSel = document.getElementById('filter-price') ? document.getElementById('filter-price').value : '';
-  let items = getListings();
-  if(category) items = items.filter(i => i.category === category);
-  if(searchVal) items = items.filter(i => i.title.toLowerCase().includes(searchVal) || i.desc.toLowerCase().includes(searchVal));
-  if(priceSel){
-    if(priceSel === '0-50') items = items.filter(i => i.price <=50 );
-    if(priceSel === '50-200') items = items.filter(i => i.price >50 && i.price <=200 );
-    if(priceSel === '200+') items = items.filter(i => i.price >200 );
+
+  async function loadAndRender(){
+    let items = [];
+    // Try backend first
+    try{
+      const res = await fetch('http://localhost:3000/listings');
+      if(res.ok){
+        const data = await res.json();
+        items = (data.listings || []).map(l => ({
+          id: l.id || l._id || l.docId || l.id,
+          title: l.title || '',
+          desc: l.description || l.desc || '',
+          category: l.category || '',
+          price: l.price || 0,
+          img: l.image || l.img || ''
+        }));
+      } else {
+        console.warn('Backend /listings responded with', res.status);
+        items = getListings();
+      }
+    } catch(err){
+      // backend not available, fall back to local storage
+      console.warn('Could not fetch backend listings, using localStorage:', err);
+      items = getListings();
+    }
+
+    // apply filters
+    if(category) items = items.filter(i => i.category === category);
+    if(searchVal) items = items.filter(i => (i.title||'').toLowerCase().includes(searchVal) || (i.desc||'').toLowerCase().includes(searchVal));
+    if(priceSel){
+      if(priceSel === '0-50') items = items.filter(i => i.price <=50 );
+      if(priceSel === '50-200') items = items.filter(i => i.price >50 && i.price <=200 );
+      if(priceSel === '200+') items = items.filter(i => i.price >200 );
+    }
+
+    grid.innerHTML = '';
+    if(items.length===0){
+      grid.innerHTML = '<div class="small">No items found. Try different filters or publish on Sell page.</div>';
+      return;
+    }
+
+    items.forEach(it=>{
+      const card = document.createElement('div'); card.className='card';
+      const imgSrc = it.img || 'https://via.placeholder.com/400x300?text=No+Image';
+      const title = escapeHtml(it.title || '');
+      const desc = escapeHtml(it.desc || '');
+      const priceHtml = it.price>0?('$'+it.price):'Free/Job';
+
+      card.innerHTML = `
+        <img src="${imgSrc}" alt="${title}" />
+        <h3>${title}</h3>
+        <p>${desc}</p>
+        <div class="meta">
+          <div class="price">${priceHtml}</div>
+          <div><button class="view-btn" data-id="${String(it.id).replace(/"/g,'')}">View</button></div>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+
+    // attach view handlers
+    grid.querySelectorAll('.view-btn').forEach(btn => {
+      btn.addEventListener('click', ()=>{
+        const id = btn.getAttribute('data-id');
+        handleView(id);
+      });
+    });
   }
-  grid.innerHTML = '';
-  if(items.length===0){
-    grid.innerHTML = '<div class="small">No items found. Try different filters or publish on Sell page.</div>';
-    return;
-  }
-  items.forEach(it=>{
-    const card = document.createElement('div'); card.className='card';
-    card.innerHTML = `
-      <img src="${it.img || 'https://via.placeholder.com/400x300?text=No+Image'}" alt="${escapeHtml(it.title)}" />
-      <h3>${escapeHtml(it.title)}</h3>
-      <p>${escapeHtml(it.desc)}</p>
-      <div class="meta">
-        <div class="price">${it.price>0?('$'+it.price):'Free/Job'}</div>
-        <div><button onclick="handleView(${it.id})">View</button></div>
-      </div>
-    `;
-    grid.appendChild(card);
-  });
+
+  loadAndRender();
 }
 
 // view item (demo)
-function handleView(id){
-  const items = getListings();
-  const it = items.find(i=>i.id===id);
-  if(!it) return alert('Item not found');
-  // show a simple modal dialog using window.open or alert - but nicer: create a simple overlay
-  showItemOverlay(it);
+async function handleView(id){
+  // Try to find item in localStorage first
+  let items = getListings();
+  let it = items.find(i=>String(i.id) === String(id));
+  if(it){ showItemOverlay(it); return; }
+  // Try backend
+  try{
+    const res = await fetch('http://localhost:3000/listings');
+    if(res.ok){
+      const data = await res.json();
+      const listings = data.listings || [];
+      it = listings.find(l => String(l.id) === String(id) || String(l.id) === String(l.docId) || String(l.id) === String(l._id));
+      if(it){
+        // normalize shape
+        const norm = { id: it.id || it._id, title: it.title, desc: it.description, price: it.price, img: it.image };
+        showItemOverlay(norm);
+        return;
+      }
+    }
+  } catch(err){
+    console.warn('Error fetching item from backend', err);
+  }
+  alert('Item not found');
 }
 
 function showItemOverlay(item){
@@ -119,15 +179,15 @@ function showItemOverlay(item){
   overlay.style.display='flex';overlay.style.alignItems='center';overlay.style.justifyContent='center';overlay.style.zIndex=9999;
   overlay.innerHTML = `
     <div style="background:#fff;padding:18px;border-radius:12px;max-width:700px;width:92%;box-shadow:0 10px 30px rgba(0,0,0,0.25)">
-      <div style="display:flex;gap:12px;align-items:start">
-        <img src="${item.img || 'https://via.placeholder.com/400x300?text=No+Image'}" style="width:40%;border-radius:8px;object-fit:cover"/>
+      <div style="display:flex;gap:12px;align-items:start;flex-wrap:wrap">
+        <img src="${item.img || 'https://via.placeholder.com/400x300?text=No+Image'}" style="width:40%;min-width:220px;border-radius:8px;object-fit:cover"/>
         <div style="flex:1">
           <h2 style="margin:0;color:${getComputedStyle(document.documentElement).getPropertyValue('--primary-red')||'#6e0b0f'}">${escapeHtml(item.title)}</h2>
           <p style="margin:8px 0">${escapeHtml(item.desc)}</p>
           <div style="display:flex;gap:10px;align-items:center;margin-top:14px">
             <div style="font-weight:800">${item.price>0?('$'+item.price):'Free/Job'}</div>
-            <button style="background:var(--gold);border:none;padding:8px 12px;border-radius:8px;cursor:pointer" onclick="openBuy(${item.id})">Buy / Contact</button>
-            <button style="background:#eee;border:none;padding:8px 12px;border-radius:8px;cursor:pointer" onclick="this.closest('div[style]').parentNode.remove()">Close</button>
+            <button style="background:var(--gold);border:none;padding:8px 12px;border-radius:8px;cursor:pointer" onclick="openBuy('${item.id}')">Buy / Contact</button>
+            <button id="close-overlay" style="background:#eee;border:none;padding:8px 12px;border-radius:8px;cursor:pointer">Close</button>
           </div>
         </div>
       </div>
@@ -135,6 +195,7 @@ function showItemOverlay(item){
   `;
   document.body.appendChild(overlay);
   overlay.addEventListener('click', e=>{ if(e.target===overlay) overlay.remove(); });
+  document.getElementById('close-overlay')?.addEventListener('click', ()=> overlay.remove());
 }
 
 function openBuy(id){

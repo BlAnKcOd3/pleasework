@@ -40,7 +40,6 @@
             margin: 0;
             font-weight: bold;
             text-align: center;
-            /* Ensures the text is readable even with the icon */
             padding: 0 10px; 
         }
 
@@ -142,59 +141,183 @@
         .search-icon:hover {
             color: #4f090c;
         }
-
-        /* Grid Layout for Categories */
-        .category-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            padding-bottom: 40px;
-        }
-
-        .category-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+        
+        /* --- Listings Section Styles --- */
+        .listings-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #4f090c;
             text-align: center;
-            cursor: pointer;
+            margin: 20px 0 20px 0; 
+            border-bottom: 4px solid #4f090c;
+            padding-bottom: 5px;
         }
 
-        /* White Box for Icons */
-        .icon-box {
+        #listings-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+            padding-bottom: 60px;
+        }
+
+        .listing-card {
             background-color: white;
             border: 3px solid black;
-            border-radius: 25px;
-            width: 100%;
-            aspect-ratio: 1 / 1;
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.3);
             display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 10px;
-            box-shadow: 3px 3px 6px rgba(0,0,0,0.2);
-            transition: transform 0.2s, box-shadow 0.2s;
+            /* Ensure the text content and image are side-by-side */
+            gap: 10px;
+            cursor: pointer; /* Indicates it's clickable */
+            transition: transform 0.2s;
         }
         
-        .icon-box:hover {
-            transform: scale(1.05);
-            box-shadow: 5px 5px 10px rgba(0,0,0,0.3);
+        .listing-card:hover {
+            transform: translateY(-5px);
         }
 
-        /* Styles for the FontAwesome Icons inside the boxes */
-        .icon-box i {
-            font-size: 5rem; /* Make icons large */
+        .listing-content {
+            flex-grow: 1; /* Allows content to take up available space */
+            display: flex;
+            flex-direction: column;
         }
 
-        /* Specific Colors for Icons to match the theme */
-        .color-red { color: #8B0000; } /* Dark Red */
-        .color-gold { color: #DAA520; } /* Goldenrod */
-        .color-brown { color: #654321; } /* Dark Brown */
-
-        .category-label {
+        .listing-card h3 {
+            font-size: 1.5rem;
             font-weight: bold;
-            font-size: 1.1rem;
-            color: #000;
-            line-height: 1.2;
+            margin: 0 0 5px 0;
+            color: #4f090c;
         }
+
+        .listing-price {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #8B0000;
+            margin-bottom: 10px;
+            border-bottom: 2px dashed #f0ce55;
+            padding-bottom: 5px;
+        }
+
+        .listing-details {
+            font-size: 0.9rem;
+            color: #333;
+        }
+        
+        .listing-details p {
+            margin: 3px 0;
+        }
+        
+        .listing-image-container {
+            flex-shrink: 0; /* Prevents image from shrinking */
+            width: 100px; 
+            height: 100px;
+            border: 2px solid #4f090c;
+            border-radius: 10px;
+            overflow: hidden;
+            align-self: flex-start; /* Aligns image to the top right */
+        }
+        
+        .listing-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Ensures image fills container without distortion */
+        }
+        
+        /* --- Modal (Popup) Styles --- */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 100; /* Above all other content */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent black overlay */
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border: 5px solid #4f090c;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            position: relative;
+            animation-name: animatetop;
+            animation-duration: 0.4s;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        /* Animation for the modal content */
+        @keyframes animatetop {
+            from {top: -300px; opacity: 0} 
+            to {top: 0; opacity: 1}
+        }
+
+        .modal-close {
+            color: #4f090c;
+            position: absolute;
+            top: 10px;
+            right: 25px;
+            font-size: 35px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .modal-close:hover,
+        .modal-close:focus {
+            color: red;
+            text-decoration: none;
+        }
+        
+        .modal-title {
+            color: #4f090c;
+            font-size: 2.5rem;
+            margin-top: 0;
+            border-bottom: 3px solid #f0ce55;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .modal-price {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #8B0000;
+            margin-bottom: 15px;
+        }
+
+        .modal-image {
+            width: 100%;
+            max-height: 250px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 2px solid #ccc;
+        }
+        
+        .contact-info {
+            background-color: #ffe08a; /* Lighter gold */
+            border: 2px dashed #4f090c;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .contact-info h4 {
+            margin-top: 0;
+            color: #4f090c;
+        }
+        
+        /* --- Footer and Responsiveness --- */
 
         footer {
             background-color: #4f090c;
@@ -206,13 +329,32 @@
         /* Responsive Adjustments */
         @media (max-width: 768px) {
             h1 { font-size: 2rem; }
-            .category-grid { grid-template-columns: repeat(2, 1fr); }
             .action-bar { flex-direction: column; gap: 10px; }
-            /* Reposition search container for mobile layout */
             .search-container { order: -1; margin-bottom: 10px; }
             .search-icon { margin-left: 0; }
-            #search-input { width: calc(100vw - 100px); } /* Full width on mobile minus padding */
+            #search-input { width: calc(100vw - 100px); }
             .header-icon { width: 40px; height: 40px; font-size: 2.5rem; right: 10px; }
+            .listings-title { font-size: 2rem; margin-top: 20px; }
+            
+            .listing-card {
+                 flex-direction: column; /* Stack content vertically on small screens */
+                 align-items: center;
+                 text-align: center;
+            }
+            
+            .listing-image-container {
+                width: 100%;
+                height: 150px;
+                margin-bottom: 10px;
+            }
+            .listing-content {
+                text-align: left; /* Keep text left-aligned even on vertical stacking */
+                width: 100%;
+            }
+            .modal-content {
+                width: 95%;
+                padding: 15px;
+            }
         }
         
         @media (max-width: 480px) {
@@ -221,34 +363,243 @@
         
         /* --- CSS END --- */
     </style>
+    
     <!-- Firebase SDK Imports -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        
-        // --- Firebase Configuration and Initialization ---
+        // getDoc is needed to fetch the single listing for the modal
+        import { getFirestore, collection, onSnapshot, setDoc, doc, addDoc, getDocs, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+
+        // --- Configuration and Initialization ---
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
         if (!firebaseConfig) {
             console.error("Firebase configuration is missing. Cannot initialize app.");
+            document.getElementById('listings-container').innerHTML = '<p style="color:red; text-align:center;">Error: Firebase config missing. Listings cannot be loaded.</p>';
         }
         
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const db = getFirestore(app);
 
         const userIcon = document.getElementById('userIcon');
+        let isAuthReady = false;
+        
+        // Storage for all fetched listings
+        let allListings = [];
+
+        // Simple placeholder image generator
+        function getPlaceholderImageUrl(title) {
+            // Use a specific color scheme (e.g., De Anza Maroon/Gold) for a consistent look
+            const bgColor = '4f090c'; // Dark Red
+            const textColor = 'f0ce55'; // Gold
+            const text = encodeURIComponent(title.split(' ')[0] || 'Item'); // Use first word of title
+            return `https://placehold.co/100x100/${bgColor}/${textColor}?text=${text}`;
+        }
+
+        // Function to render the listings to the UI
+        function renderListings(listings) {
+            const container = document.getElementById('listings-container');
+            container.innerHTML = ''; // Clear existing listings
+            allListings = listings; // Store the fetched listings
+
+            if (listings.length === 0) {
+                container.innerHTML = '<p style="text-align:center; font-style:italic; font-size:1.2rem; color:#4f090c;">No listings posted yet. Be the first!</p>';
+                return;
+            }
+
+            listings.forEach(listing => {
+                const card = document.createElement('div');
+                card.className = 'listing-card';
+                // Attach the showDetails function to the click event of the card
+                card.onclick = () => showDetails(listing.id); 
+                
+                const imageUrl = listing.imageUrl || getPlaceholderImageUrl(listing.title);
+
+                card.innerHTML = `
+                    <div class="listing-content">
+                        <h3>${listing.title}</h3>
+                        <p class="listing-price">$${listing.price.toFixed(2)}</p>
+                        <div class="listing-details">
+                            <p><strong>Category:</strong> ${listing.category}</p>
+                            <p><strong>Condition:</strong> ${listing.condition}</p>
+                            <p><strong>Seller ID:</strong> ${listing.sellerId.substring(0, 8)}...</p>
+                        </div>
+                    </div>
+                    <div class="listing-image-container">
+                        <img src="${imageUrl}" alt="Image for ${listing.title}" class="listing-image" onerror="this.onerror=null; this.src='${getPlaceholderImageUrl(listing.title)}';">
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+        
+        // Function to display the detail modal
+        async function showDetails(listingId) {
+            const modal = document.getElementById('detailModal');
+            const modalContent = document.getElementById('modalContent');
+            
+            // Look for the listing in the locally stored array first
+            let listing = allListings.find(l => l.id === listingId);
+
+            if (!listing) {
+                // If not found in memory (shouldn't happen if using real-time listener correctly)
+                // Fetch it from Firestore directly
+                try {
+                    const listingsPath = `/artifacts/${appId}/public/data/listings`;
+                    const docRef = doc(db, listingsPath, listingId);
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        listing = { id: docSnap.id, ...docSnap.data() };
+                    }
+                } catch (error) {
+                    console.error("Error fetching single listing:", error);
+                    modalContent.innerHTML = '<p style="color:red;">Failed to load details.</p>';
+                    modal.style.display = "flex";
+                    return;
+                }
+            }
+            
+            if (!listing) {
+                console.error("Listing not found for ID:", listingId);
+                return;
+            }
+            
+            const imageUrl = listing.imageUrl || getPlaceholderImageUrl(listing.title);
+
+            // Populate the modal content
+            modalContent.innerHTML = `
+                <span class="modal-close" onclick="closeDetails()">&times;</span>
+                <img src="${imageUrl}" alt="Image for ${listing.title}" class="modal-image" onerror="this.onerror=null; this.src='${getPlaceholderImageUrl(listing.title)}';">
+                <h2 class="modal-title">${listing.title}</h2>
+                <p class="modal-price">$${listing.price.toFixed(2)}</p>
+                
+                <p><strong>Category:</strong> ${listing.category}</p>
+                <p><strong>Condition:</strong> ${listing.condition}</p>
+                <p><strong>Description:</strong> ${listing.description}</p>
+                <p><strong>Posted By:</strong> Seller ID ${listing.sellerId.substring(0, 8)}...</p>
+                
+                <div class="contact-info">
+                    <h4>Contact the Seller</h4>
+                    <p>
+                        <i class="fas fa-envelope"></i> 
+                        <a href="mailto:contact@placeholder.com" style="color: #4f090c; text-decoration: underline;">
+                            Message Seller (placeholder@deanza.edu)
+                        </a>
+                    </p>
+                    <p>
+                        <i class="fas fa-phone"></i> 
+                        <span style="font-style: italic;">
+                            (408) 555-1234 (Contact number provided upon request)
+                        </span>
+                    </p>
+                </div>
+            `;
+            
+            // Make the modal visible
+            modal.style.display = "flex";
+        }
+        
+        // Function to hide the detail modal
+        function closeDetails() {
+            document.getElementById('detailModal').style.display = "none";
+        }
+
+        // Expose function to global scope so HTML onclick can call it
+        window.showDetails = showDetails;
+        window.closeDetails = closeDetails;
+        
+        // Close modal if user clicks outside of it
+        window.onclick = function(event) {
+            const modal = document.getElementById('detailModal');
+            if (event.target === modal) {
+                closeDetails();
+            }
+        }
+        
+        // --- Firestore Real-time Listener ---
+        function setupListingsListener() {
+            if (!db || !isAuthReady) {
+                console.warn("Database not ready or Auth not complete. Skipping listener setup.");
+                return;
+            }
+            
+            // Define the public collection path for listings
+            const listingsPath = `/artifacts/${appId}/public/data/listings`;
+            const listingsCollection = collection(db, listingsPath);
+            
+            console.log("Setting up real-time listener for listings at:", listingsPath);
+
+            // onSnapshot provides real-time updates
+            onSnapshot(listingsCollection, (snapshot) => {
+                const listings = [];
+                snapshot.forEach(doc => {
+                    listings.push({ id: doc.id, ...doc.data() });
+                });
+                console.log('Fetched', listings.length, 'listings.');
+                renderListings(listings);
+            }, (error) => {
+                console.error("Error fetching listings:", error);
+                document.getElementById('listings-container').innerHTML = '<p style="color:red; text-align:center;">Error loading listings. See console for details.</p>';
+            });
+        }
+
+        // --- Authentication and Initialization ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                console.log('User authenticated. UID:', user.uid);
+                isAuthReady = true;
+                setupListingsListener();
+
+                // Example: Add a sample listing if none exist (for testing)
+                const listingsPath = `/artifacts/${appId}/public/data/listings`;
+                const listingsCollection = collection(db, listingsPath);
+                
+                const querySnapshot = await getDocs(listingsCollection);
+                if (querySnapshot.empty) {
+                    const sampleListing = {
+                        title: "Intro to C++ Textbook",
+                        price: 45.99,
+                        category: "Textbooks",
+                        condition: "Good",
+                        description: "Required for CS 1A, clean pages and minimal highlighting. Meet at the library.",
+                        sellerId: user.uid,
+                        timestamp: new Date().toISOString(),
+                        // Add a placeholder image URL field (or leave empty to use default placeholder)
+                        imageUrl: getPlaceholderImageUrl("C++ Book")
+                    };
+                    await addDoc(listingsCollection, sampleListing);
+                    console.log("Added sample listing.");
+                }
+
+            } else {
+                console.log('User signed out or anonymous. Initializing anonymous session.');
+                if (!initialAuthToken) {
+                     signInAnonymously(auth).catch(e => {
+                        console.error("Anonymous Sign-In failed:", e);
+                    });
+                }
+                isAuthReady = true;
+                setupListingsListener();
+            }
+        });
+
 
         // Initial sign-in for Canvas environment
         if (initialAuthToken) {
             signInWithCustomToken(auth, initialAuthToken).catch(e => {
                 console.error("Custom Auth Token Sign-In failed:", e);
+                // Fallback to anonymous sign-in if custom token fails
                 signInAnonymously(auth).catch(e => {
-                    console.error("Anonymous Sign-In failed:", e);
+                    console.error("Anonymous Sign-In failed during fallback:", e);
                 });
             });
         } else {
+            // Sign in anonymously if no custom token is provided
             signInAnonymously(auth).catch(e => {
                 console.error("Anonymous Sign-In failed:", e);
             });
@@ -256,16 +607,13 @@
 
         // Handle user icon click
         userIcon.addEventListener('click', () => {
-             // Use onAuthStateChanged to check if the user is currently signed in
              onAuthStateChanged(auth, (user) => {
                 if (user && user.email) {
-                    // User is signed in, redirect to dashboard/account management
                     window.location.href = 'dashboard.html';
                 } else {
-                    // User is not signed in, redirect to the login page
                     window.location.href = 'login.html';
                 }
-            }, { once: true }); // Use { once: true } to prevent continuous observation
+            }, { once: true });
         });
         
     </script>
@@ -276,7 +624,6 @@
     <header>
         <h1>De Anza Marketplace</h1>
         <!-- Account Icon (Using FontAwesome) -->
-        <!-- Added id="userIcon" for JavaScript listener -->
         <div class="header-icon" id="userIcon">
             <i class="fas fa-user-circle"></i>
         </div>
@@ -286,8 +633,8 @@
         
         <!-- ACTION BAR -->
         <div class="action-bar">
-            <div class="btn-pill" onclick="console.log('Sell clicked');">Sell</div>
-            <div class="btn-pill" onclick="console.log('Buy clicked');">Buy</div>
+            <div class="btn-pill" onclick="window.location.href='sell.html';">Sell</div>
+            <div class="btn-pill" onclick="console.log('Buy clicked (Filtering logic will go here)');">Buy</div>
             
             <!-- Search Section -->
             <div class="search-container">
@@ -296,76 +643,25 @@
                 <i class="fas fa-search search-icon" onclick="toggleSearch()"></i>
             </div>
         </div>
-
-        <!-- GRID CATEGORIES -->
-        <div class="category-grid">
-            
-            <!-- Item 1: Textbooks -->
-            <div class="category-item" onclick="console.log('Textbooks clicked');">
-                <div class="icon-box">
-                    <i class="fas fa-book color-red"></i>
-                </div>
-                <div class="category-label">Textbooks</div>
-            </div>
-
-            <!-- Item 2: Supplies -->
-            <div class="category-item" onclick="console.log('Study Supplies clicked');">
-                <div class="icon-box">
-                    <i class="fas fa-pencil-ruler color-gold"></i>
-                </div>
-                <div class="category-label">Study Supplies</div>
-            </div>
-
-            <!-- Item 3: Electronics -->
-            <div class="category-item" onclick="console.log('Electronics clicked');">
-                <div class="icon-box">
-                    <i class="fas fa-laptop color-red"></i>
-                </div>
-                <div class="category-label">Electronics</div>
-            </div>
-
-            <!-- Item 4: Bikes -->
-            <div class="category-item" onclick="console.log('Bikes & Outdoors clicked');">
-                <div class="icon-box">
-                    <i class="fas fa-motorcycle color-red"></i>
-                </div>
-                <div class="category-label">Bikes & Outdoors</div>
-            </div>
-
-            <!-- Item 5: Housing -->
-            <div class="category-item" onclick="console.log('Housing & Roommates clicked');">
-                <div class="icon-box">
-                    <i class="fas fa-home color-brown"></i>
-                </div>
-                <div class="category-label">Housing<br>& Roommates</div>
-            </div>
-
-            <!-- Item 6: Services -->
-            <div class="category-item" onclick="console.log('Services & Rentals clicked');">
-                <div class="icon-box">
-                    <i class="fas fa-tools color-red"></i>
-                </div>
-                <div class="category-label">Services<br>& Rentals</div>
-            </div>
-
-            <!-- Item 7: Jobs -->
-            <div class="category-item" onclick="console.log('Student Jobs clicked');">
-                <div class="icon-box">
-                    <i class="fas fa-briefcase color-brown"></i>
-                </div>
-                <div class="category-label">Student<br>Jobs</div>
-            </div>
-
-            <!-- Item 8: Events -->
-            <div class="category-item" onclick="console.log('Events clicked');">
-                <div class="icon-box">
-                    <i class="fas fa-bell color-gold"></i>
-                </div>
-                <div class="category-label">Events &<br>Campus Activities</div>
-            </div>
-
+        
+        <!-- --- LISTINGS SECTION --- -->
+        <h2 class="listings-title">Featured Listings</h2>
+        <div id="listings-container">
+            <!-- Listings will be dynamically inserted here -->
+            <p style="text-align:center;">Loading listings...</p>
         </div>
+        <!-- --- END: LISTINGS SECTION --- -->
+        
     </div>
+
+    <!-- DETAIL MODAL (POPUP) -->
+    <div id="detailModal" class="modal">
+      <div class="modal-content">
+        <!-- Content will be injected by JavaScript -->
+        <div id="modalContent"></div>
+      </div>
+    </div>
+    <!-- END MODAL -->
 
     <!-- FOOTER -->
     <footer></footer>

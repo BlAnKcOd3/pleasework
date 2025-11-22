@@ -612,10 +612,7 @@
         }
         
         // --- Modal & Interaction Helpers ---
-        function getChatId(a,b){
-            const sorted = [String(a),String(b)].sort();
-            return sorted.join('_');
-        }
+        // Chat functionality removed: no chat ID helper required anymore.
 
         function openListingModal(listing) {
             const modal = document.getElementById('listing-modal');
@@ -625,7 +622,12 @@
             document.getElementById('modal-description').textContent = listing.description || 'No description provided.';
             document.getElementById('modal-price').textContent = listing.price === 0 ? 'FREE' : `$${(listing.price || 0).toFixed(2)}`;
             document.getElementById('modal-seller').textContent = listing.userId ? `Seller: ${listing.userId}` : '';
-            document.getElementById('modal-action').dataset.id = listing.id;
+            // Attach contact info to the action button so clicking it shows the seller contact details
+            const actionBtn = document.getElementById('modal-action');
+            actionBtn.dataset.id = listing.id;
+            actionBtn.dataset.contactEmail = listing.contactEmail || '';
+            actionBtn.dataset.contactPhone = listing.contactPhone || '';
+            actionBtn.textContent = 'Show Contact Info';
             modal.style.display = 'flex';
             modal.setAttribute('aria-hidden', 'false');
         }
@@ -644,15 +646,7 @@
             const listing = (window.currentListings || []).find(l => String(l.id) === String(id));
             if (!listing) return;
 
-            // If user not signed in, prompt to sign in
-            if (!userId) {
-                const go = confirm('You must be signed in to view or buy items. Sign in now?');
-                if (go) {
-                    window.location.href = 'login.html';
-                }
-                return;
-            }
-
+            // Open listing modal (no chat functionality)
             openListingModal(listing);
         });
 
@@ -669,48 +663,17 @@
             }
         });
 
-        // Primary modal action (Contact / Buy)
-        document.getElementById('modal-action').addEventListener('click', async (e) => {
+        // Primary modal action: show seller contact info in a popup
+        document.getElementById('modal-action').addEventListener('click', (e) => {
             const id = e.target.dataset.id;
             const listing = (window.currentListings || []).find(l => String(l.id) === String(id));
             if (!listing) return;
-            if (!userId) {
-                const go = confirm('You must be signed in to contact the seller. Sign in now?');
-                if (go) window.location.href = 'login.html';
-                return;
-            }
 
-            const sellerUid = listing.userId;
-            if (!sellerUid) {
-                alert('Seller information is not available for this listing.');
-                return;
-            }
+            const email = e.target.dataset.contactEmail || listing.contactEmail || 'Not provided';
+            const phone = e.target.dataset.contactPhone || listing.contactPhone || 'Not provided';
 
-            if (sellerUid === userId) {
-                alert('This is your listing. You cannot start a chat with yourself.');
-                return;
-            }
-
-            try {
-                const chatId = getChatId(userId, sellerUid);
-                // create/upsert a chat metadata document so other devices/users can discover it
-                const chatDocRef = doc(db, `artifacts/${appId}/public/data/chats`, chatId);
-                await setDoc(chatDocRef, {
-                    chatId: chatId,
-                    participants: [userId, sellerUid],
-                    listingId: listing.id || null,
-                    listingTitle: listing.title || null,
-                    lastUpdated: serverTimestamp()
-                }, { merge: true });
-
-                // Close modal and redirect to chats list with a prefilled auto-message so the chat opens and user can send quickly
-                closeListingModal();
-                const autoMsg = `Hi, I'm interested in your listing: "${listing.title}". Is it still available?`;
-                window.location.href = `chats_list.html?recipientUid=${encodeURIComponent(sellerUid)}&chatId=${encodeURIComponent(chatId)}&autoMessage=${encodeURIComponent(autoMsg)}`;
-            } catch (err) {
-                console.error('Error creating chat:', err);
-                alert('Could not create chat. Check console for details.');
-            }
+            // Simple popup with contact info
+            alert(`Contact Information:\n\nEmail: ${email}\nPhone: ${phone}`);
         });
 
         // --- Initialization ---
@@ -719,4 +682,3 @@
     </script>
 </body>
 </html>
-

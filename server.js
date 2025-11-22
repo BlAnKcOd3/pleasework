@@ -3,8 +3,7 @@ const admin = require('firebase-admin');
 const cors = require('cors');
 
 const app = express();
-const http = require('http');
-const WebSocket = require('ws');
+// WebSocket/local chat relay removed — server now only provides HTTP endpoints
 
 // --- IMPORTANT ---
 // 1. Download your Service Account Key JSON file from:
@@ -103,50 +102,9 @@ app.get('/protected-route', checkAuth, (req, res) => {
 
 // --- Start Server ---
 const PORT = 3000;
-// Create HTTP server so we can attach WebSocket server to the same port
-const server = http.createServer(app);
-
-// In-memory message store for local testing (not persistent)
-const messagesByChat = {}; // { chatId: [ { text, senderId, senderEmail, timestamp } ] }
-
-// WebSocket server for local real-time messaging between devices
-const wss = new WebSocket.Server({ server });
-
-wss.on('connection', (ws, req) => {
-  ws.subscribedChats = new Set();
-
-  ws.on('message', (msg) => {
-    try {
-      const data = JSON.parse(msg.toString());
-      if (data.type === 'join' && data.chatId) {
-        ws.subscribedChats.add(data.chatId);
-        // Send recent messages for that chat
-        const recent = messagesByChat[data.chatId] || [];
-        ws.send(JSON.stringify({ type: 'history', chatId: data.chatId, messages: recent }));
-      }
-
-      if (data.type === 'message' && data.chatId && data.message) {
-        // Store in memory
-        messagesByChat[data.chatId] = messagesByChat[data.chatId] || [];
-        messagesByChat[data.chatId].push(data.message);
-
-        // Broadcast to all clients subscribed to this chat
-        wss.clients.forEach(client => {
-          if (client.readyState === WebSocket.OPEN && client.subscribedChats && client.subscribedChats.has(data.chatId)) {
-            client.send(JSON.stringify({ type: 'message', chatId: data.chatId, message: data.message }));
-          }
-        });
-      }
-    } catch (e) {
-      console.error('WS message parse error', e);
-    }
-  });
-});
-
-server.listen(PORT, () => {
-  console.log(`Server (HTTP + WS) is running on http://localhost:${PORT}`);
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
   console.log('Try accessing /public-route');
-  console.log('WebSocket server ready for local chat fallback');
 });
 
 // Public listing endpoint for demo (no auth required)

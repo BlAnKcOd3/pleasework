@@ -49,7 +49,7 @@
             <h3 class="text-xl font-semibold text-gray-800">Features</h3>
             <button id="chatBtn"
                     class="w-full px-4 py-2 font-semibold text-white bg-blue-500 hover:bg-blue-600 rounded-lg transition duration-150 shadow-md">
-                Go to Private Chat
+                View Listings
             </button>
         </div>
 
@@ -175,10 +175,9 @@
         // --- Event Listeners ---
         logoutBtn.addEventListener('click', handleLogout);
         protectedBtn.addEventListener('click', accessProtected);
-        // Event listener for the chat button
+        // Event listener for the listings button
         chatBtn.addEventListener('click', () => {
-            console.log('Redirecting to chats list...');
-            window.location.href = 'chats_list.html';
+            window.location.href = 'listings.html';
         });
 
     </script>

@@ -1,4 +1,4 @@
 .github/instructions/kluster-code-verify.instructions.md
 .kluster
-.serviceAccountKey.json
 .vscode
+serviceAccountKey.json

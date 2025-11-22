@@ -10,13 +10,17 @@
 <body data-page="marketplace">
   <header class="header">
     <h1>De Anza Marketplace</h1>
+<<<<<<< HEAD
     <a class="icon" title="Your account" href="dashboard.html"><i class="fas fa-user-circle"></i></a>
+=======
+    <div id="userIcon" class="icon" title="Your account"><i class="fas fa-user-circle"></i></div>
+>>>>>>> 53dac26318dc5226e1bc3559532d4896c16c2b68
   </header>
 
   <div class="container">
     <div class="action-bar">
-      <div class="pill" onclick="location.href='sell.html'">Sell</div>
-      <div class="pill" onclick="location.href='listings.html'">Show All Listings</div>
+      <div id="sellButton" class="pill" onclick="location.href='sell.html'">Sell</div>
+      <div id="buyButton" class="pill" onclick="location.href='listings.html'">Buy</div>
 
       <div class="search-container" style="margin-left:10px;">
         <input id="search-input" placeholder="Search items..." />
@@ -26,12 +30,12 @@
 
     <div class="category-grid">
       <div class="category-item" data-cat="textbooks">
-        <div class="icon-box" data-cat="textbooks"><i class="fas fa-book color-red"></i></div>
+        <div class="icon-box" data-cat="textbooks"><i class="fas fa-book color-gold"></i></div>
         <div class="cat-label">Textbooks</div>
       </div>
 
       <div class="category-item" data-cat="study-supplies">
-        <div class="icon-box" data-cat="study-supplies"><i class="fas fa-pencil-ruler color-gold"></i></div>
+        <div class="icon-box" data-cat="study-supplies"><i class="fas fa-pencil-ruler color-red"></i></div>
         <div class="cat-label">Study Supplies</div>
       </div>
 
@@ -64,13 +68,83 @@
         <div class="icon-box" data-cat="events"><i class="fas fa-bell color-gold"></i></div>
         <div class="cat-label">Events & Campus Activities</div>
       </div>
+      
+      <div class="category-item" data-cat="misc">
+        <div class="icon-box" data-cat="misc"><i class="fas fa-ellipsis-h color-brown"></i></div>
+        <div class="cat-label">Miscellaneous</div>
+      </div>
     </div>
   </div>
 
   <footer class="site-footer">
-    <a href="index.html"><img src="https://i.ibb.co/wNYjZG9k/Image-11-21-25-at-2-05-PM.png" alt="logo"></a>
+    <p>&copy; 2025 De Anza Marketplace</p>
   </footer>
 
-  <script src="script.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    
+    // Global variables (provided by Canvas environment)
+    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+    
+    let auth;
+
+    // --- Firebase Setup ---
+    function setupFirebase() {
+        if (!firebaseConfig) {
+            console.error("Firebase configuration is missing. Cannot initialize app.");
+            return;
+        }
+        const app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+
+        // Initial sign-in for Canvas environment
+        if (initialAuthToken) {
+            signInWithCustomToken(auth, initialAuthToken).catch(e => {
+                console.error("Custom Auth Token Sign-In failed:", e);
+                signInAnonymously(auth).catch(e => {
+                    console.error("Anonymous Sign-In failed:", e);
+                });
+            });
+        } else {
+            signInAnonymously(auth).catch(e => {
+                console.error("Anonymous Sign-In failed:", e);
+            });
+        }
+    }
+
+    // --- Event Handlers ---
+    window.toggleSearch = function() {
+        var searchInput = document.getElementById("search-input");
+        searchInput.classList.toggle('visible');
+        if (searchInput.classList.contains('visible')) {
+            searchInput.focus();
+        }
+    }
+    
+    // Event listener for user icon click
+    document.getElementById('userIcon').addEventListener('click', () => {
+         onAuthStateChanged(auth, (user) => {
+            window.location.href = user ? 'dashboard.html' : 'login.html';
+        }, { once: true });
+    });
+
+    // --- NEW: Category Click Handler ---
+    document.querySelectorAll('.category-item').forEach(item => {
+        item.addEventListener('click', (event) => {
+            // Find the data-cat attribute on the item itself or its icon-box child
+            const category = item.getAttribute('data-cat');
+            if (category) {
+                // Redirect to listings.html and pass the category as a query parameter
+                window.location.href = `listings.html?category=${category}`;
+            }
+        });
+    });
+
+    // --- Initialization ---
+    window.onload = setupFirebase;
+
+  </script>
 </body>
 </html>

@@ -34,419 +34,396 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
         }
 
-        h1 {
+        header h1 {
             color: white;
-            font-size: 3rem;
+            font-size: 2rem;
             margin: 0;
             font-weight: bold;
-            text-align: center;
         }
-
-        /* Profile Icon Style */
-        #userIcon {
+        
+        .icon {
             position: absolute;
             right: 20px;
-            color: #3b82f6; /* Light blue color */
-            font-size: 3rem;
+            color: white;
+            font-size: 2rem;
             cursor: pointer;
-            background-color: white;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.2s;
-        }
-        
-        #userIcon:hover {
-            transform: scale(1.05);
         }
 
-        /* Main Content Container */
+        /* Main Container */
         .container {
-            width: 100%;
-            max-width: 1000px;
-            margin: 0 auto;
+            flex-grow: 1;
             padding: 20px;
-            flex: 1;
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            box-sizing: border-box;
         }
 
-        /* Action Bar (Sell/Buy Buttons + Search) */
+        /* Action Bar (Search/Filters) */
         .action-bar {
             display: flex;
-            justify-content: center;
             align-items: center;
-            position: relative;
-            margin-bottom: 30px;
-            margin-top: 10px;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-
-        .btn-pill {
-            background-color: white;
-            border: 3px solid black;
-            border-radius: 20px; /* Pill shape */
-            padding: 5px 0;
-            width: 200px;
-            text-align: center;
-            font-size: 2rem;
-            font-weight: bold;
-            color: black;
-            cursor: pointer;
-            box-shadow: 4px 4px 8px rgba(0,0,0,0.2);
-            transition: transform 0.1s, background-color 0.1s;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap; /* for responsiveness */
         }
         
-        .btn-pill:active {
-            transform: translateY(2px);
-            box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        .pill {
+            background-color: #4f090c;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s, transform 0.1s;
+            border: none;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
         }
 
-        /* Search Container */
+        .pill:hover {
+            background-color: #6e0b0f;
+            transform: translateY(-1px);
+        }
+
         .search-container {
             display: flex;
             align-items: center;
-        }
-
-        /* Hidden Search Input */
-        #search-input {
-            display: none;
-            font-size: 1.5rem;
-            padding: 5px 10px;
-            border: 3px solid black;
-            border-radius: 15px;
-            width: 250px; /* Wider input */
-            margin-right: 10px;
-            outline: none;
-            transition: width 0.3s ease-in-out;
-        }
-        
-        #search-input.visible {
-            display: block;
-        }
-
-        /* Search Icon Style */
-        .search-icon {
-            font-size: 3rem;
-            color: black;
-            cursor: pointer;
-        }
-
-        /* Listings Grid Layout */
-        .listings-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-            padding-top: 20px;
-            padding-bottom: 40px;
-        }
-        
-        /* Listing Card Style */
-        .listing-card {
-            background-color: white;
-            border: 3px solid black;
-            border-radius: 15px;
-            padding: 10px;
-            box-shadow: 4px 4px 8px rgba(0,0,0,0.2);
-            overflow: hidden;
-            cursor: pointer;
-            transition: transform 0.2s;
+            flex-grow: 1;
+            max-width: 400px;
             position: relative;
         }
         
-        .listing-card:hover {
-            transform: translateY(-5px);
-        }
-        
-        .listing-image {
+        #search-input {
             width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-        }
-        
-        .listing-title {
-            font-weight: bold;
-            font-size: 1.2rem;
-            margin-bottom: 5px;
-            color: #4f090c; /* Dark Red */
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        
-        .listing-price {
-            font-weight: bold;
-            font-size: 1.5rem;
-            color: #059669; /* Green for price */
-            margin-bottom: 5px;
-        }
-        
-        .listing-seller {
-            font-size: 0.9rem;
-            color: #666;
-            display: block;
-            margin-top: 4px;
-        }
-        
-        /* Category Header */
-        #category-header {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #4f090c;
-            text-align: center;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 3px solid #4f090c;
-        }
-        
-        #loading-indicator {
-            text-align: center;
-            padding: 50px;
-            font-size: 1.5rem;
-            color: #4f090c;
+            padding: 10px 40px 10px 15px;
+            border: 2px solid #ccc;
+            border-radius: 20px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
         }
 
-        /* Footer */
-        footer {
-            background-color: #4f090c;
-            height: 40px;
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            color: #777;
+            pointer-events: none; /* icon should not interfere with input */
+        }
+
+        /* Listing Grid */
+        .listings-grid {
+            display: grid;
+            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        }
+
+        .listing-card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+            border: 1px solid #ddd;
+        }
+
+        .listing-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .listing-image {
             width: 100%;
+            height: 180px;
+            object-fit: cover;
+            background-color: #f5f5f5; /* Placeholder color */
+            border-bottom: 1px solid #eee;
+        }
+
+        .listing-content {
+            padding: 15px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .listing-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #4f090c;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .listing-price {
+            font-size: 1.4em;
+            font-weight: 900;
+            color: #0d9488; /* Teal color for price */
             margin-top: auto;
         }
         
-        /* Mobile adjustments */
-        @media (max-width: 768px) {
-            h1 { font-size: 2.5rem; }
-            .listings-grid { grid-template-columns: 1fr; }
-            .action-bar { flex-direction: column; gap: 15px; }
-            .btn-pill { width: 80%; }
-            .search-container { width: 80%; justify-content: space-between; }
-            #search-input { width: 100%; }
-            .search-icon { font-size: 2.5rem; }
-            #userIcon { width: 40px; height: 40px; font-size: 2.5rem; }
-            #category-header { font-size: 2rem; }
+        .listing-category {
+            font-size: 0.85em;
+            color: #777;
+            text-transform: capitalize;
+            margin-bottom: 10px;
+        }
+
+        /* Footer */
+        .site-footer {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #4f090c;
+            color: white;
+            text-align: center;
+            font-size: 0.9em;
         }
         
-        /* --- CSS END --- */
-    </style>
-    
-</head>
-<body>
+        /* Loading/Empty Message */
+        #loading-indicator {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2em;
+            color: #4f090c;
+            font-weight: bold;
+        }
 
-    <!-- HEADER -->
-    <header>
-        <h1 onclick="window.location.href='marketplace.html'" style="cursor:pointer">De Anza Exchange</h1>
-        <!-- Account Icon -->
-        <div id="userIcon" class="header-icon">
-            <i class="fas fa-user-circle"></i>
-        </div>
+        /* Media Queries for Responsiveness */
+        @media (max-width: 600px) {
+            .listings-grid {
+                grid-template-columns: 1fr;
+            }
+            .action-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .pill {
+                width: 100%;
+                box-sizing: border-box;
+            }
+            .search-container {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body data-page="listings">
+    <header class="header">
+        <h1 id="headerTitle">Listings</h1>
+        <div id="userIcon" class="icon" title="Your account"><i class="fas fa-user-circle"></i></div>
     </header>
 
     <div class="container">
-        
-        <!-- ACTION BAR -->
+        <!-- Action Bar -->
         <div class="action-bar">
-            <div class="btn-pill" id="sellButton">Sell</div>
-            <div class="btn-pill" id="buyButton">Show All Listings</div>
-            
-            <!-- Search Section -->
-            <div class="search-container">
-                <input type="text" id="search-input" placeholder="Search items...">
-                <!-- Search Loop Icon, triggers toggleSearch function -->
-                <i class="fas fa-search search-icon" onclick="toggleSearch()"></i>
+            <div id="sellButton" class="pill">Sell</div>
+            <div id="buyButton" class="pill">All Categories</div>
+
+            <div class="search-container" style="margin-left:10px;">
+                <input id="search-input" placeholder="Search items..." />
+                <i id="search-toggle" class="fas fa-search search-icon" onclick="toggleSearch()"></i>
             </div>
         </div>
-        
-        <h2 id="category-header"></h2>
-        
-        <div id="loading-indicator">Loading listings...</div>
 
-        <!-- LISTINGS GRID (Dynamic Content Here) -->
-        <div class="listings-grid" id="listings-container">
-            <!-- Listing cards will be injected here by JavaScript -->
+        <div id="loading-indicator">Loading listings...</div>
+        <div id="product-grid" class="listings-grid">
+            <!-- Listing cards will be injected here -->
         </div>
     </div>
 
-    <!-- FOOTER -->
-    <footer></footer>
-    
+    <footer class="site-footer">
+        <p>&copy; 2025 De Anza Marketplace</p>
+    </footer>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, query, where, onSnapshot, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Global variables for Firebase
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        //const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        // Global variables (provided by Canvas environment)
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-        
-        let auth, db, userId;
-        const listingsContainer = document.getElementById('listings-container');
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        let auth, db;
+        let unsubscribe = null; // Variable to hold the listener function
+
+        const productGrid = document.getElementById('product-grid');
         const loadingIndicator = document.getElementById('loading-indicator');
-        const categoryHeader = document.getElementById('category-header');
+        const headerTitle = document.getElementById('headerTitle');
+        const pageTitle = document.getElementById('pageTitle');
         
-        // Category map to convert short keys to display names
-        const categoryDisplayMap = {
+        // Map category keys to display names
+        const categoryMap = {
             'textbooks': 'Textbooks',
             'study-supplies': 'Study Supplies',
             'electronics': 'Electronics',
-            'bikes': 'Bikes and Outdoors',
-            'housing': 'Housing',
-            'services': 'Services',
+            'bikes': 'Bikes & Outdoors',
+            'housing': 'Housing & Roommates',
+            'services': 'Services & Rentals',
             'jobs': 'Student Jobs',
-            'events': 'Events',
-            'misc': 'Other/Miscellaneous'
+            'events': 'Events & Campus Activities',
+            'misc': 'Miscellaneous'
         };
-
 
         // --- Utility Functions ---
 
+        /**
+         * Parses the URL for query parameters.
+         * @returns {string | null} The category filter, or null if not present.
+         */
         function getCategoryFromUrl() {
-            const params = new URLSearchParams(window.location.search);
-            // Default to 'All Listings' if no category is found
-            const key = params.get('category') || 'textbooks'; 
-            return {
-                key: key,
-                // Look up display name, or use the key if not found
-                display: categoryDisplayMap[key] || key.charAt(0).toUpperCase() + key.slice(1)
-            };
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('category');
         }
         
+        /**
+         * Renders the listings to the product grid.
+         * @param {Array<Object>} listings - The array of listing data.
+         */
         function renderListings(listings) {
+            productGrid.innerHTML = ''; // Clear previous listings
+            
             if (listings.length === 0) {
-                listingsContainer.innerHTML = `
-                    <p style="grid-column: 1 / -1; text-align: center; color: #4f090c; font-size: 1.2rem;">
-                        No listings found for this category yet. Be the first to post!
-                    </p>
-                `;
+                loadingIndicator.textContent = 'No listings found in this category.';
+                loadingIndicator.style.display = 'block';
                 return;
             }
-            
-            const listingsHtml = listings.map(item => {
-                const priceText = item.price > 0 ? item.priceDisplay : (item.category === 'jobs' ? 'Job Listing' : 'Free');
-                
-                return `
-                    <div class="listing-card" onclick="console.log('Viewing listing: ${item.id}')">
-                        <img src="${item.imageUrl}" alt="${item.title}" class="listing-image" 
-                             onerror="this.onerror=null; this.src='https://placehold.co/400x200/ccc/000?text=No+Image';">
-                        <div class="listing-title" title="${item.title}">${item.title}</div>
-                        <div class="listing-price">${priceText}</div>
-                        <div class="listing-seller">Seller ID: ${item.sellerId.substring(0, 8)}...</div>
+
+            loadingIndicator.style.display = 'none';
+
+            listings.forEach(listing => {
+                const card = document.createElement('div');
+                card.className = 'listing-card';
+                card.innerHTML = `
+                    <img class="listing-image" src="https://placehold.co/400x180/6e0b0f/ffffff?text=${listing.category.toUpperCase()}" alt="${listing.title}" onerror="this.src='https://placehold.co/400x180/6e0b0f/ffffff?text=No+Image'">
+                    <div class="listing-content">
+                        <div class="listing-category">${categoryMap[listing.category] || listing.category}</div>
+                        <div class="listing-title" title="${listing.title}">${listing.title}</div>
+                        <div class="listing-price">$${listing.price.toFixed(2)}</div>
                     </div>
                 `;
-            }).join('');
-
-            listingsContainer.innerHTML = listingsHtml;
+                // Add click listener for future detail page
+                card.addEventListener('click', () => {
+                    console.log('Clicked listing:', listing.id);
+                    // window.location.href = 'listing_detail.html?id=' + listing.id;
+                });
+                productGrid.appendChild(card);
+            });
         }
-        // --- Firebase Configuration ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyBJJYUOM8EBEuT39DX2F_HtxgEbHDRH-Zc",
-            authDomain: "deanzahacks11-21-2025.firebaseapp.com",
-            projectId: "deanzahacks11-21-2025",
-            storageBucket: "deanzahacks11-21-2025.firebasestorage.app",
-            messagingSenderId: "253702257130",
-            appId: "1:253702257130:web:9ea8e3ee1bd291f1801a93",
-            measurementId: "G-5B84R81S31"
-        };
-        // --- Firebase Setup and Real-time Fetching ---
-        
-        function setupFirebaseAndListeners() {
+
+
+        /**
+         * Sets up Firebase, signs in, and starts listening for listings.
+         */
+        async function setupFirebaseAndListeners() {
             if (!firebaseConfig) {
-                console.error("Firebase configuration is missing.");
-                loadingIndicator.textContent = "Error: Marketplace configuration missing.";
+                loadingIndicator.textContent = 'Configuration Error.';
+                console.error("Firebase configuration is missing. Cannot initialize app.");
                 return;
             }
 
             const app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
             auth = getAuth(app);
-            
-            const category = getCategoryFromUrl();
-            categoryHeader.textContent = `${category.display} Listings`;
-            document.getElementById('pageTitle').textContent = `${category.display} - De Anza Listings`;
-            
-            // --- Core Auth Logic ---
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    userId = user.uid;
-                } else {
-                     signInAnonymously(auth).then(anonUser => {
-                        userId = anonUser.user.uid;
-                     }).catch(e => {
-                        console.error("Anonymous Sign-In failed:", e);
-                        loadingIndicator.textContent = "Error: Cannot load data without authentication.";
-                     });
-                }
-                // Once authentication is resolved (signed in or anonymous), start fetching data
-                fetchRealtimeListings(category.key);
-            });
-            
-            // Initial custom token sign-in if available (Canvas environment)
+            db = getFirestore(app);
+
+            // 1. Initial sign-in for Canvas environment (handles the user ID needed for security rules)
             if (initialAuthToken) {
-                signInWithCustomToken(auth, initialAuthToken).catch(e => {
+                await signInWithCustomToken(auth, initialAuthToken).catch(e => {
                     console.error("Custom Auth Token Sign-In failed:", e);
+                    return signInAnonymously(auth);
+                });
+            } else {
+                await signInAnonymously(auth).catch(e => {
+                    console.error("Anonymous Sign-In failed:", e);
                 });
             }
+
+            // 2. Auth State Listener (The Gate)
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    // User is signed in. Start the Firestore listener.
+                    console.log(`User authenticated. UID: ${user.uid}. Starting data listener.`);
+                    startListingsListener();
+                } else {
+                    // User signed out. Clear listings and show message.
+                    productGrid.innerHTML = '';
+                    loadingIndicator.textContent = 'Please sign in to view listings.';
+                }
+            });
         }
         
-        function fetchRealtimeListings(categoryKey) {
-            loadingIndicator.style.display = 'block';
-            
-            const collectionPath = `artifacts/${appId}/public/data/listings`;
-            
-            // Construct the Firestore query: Filter by the category from the URL
-            const listingsQuery = query(
-                collection(db, collectionPath),
-                where('category', '==', categoryKey)
-                // Note: We avoid orderBy() to prevent needing an index, sorting is done client-side if needed
-            );
+        /**
+         * Starts the real-time Firestore listener based on the URL filter.
+         */
+        function startListingsListener() {
+            if (unsubscribe) {
+                unsubscribe(); // Stop any existing listener
+            }
 
-            // Set up the real-time listener (onSnapshot)
-            const unsubscribe = onSnapshot(listingsQuery, (snapshot) => {
-                loadingIndicator.style.display = 'none';
+            const currentCategory = getCategoryFromUrl();
+            const collectionPath = `artifacts/${appId}/public/data/listings`;
+            const listingsCollection = collection(db, collectionPath);
+            
+            // Start building the query
+            let listingsQuery = query(
+                listingsCollection,
+                orderBy('createdAt', 'desc')
+            );
+            
+            // --- NEW: Apply Category Filter ---
+            if (currentCategory) {
+                console.log(`Filtering by category: ${currentCategory}`);
+                // Add the WHERE clause for the category
+                listingsQuery = query(
+                    listingsQuery,
+                    where('category', '==', currentCategory)
+                );
+                
+                // Update titles to reflect the filtered category
+                const displayName = categoryMap[currentCategory] || currentCategory;
+                headerTitle.textContent = displayName;
+                pageTitle.textContent = `${displayName} Listings`;
+                
+                // Update the "All Categories" button text
+                document.getElementById('buyButton').textContent = `All Categories (${displayName} active)`;
+            } else {
+                 headerTitle.textContent = 'All Listings';
+                 pageTitle.textContent = 'All Listings - De Anza';
+                 document.getElementById('buyButton').textContent = 'All Categories';
+                 console.log('Showing all listings (no category filter).');
+            }
+
+
+            // Attach the real-time listener
+            unsubscribe = onSnapshot(listingsQuery, (snapshot) => {
                 const listings = [];
-                snapshot.forEach((doc) => {
+                snapshot.forEach(doc => {
                     const data = doc.data();
-                    listings.push({ 
-                        id: doc.id, 
-                        ...data,
-                        // Ensure price is formatted nicely for display
-                        priceDisplay: data.price ? `$${data.price.toFixed(2)}` : 'Free/TBD'
-                    });
+                    // Ensure price is a number for toFixed()
+                    data.price = typeof data.price === 'number' ? data.price : parseFloat(data.price) || 0;
+                    listings.push({ id: doc.id, ...data });
                 });
-                
-                // Sort client-side by creation time (newest first)
-                listings.sort((a, b) => {
-                    // Check if serverTimestamp is available (it might be null for pending writes)
-                    const aTime = a.createdAt?.toMillis() || 0;
-                    const bTime = b.createdAt?.toMillis() || 0;
-                    return bTime - aTime; 
-                });
-                
                 renderListings(listings);
-                
+
             }, (error) => {
                 console.error("Error listening to listings:", error);
                 loadingIndicator.textContent = `Error loading listings: ${error.message}`;
             });
             
-            // In a production app, you would return 'unsubscribe' to stop listening when the component unmounts.
+            // Clean up listener on window close (best practice)
             window.addEventListener('beforeunload', unsubscribe);
         }
         
         // --- Event Listeners for Navigation ---
         
         window.toggleSearch = function() {
-            var searchInput = document.getElementById("search-input");
-            searchInput.classList.toggle('visible');
-            if (searchInput.classList.contains('visible')) {
-                searchInput.focus();
-            }
+            // ... (Your existing toggleSearch logic) ...
         }
 
         document.getElementById('userIcon').addEventListener('click', () => {
@@ -460,7 +437,8 @@
         });
         
         document.getElementById('buyButton').addEventListener('click', () => {
-            window.location.href = 'marketplace.html'; // Go back to category selection
+            // Clicking "All Categories" button removes the filter
+            window.location.href = 'listings.html'; 
         });
         
         // --- Initialization ---

@@ -1,273 +1,338 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title>My Profile - De Anza</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - De Anza Marketplace</title>
+    <link rel="icon" href="https://i.ibb.co/wNYjZG9k/Image-11-21-25-at-2-05-PM.png" type="image/png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Base styles consistent with the rest of the application */
-        body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #fdfcf5; color: #333; display: flex; flex-direction: column; min-height: 100vh; }
-        a { text-decoration: none; color: inherit; }
+        /* Base styles from marketplace.html for consistency */
+        body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #fdfcf5; color: #333; min-height: 100vh; display: flex; flex-direction: column; }
         * { box-sizing: border-box; }
         
-        .header { background-color: #4f090c; color: white; padding: 15px 20px; text-align: center; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); }
-        .header h1 { margin: 0; font-size: 1.5rem; }
+        .header { background-color: #4f090c; color: white; padding: 15px 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 1000; }
+        .header-content { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; position: relative; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: #f0ce55; cursor: pointer; }
         
-        .container {
-            flex-grow: 1;
-            padding: 30px 20px;
-            display: flex;
-            justify-content: center;
-            background-color: #f0ce55; /* Gold background */
-        }
-
+        .container { max-width: 800px; margin: 25px auto; padding: 20px; flex-grow: 1; }
+        
+        /* Profile Card Styling */
         .profile-card {
-            background: #fff;
-            padding: 30px;
+            background-color: white;
             border-radius: 12px;
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
-            max-width: 500px;
-            width: 100%;
-            text-align: left;
-        }
-
-        .profile-header {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 20px;
-            margin-bottom: 20px;
-        }
-
-        .profile-icon {
-            font-size: 3rem;
-            color: #4f090c;
-        }
-
-        .profile-info h2 {
-            margin: 0;
-            color: #4f090c;
-        }
-
-        .profile-info p {
-            margin: 5px 0 0 0;
-            color: #777;
-        }
-
-        .detail-item {
-            margin-bottom: 15px;
-            padding: 10px 0;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .detail-item label {
-            display: block;
-            font-weight: bold;
-            color: #4f090c;
-            margin-bottom: 3px;
-        }
-
-        .detail-item span {
-            display: block;
-            font-size: 1.1rem;
-            color: #333;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            background-color: #4f090c;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            margin-top: 15px;
-            display: block;
-            width: 100%;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             text-align: center;
         }
 
-        .btn:hover { background-color: #6e0b0f; }
+        .profile-icon-large {
+            font-size: 4rem;
+            color: #4f090c;
+            margin-bottom: 15px;
+        }
 
-        .message-box {
+        h2 {
+            font-size: 1.8rem;
+            color: #4f090c;
+            margin-bottom: 5px;
+        }
+
+        .student-id {
+            color: #777;
+            font-size: 0.95rem;
+            margin-bottom: 25px;
+            padding: 8px 15px;
+            background-color: #eee;
+            border-radius: 6px;
+            display: inline-block;
+            font-family: monospace;
+        }
+
+        .btn-signout {
+            background-color: #f0ce55;
+            color: #4f090c;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .btn-signout:hover {
+            background-color: #ebc034;
+            transform: translateY(-1px);
+        }
+
+        /* Listings Section */
+        .my-listings {
+            margin-top: 40px;
+            border-top: 1px solid #ddd;
+            padding-top: 30px;
+        }
+        .my-listings h3 {
+            color: #4f090c;
+            border-bottom: 2px solid #f0ce55;
+            padding-bottom: 8px;
+            margin-bottom: 20px;
+        }
+        .listing-item {
+            background-color: white;
             padding: 15px;
             border-radius: 8px;
-            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .listing-item p { margin: 0; font-weight: 500; }
+        .listing-item span { color: #4f090c; font-weight: bold; }
+        
+        /* Message Box for Status */
+        .message-box {
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 8px;
             text-align: center;
-            font-weight: bold;
-            display: none;
+            font-weight: 600;
+            display: none; /* Hidden by default */
         }
-        .message-box.info { background-color: #ffe0b2; color: #e65100; } /* Light orange */
-        .message-box.success { background-color: #d4edda; color: #155724; } /* Light green */
-        .message-box.error { background-color: #f8d7da; color: #721c24; } /* Light red */
+        .message-box.error {
+            background-color: #fdd;
+            color: #a00;
+            border: 1px solid #f00;
+        }
+        .message-box.info {
+            background-color: #ddf;
+            color: #00a;
+            border: 1px solid #00f;
+        }
 
-        /* Responsive adjustments */
-        @media (max-width: 600px) {
-            .profile-header {
-                flex-direction: column;
-                text-align: center;
-            }
-            .profile-icon {
-                margin-bottom: 10px;
-            }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: auto;
+            border-top: 1px solid #eee;
+            color: #777;
         }
+        
     </style>
 </head>
 <body>
-    <header class="header"><h1>My Profile</h1></header>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo" onclick="window.location.href='marketplace.html'">DA Marketplace</div>
+            <a href="marketplace.html" style="color: #f0ce55; font-size: 1.5rem;" title="Marketplace Home">
+                <i class="fas fa-home"></i>
+            </a>
+        </div>
+    </header>
 
     <div class="container">
-        <div class="profile-card">
-            <div id="loading" class="message-box info" style="display: block;">
-                Loading profile information...
-            </div>
-            
-            <div id="not-logged-in" class="message-box error" style="display: none;">
-                You must be logged in to view your profile. 
-                <a href="login.html" style="color: #721c24; text-decoration: underline;">Go to Login</a>
+        <div id="loading-message" class="message-box info" style="display: block;">
+            Checking authentication...
+        </div>
+
+        <div id="profile-content" style="display: none;">
+            <div class="profile-card">
+                <i class="fas fa-user-circle profile-icon-large"></i>
+                <h2>Welcome Back!</h2>
+                <div class="student-id" id="display-student-id">Student ID: [Loading...]</div>
+                <button id="signout-button" class="btn-signout">Sign Out</button>
             </div>
 
-            <div id="profile-content" style="display: none;">
-                <div class="profile-header">
-                    <i class="fas fa-user-circle profile-icon"></i>
-                    <div class="profile-info">
-                        <h2 id="userName">Student User</h2>
-                        <p id="userEmail">Loading...</p>
+            <div class="my-listings">
+                <h3>My Current Listings</h3>
+                <div id="listings-container">
+                    <!-- Listings will be dynamically inserted here -->
+                    <div class="listing-item">
+                        <p>No active listings found.</p>
+                        <a href="sell.html" class="btn-signout" style="padding: 8px 15px; font-size: 0.9rem;">Post New Item</a>
                     </div>
                 </div>
-
-                <div class="detail-item">
-                    <label>De Anza Student ID</label>
-                    <span id="studentId">N/A</span>
-                </div>
-                
-                <div class="detail-item">
-                    <label>Account Creation Date</label>
-                    <span id="creationDate">N/A</span>
-                </div>
-
-                <button id="changePasswordButton" class="btn">Change Password</button>
-                <div id="passwordMessage" class="message-box success" style="margin-top: 20px;"></div>
-                
-                <button id="logoutButton" class="btn" style="background-color: #ccc; color: #333; margin-top: 20px;">Log Out</button>
             </div>
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { 
-            getAuth, 
-            onAuthStateChanged, 
-            sendPasswordResetEmail,
-            signOut
-        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    <footer class="footer">
+        <p>&copy; 2024 De Anza Marketplace. Security enforced by Firebase.</p>
+    </footer>
 
-        // Global variables (from Canvas environment)
+    <script type="module">
+        // Import necessary Firebase functions
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        // Firestore is needed for data, but we'll import getFirestore and related methods only if needed
+        import { getFirestore, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global Firebase variables will be defined in setupFirebase
+        let auth, db;
+
+        // Mandated Global Variables
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
 
-        // DOM elements
-        const loadingDiv = document.getElementById('loading');
-        const notLoggedInDiv = document.getElementById('not-logged-in');
-        const profileContentDiv = document.getElementById('profile-content');
-        const userNameEl = document.getElementById('userName');
-        const userEmailEl = document.getElementById('userEmail');
-        const studentIdEl = document.getElementById('studentId');
-        const creationDateEl = document.getElementById('creationDate');
-        const changePasswordButton = document.getElementById('changePasswordButton');
-        const logoutButton = document.getElementById('logoutButton');
-        const passwordMessageEl = document.getElementById('passwordMessage');
-        
-        let auth;
+        // DOM Elements
+        const loadingMessage = document.getElementById('loading-message');
+        const profileContent = document.getElementById('profile-content');
+        const displayStudentId = document.getElementById('display-student-id');
+        const signoutButton = document.getElementById('signout-button');
+        const listingsContainer = document.getElementById('listings-container');
 
-        function displayMessage(type, message) {
-            passwordMessageEl.textContent = message;
-            passwordMessageEl.className = 'message-box ' + type;
-            passwordMessageEl.style.display = 'block';
-            setTimeout(() => { passwordMessageEl.style.display = 'none'; }, 5000);
-        }
-
-        function setupFirebase() {
-            if (!firebaseConfig || Object.keys(firebaseConfig).length === 0) {
-                console.error("Firebase configuration is missing.");
-                loadingDiv.textContent = 'Configuration error.';
-                return;
+        /**
+         * Hides or shows a message box element.
+         * @param {string} type - 'info' or 'error'.
+         * @param {string} message - The message to display.
+         * @param {boolean} show - Whether to show (true) or hide (false).
+         */
+        function displayMessage(type, message, show = true) {
+            loadingMessage.classList.remove('info', 'error');
+            loadingMessage.textContent = message;
+            if (show) {
+                loadingMessage.classList.add(type);
+                loadingMessage.style.display = 'block';
+            } else {
+                loadingMessage.style.display = 'none';
             }
-
-            const app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
+        }
+        
+        /**
+         * Loads and displays the user's current listings from Firestore.
+         * @param {string} studentId - The authenticated student ID (used as part of the document path).
+         * @param {string} userId - The Firebase UID.
+         */
+        function loadMyListings(studentId, userId) {
+            // Firestore data path for private user listings:
+            // /artifacts/{appId}/users/{userId}/listings
+            const listingsRef = collection(db, `artifacts/${appId}/users/${userId}/listings`);
             
-            onAuthStateChanged(auth, (user) => {
-                loadingDiv.style.display = 'none';
+            // Query for listings posted by this student ID (optional filtering, but good practice)
+            // Note: Since the listings are stored under the user's private collection,
+            // no additional 'where' clause is strictly necessary here, but we can filter by the stored student ID if needed.
+            // const q = query(listingsRef, where("studentId", "==", studentId));
+
+            // Use onSnapshot to get real-time updates
+            const unsubscribe = onSnapshot(listingsRef, (snapshot) => {
+                listingsContainer.innerHTML = ''; // Clear previous listings
                 
-                if (user) {
-                    // Logged In
-                    notLoggedInDiv.style.display = 'none';
-                    profileContentDiv.style.display = 'block';
-
-                    // Email is the student ID + @deanza.edu format
-                    const fullEmail = user.email || 'N/A';
-                    const studentId = fullEmail.includes('@') ? fullEmail.split('@')[0] : 'N/A';
-                    
-                    userEmailEl.textContent = fullEmail;
-                    studentIdEl.textContent = studentId;
-                    userNameEl.textContent = user.displayName || 'De Anza Student';
-                    
-                    if (user.metadata.creationTime) {
-                        const date = new Date(user.metadata.creationTime);
-                        creationDateEl.textContent = date.toLocaleDateString();
-                    } else {
-                        creationDateEl.textContent = 'Unknown';
-                    }
-
-                    changePasswordButton.addEventListener('click', () => handleChangePassword(user.email));
-                    logoutButton.addEventListener('click', handleLogout);
-
-                } else {
-                    // Not Logged In
-                    profileContentDiv.style.display = 'none';
-                    notLoggedInDiv.style.display = 'block';
+                if (snapshot.empty) {
+                    listingsContainer.innerHTML = `
+                        <div class="listing-item">
+                            <p>You currently have no active listings.</p>
+                            <a href="sell.html" class="btn-signout" style="padding: 8px 15px; font-size: 0.9rem;">Post New Item</a>
+                        </div>
+                    `;
+                    return;
                 }
+
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const listingElement = document.createElement('div');
+                    listingElement.className = 'listing-item';
+                    
+                    const priceDisplay = data.price > 0 ? `$${data.price.toFixed(2)}` : 'FREE';
+
+                    listingElement.innerHTML = `
+                        <div>
+                            <p>${data.title}</p>
+                            <small>${data.category} | <span>${priceDisplay}</span></small>
+                        </div>
+                        <a href="sell.html?edit=${doc.id}" class="btn-signout" style="padding: 6px 12px; font-size: 0.8rem;">Edit</a>
+                    `;
+                    listingsContainer.appendChild(listingElement);
+                });
+
+            }, (error) => {
+                console.error("Error loading user listings:", error);
+                listingsContainer.innerHTML = `<div class="message-box error" style="display: block;">Error loading listings.</div>`;
             });
-        }
-
-        async function handleChangePassword(email) {
-            if (!email || email === 'N/A') {
-                displayMessage('error', 'Cannot send reset email. Your email is not available.');
-                return;
-            }
             
-            changePasswordButton.disabled = true;
-            displayMessage('info', 'Sending password reset link to ' + email + '...');
+            // Return the unsubscribe function in case we need to clean up later
+            return unsubscribe;
+        }
 
+        /**
+         * Initializes Firebase and checks authentication status.
+         */
+        async function setupProfile() {
             try {
-                // Firebase function to send the reset email
-                await sendPasswordResetEmail(auth, email);
-                displayMessage('success', 'A password reset link has been sent to your student email. Check your inbox!');
+                // Check local storage for the application-level student ID
+                const authenticatedStudentId = localStorage.getItem('authenticatedStudentId');
+
+                if (!authenticatedStudentId) {
+                    // Critical: Redirect if the application session is missing
+                    window.location.href = 'login.html';
+                    return; 
+                }
+
+                // 1. Initialize Firebase Services
+                if (Object.keys(firebaseConfig).length === 0) {
+                    console.error("Firebase configuration is missing.");
+                    displayMessage('error', 'Configuration error: Firebase not configured.', true);
+                    return;
+                }
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                
+                // 2. We expect to be logged into Firebase from the login/registration process.
+                // We will rely on the Firebase Admin SDK to handle the custom token in a real environment.
+                // For this front-end implementation, we use the local storage student ID for profile data.
+
+                // Show authenticated content
+                displayMessage('info', 'Authenticated successfully.', false); // Hide loading message
+                profileContent.style.display = 'block';
+                displayStudentId.textContent = `Student ID: ${authenticatedStudentId}`;
+                
+                // Get the current Firebase user UID for database pathing
+                const currentUser = auth.currentUser;
+                if (currentUser && currentUser.uid) {
+                    // 3. Load user-specific data (Listings)
+                    loadMyListings(authenticatedStudentId, currentUser.uid);
+                } else {
+                    // Fallback if Firebase auth state is lost, but local storage is present
+                    console.warn("Firebase user state missing. Re-authenticating needed.");
+                    window.location.href = 'login.html';
+                }
+
             } catch (error) {
-                console.error("Password reset error:", error);
-                displayMessage('error', 'Failed to send reset email. Please try again.');
-            } finally {
-                changePasswordButton.disabled = false;
+                console.error("Profile setup failed:", error);
+                displayMessage('error', `An error occurred: ${error.message}. Redirecting to login.`, true);
+                
+                // Fail-safe redirect on any major setup error
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 3000);
             }
         }
-        
-        async function handleLogout() {
+
+        /**
+         * Handles the sign-out process.
+         */
+        async function handleSignOut() {
             try {
+                // 1. Clear the custom application session
+                localStorage.removeItem('authenticatedStudentId');
+                
+                // 2. Sign out the Firebase session
                 await signOut(auth);
-                // Redirect to the main page after successful logout
-                window.location.href = 'index.html'; 
+
+                // 3. Redirect to the login page
+                window.location.href = 'login.html';
+
             } catch (error) {
-                console.error("Logout error:", error);
-                displayMessage('error', 'Logout failed. Please try again.');
+                console.error("Sign out failed:", error);
+                displayMessage('error', 'Sign out failed. Please try clearing your browser storage.', true);
             }
         }
 
-        window.onload = setupFirebase;
+        // --- Event Listeners ---
+        signoutButton.addEventListener('click', handleSignOut);
 
+        // --- Initialization ---
+        window.onload = setupProfile;
     </script>
 </body>
 </html>

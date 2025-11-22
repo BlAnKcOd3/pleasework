@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Private Chat Dashboard</title>
+    <!-- We'll use Tailwind CSS for quick, modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f7f7;
+        }
+        /* Custom scrollbar style for the chat window */
+        #chatMessages::-webkit-scrollbar {
+            width: 8px;
+        }
+        #chatMessages::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 4px;
+        }
+        /* Style for the current user's messages */
+        .my-message {
+            @apply bg-blue-500 text-white rounded-br-none;
+        }
+        /* Style for other users' messages */
+        .other-message {
+            @apply bg-gray-200 text-gray-800 rounded-tl-none;
+        }
+        /* Style for selected user in sidebar */
+        .user-active {
+            @apply bg-blue-100 font-semibold border-blue-500;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+
+    <div class="w-full max-w-4xl h-[90vh] flex bg-white rounded-2xl shadow-2xl overflow-hidden">
+        
+        <!-- Sidebar: User List -->
+        <div class="w-1/3 border-r border-gray-200 flex flex-col">
+            <div class="p-4 bg-gray-50 border-b border-gray-200">
+                <h3 class="text-xl font-bold text-gray-800">Users</h3>
+                <p class="text-sm text-gray-500 mt-1">Click a user to start a private chat.</p>
+            </div>
+            <div id="userList" class="flex-1 overflow-y-auto">
+                <div class="p-4 text-center text-gray-400">Loading users...</div>
+            </div>
+            <!-- Logout and User Info at bottom of sidebar -->
+            <div class="p-4 border-t border-gray-200 space-y-2">
+                <p class="text-xs text-gray-600 truncate">
+                    Logged in as: <span id="userEmail" class="font-medium text-blue-600">...</span>
+                </p>
+                <button id="logoutBtn" class="w-full px-4 py-2 text-sm font-semibold text-white bg-red-500 hover:bg-red-600 rounded-lg transition duration-150 shadow-md">
+                    Logout
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Chat Area -->
+        <div class="w-2/3 flex flex-col">
+            
+            <!-- Chat Header -->
+            <div class="flex justify-between items-center p-4 border-b border-gray-200 bg-blue-50">
+                <h2 class="text-xl font-bold text-gray-800">
+                    <span id="chatHeader">Select a user to chat</span>
+                </h2>
+                <span id="userIdDisplay" class="font-mono text-xs bg-gray-200 p-1 rounded">ID: ...</span>
+            </div>
+
+            <!-- Chat Messages Window -->
+            <div id="chatMessages" class="flex-1 overflow-y-auto space-y-4 p-4 bg-gray-50 shadow-inner">
+                <!-- Messages will be injected here by JavaScript -->
+                <div id="initialMessage" class="text-center text-gray-400 mt-10">
+                    Your messages will appear here. Select a user from the list to begin!
+                </div>
+            </div>
+
+            <!-- Message Input Area -->
+            <div class="flex space-x-3 p-4 border-t border-gray-200">
+                <input type="text" id="messageInput" placeholder="Select a user to enable messaging..."
+                       class="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 shadow-sm"
+                       required disabled>
+                <button id="sendBtn" disabled
+                        class="px-6 py-3 font-semibold text-white bg-blue-500 hover:bg-blue-600 rounded-xl transition duration-150 shadow-md disabled:bg-blue-300">
+                    Send
+                </button>
+            </div>
+
+            <!-- Message/Error Display Area -->
+            <div id="messageDiv" class="text-sm text-center p-2 rounded-lg hidden"></div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        // --- Firebase Imports ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { 
+            getAuth, 
+            signInAnonymously, 
+            signInWithCustomToken, 
+            onAuthStateChanged, 
+            signOut 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getFirestore, 
+            collection, 
+            addDoc, 
+            onSnapshot, 
+            query, 
+            orderBy, 
+            serverTimestamp,
+            setDoc,
+            doc
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // --- Environment Variables & Initialization ---
+        // MANDATORY: Global variables provided by the environment
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        if (Object.keys(firebaseConfig).length === 0) {
+             console.error("Firebase configuration is missing. Cannot initialize app.");
+        }
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // --- DOM Elements ---
+        const userListDiv = document.getElementById('userList');
+        const chatMessages = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const userEmailSpan = document.getElementById('userEmail');
+        const userIdDisplay = document.getElementById('userIdDisplay');
+        const chatHeader = document.getElementById('chatHeader');
+        const messageDiv = document.getElementById('messageDiv');
+        const initialMessage = document.getElementById('initialMessage');
+
+        // --- State Variables ---
+        let currentUserId = null;
+        let currentUserEmail = null;
+        let authReady = false;
+        let selectedRecipient = null; // Stores { uid, email } of the user currently chatting with
+        let unsubscribeMessages = null; // Function to stop the current message listener
+
+        // --- Path Definitions ---
+        const getUserStatusCollectionPath = () => 
+            `artifacts/${appId}/public/data/users`;
+
+        const getChatCollectionPath = (chatId) => 
+            `artifacts/${appId}/public/data/chats/${chatId}/messages`;
+
+
+        // --- Utility Functions ---
+        function showMessage(text, type) {
+            messageDiv.textContent = text;
+            messageDiv.className = 'text-sm text-center p-2 rounded-lg';
+            if (type === 'success') {
+                messageDiv.classList.add('bg-green-100', 'text-green-800');
+            } else if (type === 'error') {
+                messageDiv.classList.add('bg-red-100', 'text-red-800');
+            } else {
+                messageDiv.classList.add('bg-blue-100', 'text-blue-800');
+            }
+            messageDiv.classList.remove('hidden');
+        }
+
+        /**
+         * Creates a unique, sorted ID for a chat between two users.
+         * This ensures UserA and UserB always get the same chat room ID.
+         */
+        function getChatId(uid1, uid2) {
+            const sortedUids = [uid1, uid2].sort();
+            return sortedUids.join('_');
+        }
+
+        // --- User List Functions ---
+
+        /**
+         * Renders the list of users in the sidebar.
+         */
+        function renderUserList(users) {
+            userListDiv.innerHTML = ''; // Clear current list
+            
+            // Filter out the current user
+            const otherUsers = users.filter(u => u.uid !== currentUserId);
+
+            if (otherUsers.length === 0) {
+                userListDiv.innerHTML = '<div class="p-4 text-center text-gray-400">No other users online.</div>';
+                return;
+            }
+
+            otherUsers.forEach(user => {
+                const userElement = document.createElement('div');
+                userElement.className = 'p-3 border-b border-gray-100 cursor-pointer hover:bg-gray-100 transition duration-100';
+                userElement.textContent = user.email || 'Anonymous User';
+                userElement.dataset.uid = user.uid;
+                userElement.dataset.email = user.email || 'Anonymous User';
+                
+                // Highlight if this is the currently selected user
+                if (selectedRecipient && selectedRecipient.uid === user.uid) {
+                    userElement.classList.add('user-active');
+                }
+
+                userElement.addEventListener('click', () => {
+                    // Update the selected recipient state
+                    selectedRecipient = { uid: user.uid, email: user.email || 'Anonymous User' };
+                    
+                    // Update UI
+                    chatHeader.textContent = `Chatting with: ${selectedRecipient.email}`;
+                    messageInput.placeholder = `Message ${selectedRecipient.email}...`;
+                    messageInput.disabled = false;
+                    sendBtn.disabled = false;
+                    
+                    // Re-render the user list to show active state
+                    renderUserList(users);
+                    
+                    // Start listening to the new chat
+                    setupMessageListener();
+                });
+
+                userListDiv.appendChild(userElement);
+            });
+        }
+
+        /**
+         * Sets up the real-time listener for the list of all users.
+         * We need this to populate the sidebar.
+         */
+        function setupUserListener() {
+            if (!authReady) return;
+
+            const usersRef = collection(db, getUserStatusCollectionPath());
+            const q = query(usersRef, orderBy('email', 'asc')); // Order by email for stable list
+
+            onSnapshot(q, (snapshot) => {
+                const users = [];
+                snapshot.forEach(doc => {
+                    users.push(doc.data());
+                });
+                renderUserList(users);
+            }, (error) => {
+                console.error("Error listening to users:", error);
+                showMessage("Failed to load user list.", 'error');
+            });
+        }
+
+        // --- Chat Functions ---
+
+        /**
+         * Renders a single message element.
+         */
+        function renderMessage(message) {
+            const isMyMessage = message.senderId === currentUserId;
+            
+            const messageContainer = document.createElement('div');
+            messageContainer.className = 'flex';
+            messageContainer.classList.add(isMyMessage ? 'justify-end' : 'justify-start');
+
+            const messageBubble = document.createElement('div');
+            messageBubble.className = 'max-w-xs md:max-w-md lg:max-w-lg px-4 py-2 rounded-xl shadow';
+            messageBubble.classList.add(isMyMessage ? 'my-message' : 'other-message');
+
+            const sender = document.createElement('p');
+            sender.className = 'text-xs font-semibold mb-1';
+            sender.textContent = isMyMessage ? 'You' : message.senderEmail;
+            sender.style.color = isMyMessage ? 'white' : '#1f2937';
+
+            const content = document.createElement('p');
+            content.textContent = message.text;
+            content.className = 'text-base break-words';
+            
+            // Only add sender info for 'other' messages
+            if (!isMyMessage) {
+                messageBubble.appendChild(sender);
+            }
+            messageBubble.appendChild(content);
+            messageContainer.appendChild(messageBubble);
+
+            // Add timestamp/metadata for all messages
+            if (message.timestamp) {
+                const timestampSpan = document.createElement('span');
+                timestampSpan.className = 'text-xs text-gray-500 italic ml-2 self-end';
+                const date = message.timestamp.toDate ? message.timestamp.toDate() : new Date(message.timestamp);
+                timestampSpan.textContent = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                if (isMyMessage) {
+                    messageContainer.appendChild(timestampSpan);
+                } else {
+                    // Prepend to show before the bubble for others
+                    messageContainer.appendChild(messageBubble); 
+                    messageContainer.insertBefore(timestampSpan, messageBubble);
+                }
+            }
+
+
+            chatMessages.appendChild(messageContainer);
+        }
+
+        /**
+         * Sets up the real-time listener for the private chat messages.
+         */
+        function setupMessageListener() {
+            if (!authReady || !selectedRecipient) {
+                chatMessages.innerHTML = '';
+                initialMessage.textContent = 'Select a user from the list to begin chatting.';
+                chatMessages.appendChild(initialMessage);
+                return;
+            }
+
+            // 1. Stop the previous listener if it exists
+            if (unsubscribeMessages) {
+                unsubscribeMessages();
+                unsubscribeMessages = null;
+            }
+
+            // Clear the old messages and show the loading state
+            chatMessages.innerHTML = '';
+            chatMessages.appendChild(initialMessage);
+            initialMessage.textContent = `Loading chat history with ${selectedRecipient.email}...`;
+
+            const chatId = getChatId(currentUserId, selectedRecipient.uid);
+            const messagesRef = collection(db, getChatCollectionPath(chatId));
+            const q = query(messagesRef, orderBy('timestamp', 'asc'));
+
+            // 2. Start the new real-time listener
+            unsubscribeMessages = onSnapshot(q, (snapshot) => {
+                // Remove the loading/initial message
+                if (initialMessage) initialMessage.remove();
+                
+                // Process only changes since the last snapshot (new messages)
+                snapshot.docChanges().forEach((change) => {
+                    if (change.type === 'added') {
+                        const message = change.doc.data();
+                        renderMessage(message);
+                    }
+                });
+
+                // Scroll to the bottom of the chat window
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            }, (error) => {
+                console.error("Error listening to messages:", error);
+                showMessage("Failed to load messages in real-time.", 'error');
+            });
+        }
+
+        /**
+         * Sends a message to Firestore.
+         */
+        async function sendMessage() {
+            const text = messageInput.value.trim();
+            if (text === "" || !currentUserId || !selectedRecipient) {
+                return;
+            }
+
+            try {
+                const chatId = getChatId(currentUserId, selectedRecipient.uid);
+                const messagesRef = collection(db, getChatCollectionPath(chatId));
+
+                await addDoc(messagesRef, {
+                    text: text,
+                    timestamp: serverTimestamp(),
+                    senderId: currentUserId,
+                    senderEmail: currentUserEmail,
+                    recipientId: selectedRecipient.uid
+                });
+
+                // Clear input field on success
+                messageInput.value = '';
+                
+            } catch (error) {
+                console.error("Error sending message:", error);
+                showMessage("Failed to send message.", 'error');
+            }
+        }
+        
+        // --- Authentication & Setup ---
+
+        /**
+         * Registers the current user's email/UID in the public user list.
+         * This allows other users to see them in the sidebar.
+         */
+        async function registerUserStatus(user) {
+            const userDocRef = doc(db, getUserStatusCollectionPath(), user.uid);
+            await setDoc(userDocRef, {
+                uid: user.uid,
+                email: user.email || 'Anonymous User',
+                lastSeen: serverTimestamp()
+            }, { merge: true });
+        }
+
+
+        /**
+         * Handles user logout.
+         */
+        async function handleLogout() {
+            try {
+                // Stop any running listener
+                if (unsubscribeMessages) unsubscribeMessages();
+
+                await signOut(auth);
+                // The onAuthStateChanged listener will handle the redirect
+            } catch (error) {
+                console.error('Logout error:', error);
+                showMessage('Failed to log out.', 'error');
+            }
+        }
+
+        /**
+         * Main function to handle user state and initialization.
+         */
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // User is signed in
+                currentUserId = user.uid;
+                currentUserEmail = user.email || 'Anonymous User';
+                authReady = true;
+
+                // 1. Register user status so others can see them
+                try {
+                    await registerUserStatus(user);
+                } catch (e) {
+                    console.error("Could not register user status:", e);
+                }
+
+                // 2. Update UI
+                userEmailSpan.textContent = currentUserEmail;
+                userIdDisplay.textContent = currentUserId; 
+                
+                // 3. Start listening for the list of other users
+                setupUserListener();
+
+                // 4. Set up the message listener (will wait until a recipient is selected)
+                setupMessageListener(); 
+                
+            } else {
+                // User is signed out. Redirect to login.
+                console.log('User is not logged in. Redirecting to index.html');
+                window.location.href = 'index.html';
+            }
+        });
+
+        // --- Event Listeners ---
+        logoutBtn.addEventListener('click', handleLogout);
+        sendBtn.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !sendBtn.disabled) {
+                sendMessage();
+            }
+        });
+        
+        // Initial sign-in logic (same as your original flow)
+        if (initialAuthToken) {
+            signInWithCustomToken(auth, initialAuthToken).catch(e => {
+                console.error("Custom Auth Token Sign-In failed:", e);
+                signInAnonymously(auth).catch(e => {
+                    console.error("Anonymous Sign-In failed:", e);
+                });
+            });
+        } else {
+            signInAnonymously(auth).catch(e => {
+                console.error("Anonymous Sign-In failed:", e);
+            });
+        }
+
+    </script>
+</body>
+</html>

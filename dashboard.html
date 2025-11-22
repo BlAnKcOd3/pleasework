@@ -44,6 +44,15 @@
         <!-- Message Area -->
         <div id="message" class="p-3 text-center rounded-md text-sm"></div>
 
+        <!-- Navigation Section (NEW) -->
+        <div class="space-y-3 pt-6 border-t border-gray-200">
+            <h3 class="text-xl font-semibold text-gray-800">Features</h3>
+            <button id="chatBtn"
+                    class="w-full px-4 py-2 font-semibold text-white bg-blue-500 hover:bg-blue-600 rounded-lg transition duration-150 shadow-md">
+                Go to Private Chat
+            </button>
+        </div>
+
     </div>
 
     <!-- Firebase Client SDK -->
@@ -78,6 +87,8 @@
         const protectedBtn = document.getElementById('protectedBtn');
         const logoutBtn = document.getElementById('logoutBtn');
         const messageDiv = document.getElementById('message');
+        const chatBtn = document.getElementById('chatBtn'); // Get the chat button
+
 
         const expressServerUrl = 'http://localhost:3000'; // Your Express server URL
         let currentIdToken = null; // Store the user's ID token
@@ -164,6 +175,11 @@
         // --- Event Listeners ---
         logoutBtn.addEventListener('click', handleLogout);
         protectedBtn.addEventListener('click', accessProtected);
+        // Event listener for the chat button
+        chatBtn.addEventListener('click', () => {
+            console.log('Redirecting to chat dashboard...');
+            window.location.href = 'chat_dashboard.html';
+        });
 
     </script>
 </body>

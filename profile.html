@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>My Profile - De Anza</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Base styles consistent with the rest of the application */
+        body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #fdfcf5; color: #333; display: flex; flex-direction: column; min-height: 100vh; }
+        a { text-decoration: none; color: inherit; }
+        * { box-sizing: border-box; }
+        
+        .header { background-color: #4f090c; color: white; padding: 15px 20px; text-align: center; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); }
+        .header h1 { margin: 0; font-size: 1.5rem; }
+        
+        .container {
+            flex-grow: 1;
+            padding: 30px 20px;
+            display: flex;
+            justify-content: center;
+            background-color: #f0ce55; /* Gold background */
+        }
+
+        .profile-card {
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+            max-width: 500px;
+            width: 100%;
+            text-align: left;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+
+        .profile-icon {
+            font-size: 3rem;
+            color: #4f090c;
+        }
+
+        .profile-info h2 {
+            margin: 0;
+            color: #4f090c;
+        }
+
+        .profile-info p {
+            margin: 5px 0 0 0;
+            color: #777;
+        }
+
+        .detail-item {
+            margin-bottom: 15px;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .detail-item label {
+            display: block;
+            font-weight: bold;
+            color: #4f090c;
+            margin-bottom: 3px;
+        }
+
+        .detail-item span {
+            display: block;
+            font-size: 1.1rem;
+            color: #333;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            background-color: #4f090c;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 15px;
+            display: block;
+            width: 100%;
+            text-align: center;
+        }
+
+        .btn:hover { background-color: #6e0b0f; }
+
+        .message-box {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+        .message-box.info { background-color: #ffe0b2; color: #e65100; } /* Light orange */
+        .message-box.success { background-color: #d4edda; color: #155724; } /* Light green */
+        .message-box.error { background-color: #f8d7da; color: #721c24; } /* Light red */
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            .profile-icon {
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header"><h1>My Profile</h1></header>
+
+    <div class="container">
+        <div class="profile-card">
+            <div id="loading" class="message-box info" style="display: block;">
+                Loading profile information...
+            </div>
+            
+            <div id="not-logged-in" class="message-box error" style="display: none;">
+                You must be logged in to view your profile. 
+                <a href="login.html" style="color: #721c24; text-decoration: underline;">Go to Login</a>
+            </div>
+
+            <div id="profile-content" style="display: none;">
+                <div class="profile-header">
+                    <i class="fas fa-user-circle profile-icon"></i>
+                    <div class="profile-info">
+                        <h2 id="userName">Student User</h2>
+                        <p id="userEmail">Loading...</p>
+                    </div>
+                </div>
+
+                <div class="detail-item">
+                    <label>De Anza Student ID</label>
+                    <span id="studentId">N/A</span>
+                </div>
+                
+                <div class="detail-item">
+                    <label>Account Creation Date</label>
+                    <span id="creationDate">N/A</span>
+                </div>
+
+                <button id="changePasswordButton" class="btn">Change Password</button>
+                <div id="passwordMessage" class="message-box success" style="margin-top: 20px;"></div>
+                
+                <button id="logoutButton" class="btn" style="background-color: #ccc; color: #333; margin-top: 20px;">Log Out</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { 
+            getAuth, 
+            onAuthStateChanged, 
+            sendPasswordResetEmail,
+            signOut
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        // Global variables (from Canvas environment)
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+
+        // DOM elements
+        const loadingDiv = document.getElementById('loading');
+        const notLoggedInDiv = document.getElementById('not-logged-in');
+        const profileContentDiv = document.getElementById('profile-content');
+        const userNameEl = document.getElementById('userName');
+        const userEmailEl = document.getElementById('userEmail');
+        const studentIdEl = document.getElementById('studentId');
+        const creationDateEl = document.getElementById('creationDate');
+        const changePasswordButton = document.getElementById('changePasswordButton');
+        const logoutButton = document.getElementById('logoutButton');
+        const passwordMessageEl = document.getElementById('passwordMessage');
+        
+        let auth;
+
+        function displayMessage(type, message) {
+            passwordMessageEl.textContent = message;
+            passwordMessageEl.className = 'message-box ' + type;
+            passwordMessageEl.style.display = 'block';
+            setTimeout(() => { passwordMessageEl.style.display = 'none'; }, 5000);
+        }
+
+        function setupFirebase() {
+            if (!firebaseConfig || Object.keys(firebaseConfig).length === 0) {
+                console.error("Firebase configuration is missing.");
+                loadingDiv.textContent = 'Configuration error.';
+                return;
+            }
+
+            const app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            
+            onAuthStateChanged(auth, (user) => {
+                loadingDiv.style.display = 'none';
+                
+                if (user) {
+                    // Logged In
+                    notLoggedInDiv.style.display = 'none';
+                    profileContentDiv.style.display = 'block';
+
+                    // Email is the student ID + @deanza.edu format
+                    const fullEmail = user.email || 'N/A';
+                    const studentId = fullEmail.includes('@') ? fullEmail.split('@')[0] : 'N/A';
+                    
+                    userEmailEl.textContent = fullEmail;
+                    studentIdEl.textContent = studentId;
+                    userNameEl.textContent = user.displayName || 'De Anza Student';
+                    
+                    if (user.metadata.creationTime) {
+                        const date = new Date(user.metadata.creationTime);
+                        creationDateEl.textContent = date.toLocaleDateString();
+                    } else {
+                        creationDateEl.textContent = 'Unknown';
+                    }
+
+                    changePasswordButton.addEventListener('click', () => handleChangePassword(user.email));
+                    logoutButton.addEventListener('click', handleLogout);
+
+                } else {
+                    // Not Logged In
+                    profileContentDiv.style.display = 'none';
+                    notLoggedInDiv.style.display = 'block';
+                }
+            });
+        }
+
+        async function handleChangePassword(email) {
+            if (!email || email === 'N/A') {
+                displayMessage('error', 'Cannot send reset email. Your email is not available.');
+                return;
+            }
+            
+            changePasswordButton.disabled = true;
+            displayMessage('info', 'Sending password reset link to ' + email + '...');
+
+            try {
+                // Firebase function to send the reset email
+                await sendPasswordResetEmail(auth, email);
+                displayMessage('success', 'A password reset link has been sent to your student email. Check your inbox!');
+            } catch (error) {
+                console.error("Password reset error:", error);
+                displayMessage('error', 'Failed to send reset email. Please try again.');
+            } finally {
+                changePasswordButton.disabled = false;
+            }
+        }
+        
+        async function handleLogout() {
+            try {
+                await signOut(auth);
+                // Redirect to the main page after successful logout
+                window.location.href = 'index.html'; 
+            } catch (error) {
+                console.error("Logout error:", error);
+                displayMessage('error', 'Logout failed. Please try again.');
+            }
+        }
+
+        window.onload = setupFirebase;
+
+    </script>
+</body>
+</html>

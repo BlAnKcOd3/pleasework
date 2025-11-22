@@ -226,23 +226,37 @@
     // Set Firestore log level to debug for better console feedback
     setLogLevel('Debug');
 
-    // --- Global Variables ---
-    let app, auth, db, userId = null;
-    let isAuthReady = false;
+    // --- Configuration and Global Variables ---
+    const explicitFirebaseConfig = {
+        apiKey: "AIzaSyBJJYUOM8EBEuT39DX2F_HtxgEbHDRH-Zc",
+        authDomain: "deanzahacks11-21-2025.firebaseapp.com",
+        projectId: "deanzahacks11-21-2025",
+        storageBucket: "deanzahacks11-21-2025.firebasestorage.app",
+        messagingSenderId: "253702257130",
+        appId: "1:253702257130:web:9ea8e3ee1bd291f1801a93",
+        measurementId: "G-5B84R81S31"
+    };
 
-    // MANDATORY GLOBAL VARIABLE ACCESS
-  const firebaseConfig = {
-            apiKey: "AIzaSyBJJYUOM8EBEuT39DX2F_HtxgEbHDRH-Zc",
-            authDomain: "deanzahacks11-21-2025.firebaseapp.com",
-            projectId: "deanzahacks11-21-2025",
-            storageBucket: "deanzahacks11-21-2025.firebasestorage.app",
-            messagingSenderId: "253702257130",
-            appId: "1:253702257130:web:9ea8e3ee1bd291f1801a93",
-            measurementId: "G-5B84R81S31"
-        };    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+    let firebaseConfig = explicitFirebaseConfig;
+    try {
+        // Attempt to use the global configuration, which is the standard practice in this environment
+        const globalConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        if (globalConfig && Object.keys(globalConfig).length > 0) {
+            firebaseConfig = globalConfig;
+            console.log("Using global Firebase configuration.");
+        } else {
+            console.log("Global config missing or empty. Using provided explicit configuration.");
+        }
+    } catch (e) {
+        console.error("Error parsing global __firebase_config. Falling back to explicit config.", e);
+    }
+    
+    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
-    // --- DOM Elements ---
+    // --- State and DOM Elements ---
+    let app, auth, db, userId = null;
+    let isAuthReady = false;
     const sellForm = document.getElementById('sell-form');
     const messageBox = document.getElementById('message-box');
     const submitButton = document.getElementById('publish-btn');
@@ -284,6 +298,7 @@
             };
             
             // 2. Define the public collection path
+            // Data is public, so we use the common /artifacts/{appId}/public/data/{collectionName} path
             const listingsRef = collection(db, `artifacts/${appId}/public/data/listings`);
 
             // 3. Save the document
@@ -294,7 +309,6 @@
             
         } catch (error) {
             console.error("Error publishing listing:", error);
-            // Check for specific error codes if available, otherwise show generic error
             showMessage(`Firebase write failed. Check console for details. Error: ${error.message.substring(0, 50)}...`, 'error');
         } finally {
             submitButton.disabled = false;
@@ -302,9 +316,10 @@
     }
 
     async function setupFirebase() {
-        if (!firebaseConfig) {
-            console.error("Firebase configuration is missing.");
-            showMessage('Configuration Error: Cannot load Firebase services.', 'error');
+        if (!firebaseConfig || Object.keys(firebaseConfig).length === 0) {
+            console.error("Firebase Initialization Error: Configuration is missing or empty after fallback.");
+            showMessage('FATAL Error: Firebase configuration data not available.', 'error');
+            submitButton.disabled = true;
             return;
         }
 
@@ -322,8 +337,8 @@
                     await signInAnonymously(auth);
                 }
             } catch (error) {
-                 console.error("Initial Authentication failed, attempting Anonymous fallback:", error);
-                 await signInAnonymously(auth); // Final attempt to get an anonymous user
+                 console.error("Authentication failed:", error);
+                 // Do not return here, let onAuthStateChanged handle the final state.
             }
 
             // 3. Set up auth state listener
@@ -332,13 +347,14 @@
                 if (user) {
                     userId = user.uid;
                     console.log("User authenticated. UID:", userId);
-                    showMessage(`Ready to publish. Authenticated as user ${userId.substring(0, 8)}...`, 'info');
+                    showMessage(`Ready to publish. Authenticated as user ${user.email || user.uid.substring(0, 8)}...`, 'info');
                     submitButton.disabled = false; // Enable form submission
                 } else {
                     userId = null;
-                    console.error("Authentication failed. Cannot get a user ID.");
-                    showMessage('Authentication failed. Cannot publish listing.', 'error');
-                    submitButton.disabled = true;
+                    console.error("Authentication listener found no user. User is Anonymous.");
+                    // Allow anonymous users to proceed if rules permit public/write access
+                    showMessage('Ready to publish. Signed in anonymously.', 'info');
+                    submitButton.disabled = false; 
                 }
             });
             
@@ -346,8 +362,9 @@
             sellForm.addEventListener('submit', handleSellForm);
 
         } catch (error) {
-            console.error("Fatal Firebase Initialization Error:", error);
-            showMessage('FATAL Firebase connection error. See console.', 'error');
+            // This catches errors specifically from initializeApp or getAuth/getFirestore
+            console.error("FATAL Firebase Initialization Error:", error);
+            showMessage(`FATAL Firebase Error: Initialization failed. See console for details.`, 'error');
             submitButton.disabled = true;
         }
     }

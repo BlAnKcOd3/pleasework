@@ -31,5 +31,13 @@
   </footer>
 
   <script src="script.js"></script>
+  
+  <script>
+    if(typeof initRegister === 'function') {
+      initRegister(); 
+    } else {
+      console.error("Error: script.js is not linked correctly.");
+    }
+  </script>
 </body>
 </html>

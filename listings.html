@@ -1,695 +1,558 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="pageTitle">De Anza Listings</title>
-    <!-- Load FontAwesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title id="pageTitle">Browse Listings - De Anza Marketplace</title>
+  <link rel="icon" href="https://i.ibb.co/wNYjZG9k/Image-11-21-25-at-2-05-PM.png" type="image/png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* --- BASE STYLES --- */
+    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8f9fa; color: #333; display: flex; flex-direction: column; min-height: 100vh;}
+    * { box-sizing: border-box; }
+    a { text-decoration: none; color: inherit; }
+
+    /* Header */
+    .header { background: white; box-shadow: 0 4px 20px rgba(0,0,0,0.04); position: sticky; top: 0; z-index: 100; padding: 15px 20px; }
+    .header-inner { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+    .header-title { font-size: 1.4rem; color: #6e0b0f; font-weight: 800; margin-left: 10px; letter-spacing: -0.5px; }
+    .sell-btn { background: #6e0b0f; color: white; padding: 10px 28px; border-radius: 30px; font-weight: 600; text-decoration: none; transition: transform 0.2s; box-shadow: 0 4px 10px rgba(110, 11, 15, 0.3); }
+    .sell-btn:hover { transform: translateY(-2px); }
+
+    /* Container */
+    .container { flex-grow: 1; max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+    .page-title { font-size: 2.2rem; margin: 0 0 8px 0; color: #111; font-weight: 800; letter-spacing: -1px; }
+    .page-subtitle { margin: 0 0 40px 0; color: #666; font-size: 1.1rem; }
+
+    /* Filter Bar */
+    .filters-wrapper {
+      background: white; padding: 15px; border-radius: 16px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.05); margin-bottom: 40px;
+      display: flex; gap: 10px; align-items: center; flex-wrap: wrap; border: 1px solid #f0f0f0;
+    }
+    .search-box { flex-grow: 1; position: relative; min-width: 240px; }
+    .search-box i { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #999; }
+    .search-box input {
+      width: 100%; padding: 14px 20px 14px 45px; border-radius: 12px;
+      border: 2px solid transparent; background: #f9f9f9; font-size: 1rem; outline: none; transition: all 0.2s;
+    }
+    .search-box input:focus { background: white; border-color: #ebc034; box-shadow: 0 0 0 4px rgba(235, 192, 52, 0.1); }
+    .filter-select { padding: 14px 24px; border-radius: 12px; border: 1px solid #eee; background: white; font-size: 0.95rem; cursor: pointer; outline: none; font-weight: 500; }
+    .btn-filter { background: #333; color: white; padding: 14px 30px; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    .btn-filter:hover { background: #6e0b0f; }
     
-    <style>
-        /* --- CSS START: Reusing Homepage Style for Consistency --- */
-        
-        /* FIX: Box sizing fix to prevent width overflow issues and ensure padding/border don't cause horizontal scrolling */
-        html {
-            box-sizing: border-box;
-        }
-        *, *::before, *::after {
-            box-sizing: inherit;
-        }
-        
-        /* General Page Reset */
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #f0ce55; /* Gold/Mustard background */
-            font-family: Arial, Helvetica, sans-serif;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            overflow-x: hidden; /* Prevents layout shift from unexpected horizontal scrolling */
-        }
+    /* Responsive filter adjustments */
+    @media (max-width: 768px) {
+        .filters-wrapper { flex-direction: column; align-items: stretch; }
+        .filter-select, .search-box, .btn-filter { width: 100%; max-width: none; }
+    }
 
-        /* Header Section */
-        header {
-            background-color: #4f090c; /* Dark Red */
-            padding: 15px 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            height: 80px;
-            box-sizing: border-box;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-        }
+    /* Grid */
+    .listings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 30px;
+      padding-bottom: 80px;
+    }
+    #loading-indicator {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 40px;
+        font-size: 1.2em;
+        color: #6e0b0f;
+    }
+    .centered-message {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 40px;
+        color: #888;
+    }
 
-        header h1 {
-            color: white;
-            font-size: 1.8em;
-            margin: 0;
-        }
+    /* Card */
+    .card {
+      background: white; border-radius: 20px; overflow: hidden;
+      transition: all 0.3s ease; border: 1px solid #f0f0f0;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+      display: flex; flex-direction: column; cursor: pointer; position: relative;
+    }
+    .card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); border-color: transparent; }
+    
+    .img-frame {
+      height: 240px; width: 100%; background: #f4f4f4;
+      display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative;
+    }
+    .img-frame img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+    .card:hover .img-frame img { transform: scale(1.05); }
+    
+    .cat-badge {
+      position: absolute; top: 15px; left: 15px;
+      background: rgba(255,255,255,0.9); color: #333; padding: 6px 12px;
+      border-radius: 30px; font-size: 0.7rem; text-transform: capitalize; font-weight: 800;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1); letter-spacing: 0.5px;
+    }
 
-        header h1 a {
-            color: white;
-            text-decoration: none;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
+    .card-body { padding: 20px; display: flex; flex-direction: column; flex: 1; }
+    .card-title { font-size: 1.1rem; font-weight: 700; color: #111; margin: 0 0 8px 0; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .card-desc { font-size: 0.9rem; color: #777; margin-bottom: 20px; height: 40px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+    .card-footer { margin-top: auto; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f5f5f5; padding-top: 15px; }
+    .price { font-size: 1.2rem; font-weight: 800; color: #6e0b0f; }
+    .btn-view { background: #f4f4f4; color: #333; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    .card:hover .btn-view { background: #ebc034; }
 
-        header h1 a:hover {
-            opacity: 0.8;
-        }
+    /* --- MODAL STYLES --- */
+    .modal-overlay {
+      display: none;
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7); z-index: 2000;
+      align-items: center; justify-content: center;
+      backdrop-filter: blur(8px);
+      animation: fadeIn 0.3s ease-out;
+    }
+    
+    .modal-content {
+      background: white; width: 95%; max-width: 900px;
+      border-radius: 24px; overflow: hidden;
+      display: flex; flex-direction: column;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+      animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+    
+    @media(min-width: 768px) {
+      .modal-content { flex-direction: row; height: 550px; }
+    }
 
-        .icon {
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #f0ce55;
-            cursor: pointer;
-            font-size: 1.8em;
-        }
+    /* Image Side */
+    .modal-img-col {
+      flex: 1.2; background: #f8f8f8; position: relative;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    .modal-img-col img { width: 100%; height: 100%; object-fit: cover; }
+    
+    /* Close Button */
+    .close-btn {
+      position: absolute; top: 20px; left: 20px;
+      background: rgba(255,255,255,0.9); border-radius: 50%; width: 40px; height: 40px;
+      border: none; cursor: pointer; font-size: 1.1rem; color: #333;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15); z-index: 10; transition: transform 0.2s;
+    }
+    .close-btn:hover { transform: scale(1.1); }
 
-        /* Main Content Container */
-        .container {
-            flex-grow: 1;
-            padding: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+    /* Info Side */
+    .modal-info-col {
+      flex: 1; padding: 40px; display: flex; flex-direction: column;
+      overflow-y: auto; background: white;
+    }
 
-        /* Action Bar - The filter and search controls area */
-        .action-bar {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            align-items: center;
-            flex-wrap: wrap; /* Allows wrapping on small screens */
-        }
-        
-        .action-bar .pill {
-            cursor: pointer;
-            padding: 8px 15px;
-            border-radius: 20px;
-            background-color: #4f090c; /* Dark Red */
-            color: white;
-            font-size: 0.9em;
-            transition: background-color 0.2s;
-            border: 2px solid #4f090c;
-            /* Ensure fixed width for these buttons */
-            flex-shrink: 0;
-        }
-        
-        .action-bar .pill:hover {
-            background-color: #6e0b0f; /* Lighter Dark Red */
-        }
-        
-        .action-bar .pill.active {
-             background-color: #f0ce55; /* Gold */
-             color: #4f090c; /* Dark Red */
-             border-color: #4f090c;
-        }
+    .modal-cat { color: #888; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; margin-bottom: 10px; }
+    .modal-title-h2 { font-size: 2.2rem; margin: 0 0 10px 0; line-height: 1.1; color: #111; font-weight: 800; letter-spacing: -0.5px; }
+    .modal-price { font-size: 2rem; color: #6e0b0f; font-weight: 800; margin-bottom: 25px; }
+    
+    /* Seller Badge */
+    .seller-info {
+      display: flex; align-items: center; gap: 15px; padding: 12px 16px;
+      background: #fdfcf5; border: 1px solid #eee; 
+      border-radius: 12px; margin-bottom: 25px;
+    }
+    .seller-avatar { 
+      width: 45px; height: 45px; background: #ebc034; 
+      border-radius: 50%; display: flex; align-items: center; 
+      justify-content: center; font-weight: bold; color: #333; font-size: 1.2rem;
+    }
+    .seller-text h4 { margin: 0; font-size: 0.95rem; color: #333; }
+    .seller-text span { font-size: 0.8rem; color: #2ecc71; font-weight: 600; display: flex; align-items: center; gap: 4px; }
 
-        /* Search & Filters */
-        .search-container {
-            display: flex;
-            align-items: center;
-            flex-grow: 1; /* Allow search bar to take up remaining space */
-            max-width: 400px;
-            position: relative;
-        }
-        
-        /* Input and Select Styles */
-        #search-input, #filter-category, #filter-price {
-            padding: 10px 15px;
-            border: 2px solid #4f090c;
-            border-radius: 8px;
-            font-size: 1em;
-            box-sizing: border-box;
-            width: 100%;
-            flex-shrink: 0; /* Prevents stretching */
-        }
-        
-        /* FIX: Give filters a max width so they don't stretch excessively */
-        #filter-category, #filter-price {
-            max-width: 200px; 
-        }
+    .modal-desc { font-size: 1rem; line-height: 1.6; color: #555; margin-bottom: 30px; flex: 1; white-space: pre-wrap;}
+    
+    /* Action Button (Now "Show Contact Info") */
+    .btn-msg {
+      width: 100%; background: #6e0b0f; color: white; border: none;
+      padding: 16px; border-radius: 14px; font-size: 1.1rem; font-weight: 700;
+      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
+      text-decoration: none; transition: all 0.2s;
+      box-shadow: 0 8px 20px rgba(110, 11, 15, 0.2);
+    }
+    .btn-msg:hover { background: #50080b; transform: translateY(-2px); }
 
-        /* Listing Grid */
-        .listings-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
-            padding-top: 10px;
-        }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        .listing-card {
-            background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            transition: transform 0.2s, box-shadow 0.2s;
-            cursor: pointer;
-        }
-        
-        .listing-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .listing-image {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-            border-bottom: 2px solid #ddd;
-        }
-
-        .listing-content {
-            padding: 15px;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .listing-title {
-            font-size: 1.2em;
-            font-weight: bold;
-            color: #4f090c; /* Dark Red */
-            margin-bottom: 5px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .listing-price {
-            font-size: 1.4em;
-            font-weight: bold;
-            color: #000;
-            margin-top: auto; /* Pushes price to the bottom */
-            padding-top: 10px;
-        }
-        
-        .listing-category {
-            font-size: 0.85em;
-            color: #666;
-            margin-bottom: 10px;
-            background-color: #eee;
-            align-self: flex-start;
-            padding: 3px 8px;
-            border-radius: 5px;
-        }
-
-        .listing-seller {
-            font-size: 0.75em;
-            color: #888;
-            margin-top: 5px;
-        }
-        
-        /* Message/Loading Indicator */
-        #loading-indicator {
-            text-align: center;
-            padding: 40px;
-            font-size: 1.2em;
-            color: #4f090c;
-        }
-        
-        /* Style for the "No listings found" message to ensure centering */
-        .centered-message {
-            text-align: center;
-            font-size: 1.1em;
-            color: #666;
-            padding: 40px;
-            /* IMPORTANT: Override grid behavior when this is the only content */
-            grid-column: 1 / -1; /* Make it span all columns */
-        }
-        
-        /* Footer */
-        .site-footer {
-            background-color: #4f090c;
-            color: white;
-            text-align: center;
-            padding: 10px 0;
-            margin-top: auto;
-        }
-        
-        .footer-link {
-            color: #f0ce55;
-            text-decoration: none;
-            font-size: 0.9em;
-        }
-        
-        /* Responsive Adjustments */
-        @media (max-width: 600px) {
-            .action-bar {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .action-bar > * {
-                width: 100%;
-                max-width: none !important; /* Allow all elements to stretch on mobile */
-            }
-            .search-container {
-                max-width: 100%;
-            }
-        }
-        /* Modal for enlarged listing view */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.6);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            padding: 20px;
-        }
-        .modal-content {
-            background: #fff;
-            border-radius: 10px;
-            max-width: 900px;
-            width: 100%;
-            max-height: 90vh;
-            overflow: auto;
-            display: flex;
-            gap: 20px;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-        .modal-image {
-            width: 45%;
-            object-fit: cover;
-            border-radius: 8px;
-        }
-        .modal-body {
-            width: 55%;
-            display: flex;
-            flex-direction: column;
-        }
-        .modal-title {
-            font-size: 1.6em;
-            color: #4f090c;
-            margin-bottom: 8px;
-        }
-        .modal-price { font-size: 1.4em; font-weight: bold; margin-top: auto; }
-        .modal-close {
-            position: absolute;
-            top: 16px;
-            right: 20px;
-            font-size: 1.8em;
-            color: white;
-            cursor: pointer;
-        }
-    </style>
+    /* Footer */
+    .site-footer {
+        text-align: center;
+        padding: 20px;
+        border-top: 1px solid #eee;
+        color: #888;
+        font-size: 0.9rem;
+    }
+    .footer-link { color: #6e0b0f; text-decoration: underline; margin: 0 10px; }
+  </style>
 </head>
 <body>
-    <header>
-        <h1><a href="marketplace.html">De Anza Listings</a></h1>
-        <div class="icon" id="userIcon" title="Your account"><i class="fas fa-user-circle"></i></div>
-    </header>
 
-    <div class="container">
-        <!-- Filter and Search Bar -->
-        <div class="action-bar">
-            <!-- Sell/Buy Buttons -->
-            <div id="sellButton" class="pill">Sell Item</div>
-            <div id="buyButton" class="pill active">Categories</div>
+  <header class="header">
+    <div class="header-inner">
+      <a href="marketplace.html" style="text-decoration:none; display:flex; align-items:center;">
+        <img src="https://i.ibb.co/wNYjZG9k/Image-11-21-25-at-2-05-PM.png" class="logo" alt="Logo" style="height:45px;">
+        <span class="header-title">De Anza Marketplace</span>
+      </a>
+      <a href="sell.html" class="sell-btn" id="sellButton"><i class="fas fa-plus"></i> Sell</a>
+    </div>
+  </header>
 
-            <!-- Category Filter Dropdown -->
-            <select id="filter-category">
-                <option value="">All Categories</option>
-                <option value="textbooks">Textbooks</option>
-                <option value="study-supplies">Study Supplies</option>
-                <option value="electronics">Electronics</option>
-                <option value="bikes">Bikes & Outdoors</option>
-                <option value="housing">Housing & Roommates</option>
-                <option value="services">Services & Rentals</option>
-                <option value="jobs">Student Jobs</option>
-                <option value="events">Events & Campus Activities</option>
-                <option value="misc">Other/Misc</option>
-            </select>
-            
-            <!-- Price Filter Dropdown -->
-            <select id="filter-price">
-                <option value="">Any Price</option>
-                <option value="0-50">$0 - $50</option>
-                <option value="51-200">$51 - $200</option>
-                <option value="201-inf">$201+</option>
-                <option value="free">Free</option>
-            </select>
-            
-            <!-- Search Bar -->
-            <div class="search-container">
-                <input id="search-input" placeholder="Search title or description..." />
-            </div>
-            
-        </div>
-        
-        <div id="loading-indicator">Loading listings...</div>
-        <div id="product-grid" class="listings-grid">
-            <!-- Listings will be inserted here by JavaScript -->
-        </div>
-        <!-- Modal for enlarged listing -->
-        <div id="listing-modal" class="modal" aria-hidden="true">
-            <div class="modal-close" id="listing-modal-close" title="Close">&times;</div>
-            <div class="modal-content">
-                <img src="" alt="Listing Image" id="modal-image" class="modal-image" />
-                <div class="modal-body">
-                    <div class="modal-title" id="modal-title"></div>
-                    <div id="modal-category" style="color:#666;margin-bottom:8px;"></div>
-                    <div id="modal-description" style="white-space:pre-wrap; color:#333;"> </div>
-                    <div class="modal-price" id="modal-price"></div>
-                    <div id="modal-seller" style="font-size:0.9em;color:#666;margin-top:8px"></div>
-                    <div style="margin-top:16px;"><button id="modal-action" class="pill">Contact / Buy</button></div>
-                </div>
-            </div>
-        </div>
+  <div class="container">
+    <h2 class="page-title">Browse Listings</h2>
+    <p class="page-subtitle">Find textbooks, electronics, and gear from other students.</p>
+
+    <div class="filters-wrapper">
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input id="search-input" type="text" placeholder="Search items...">
+      </div>
+      
+      <select id="filter-category" class="filter-select">
+          <option value="">All Categories</option>
+          <option value="textbooks">Textbooks</option>
+          <option value="study-supplies">Study Supplies</option>
+          <option value="electronics">Electronics</option>
+          <option value="bikes">Bikes & Outdoors</option>
+          <option value="housing">Housing & Roommates</option>
+          <option value="services">Services & Rentals</option>
+          <option value="jobs">Student Jobs</option>
+          <option value="events">Events & Campus Activities</option>
+          <option value="misc">Other/Misc</option>
+      </select>
+      
+      <select id="filter-price" class="filter-select">
+          <option value="">Any Price</option>
+          <option value="free">Free</option>
+          <option value="1-50">$1 - $50</option>
+          <option value="51-200">$51 - $200</option>
+          <option value="201-inf">$201+</option>
+      </select>
+      
+      <button id="btn-apply" class="btn-filter">Apply</button>
     </div>
 
-    <footer class="site-footer">
-        <a href="index.html" class="footer-link">Logout</a>
-    </footer>
+    <div id="loading-indicator">Loading listings...</div>
+    <div id="product-grid" class="listings-grid">
+      </div>
+  </div>
 
-    <script src="firebase_config.js"></script>
+  <div id="listing-modal" class="modal-overlay" aria-hidden="true">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      
+      <div class="modal-img-col">
+        <button class="close-btn" id="listing-modal-close"><i class="fas fa-times"></i></button>
+        <img id="modal-image" src="" alt="Product">
+      </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, query, where, onSnapshot, orderBy, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+      <div class="modal-info-col">
+        <div id="modal-category" class="modal-cat">Category</div>
+        <h2 id="modal-title" class="modal-title-h2">Product Title</h2>
+        <div id="modal-price" class="modal-price">$0.00</div>
         
-        // Global Firebase instances
-        let app, auth, db, userId = null;
-        let isAuthReady = false;
-        // Set Firestore log level to debug for better console feedback
-        setLogLevel('Debug');
+        <div class="seller-info">
+          <div class="seller-avatar"><i class="fas fa-user"></i></div>
+          <div class="seller-text">
+            <h4>Sold by <span id="modal-seller-id">Student</span></h4>
+            <span><i class="fas fa-check-circle"></i> Verified Student ID</span>
+          </div>
+        </div>
 
-                // --- Firebase Configuration (prefer global `__firebase_config` if present) ---
-                let firebaseConfig = {};
-                try{
-                    const parsed = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-                    if(parsed && Object.keys(parsed).length) firebaseConfig = parsed;
-                }catch(e){ console.warn('Could not parse __firebase_config', e); }
-                if(!firebaseConfig || Object.keys(firebaseConfig).length === 0){
-                    firebaseConfig = {
-                        apiKey: "AIzaSyBJJYUOM8EBEuT39DX2F_HtxgEbHDRH-Zc",
-                        authDomain: "deanzahacks11-21-2025.firebaseapp.com",
-                        projectId: "deanzahacks11-21-2025",
-                        storageBucket: "deanzahacks11-21-2025.firebasestorage.app",
-                        messagingSenderId: "253702257130",
-                        appId: "1:253702257130:web:9ea8e3ee1bd291f1801a93",
-                        measurementId: "G-5B84R81S31"
-                    };
-                }
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-
-        const productGrid = document.getElementById('product-grid');
-        const loadingIndicator = document.getElementById('loading-indicator');
-        const filterCategory = document.getElementById('filter-category');
-        const filterPrice = document.getElementById('filter-price');
-        const searchInput = document.getElementById('search-input');
-        const pageTitle = document.getElementById('pageTitle');
+        <p id="modal-description" class="modal-desc">Description goes here...</p>
         
-        // State for current filters
-        let currentCategory = '';
-        let currentPriceRange = '';
-        let currentSearchTerm = '';
-        
-        // --- Utility Functions ---
+        <button id="modal-action" class="btn-msg">
+          <i class="fas fa-phone-alt"></i> Show Contact Info
+        </button>
+      </div>
+    </div>
+  </div>
 
-        function renderListings(listings) {
-            productGrid.innerHTML = ''; // Clear previous listings
-            loadingIndicator.style.display = 'none';
+  <footer class="site-footer">
+    &copy; 2025 De Anza Marketplace 
+    <a href="index.html" class="footer-link">Logout</a>
+  </footer>
 
-            if (listings.length === 0) {
-                // Use the 'centered-message' class for centering the error message
-                productGrid.innerHTML = '<p class="centered-message">No listings found matching your criteria.</p>';
-                return;
-            }
+  <script src="firebase_config.js"></script>
 
-            listings.forEach(listing => {
-                const card = document.createElement('div');
-                card.className = 'listing-card';
-                // Check if 'image' field exists and provide a default if not (it's optional from sell.html)
-                const imageUrl = listing.image || 'https://placehold.co/400x300/4f090c/f0ce55?text=No+Image';
+  <script type="module">
+    // Firebase imports (v11)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, collection, query, where, onSnapshot, orderBy, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    
+    // Global Firebase instances
+    let app, auth, db, userId = null;
+    let isAuthReady = false;
+    setLogLevel('Debug'); // Set Firestore log level to debug for better console feedback
 
-                card.dataset.id = listing.id;
-                card.innerHTML = `
-                    <img src="${imageUrl}" class="listing-image" alt="${listing.title}" onerror="this.onerror=null;this.src='https://placehold.co/400x300/4f090c/f0ce55?text=Image+Unavailable';" />
-                    <div class="listing-content">
-                        <div class="listing-category">${listing.category.charAt(0).toUpperCase() + listing.category.slice(1).replace('-', ' & ')}</div>
-                        <div class="listing-title">${listing.title}</div>
-                        <div class="listing-seller">Seller: ${listing.userId ? listing.userId.substring(0, 8) + '...' : 'N/A'}</div>
-                        <div class="listing-price">${listing.price === 0 ? 'FREE' : `$${(listing.price || 0).toFixed(2)}`}</div>
+    // --- Firebase Configuration (Fallback/Default) ---
+    // Note: The global __firebase_config is used if available, otherwise this fallback is used.
+    let firebaseConfig = {
+        apiKey: "AIzaSyBJJYUOM8EBEuT39DX2F_HtxgEbHDRH-Zc",
+        authDomain: "deanzahacks11-21-2025.firebaseapp.com",
+        projectId: "deanzahacks11-21-2025",
+        storageBucket: "deanzahacks11-21-2025.firebasestorage.app",
+        messagingSenderId: "253702257130",
+        appId: "1:253702257130:web:9ea8e3ee1bd291f1801a93",
+        measurementId: "G-5B84R81S31"
+    };
+
+    const appId = 'default-app-id'; // Used to construct the listings path
+
+    // --- DOM Elements ---
+    const productGrid = document.getElementById('product-grid');
+    const loadingIndicator = document.getElementById('loading-indicator');
+    const filterCategory = document.getElementById('filter-category');
+    const filterPrice = document.getElementById('filter-price');
+    const searchInput = document.getElementById('search-input');
+    const pageTitle = document.getElementById('pageTitle');
+    
+    // State for current filters
+    let currentCategory = '';
+    let currentPriceRange = '';
+    let currentSearchTerm = '';
+    
+    // --- Utility Functions ---
+
+    function renderListings(listings) {
+        productGrid.innerHTML = ''; // Clear previous listings
+        loadingIndicator.style.display = 'none';
+
+        if (listings.length === 0) {
+            productGrid.innerHTML = '<p class="centered-message">No listings found matching your criteria.</p>';
+            return;
+        }
+
+        listings.forEach(listing => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            const imageUrl = listing.image || 'https://placehold.co/400x300/6e0b0f/f8f9fa?text=No+Image';
+
+            card.dataset.id = listing.id;
+            card.onclick = () => openListingModal(listing); // Call modal on click
+
+            // Clean up category for display (e.g., 'study-supplies' -> 'Study Supplies')
+            const displayCategory = listing.category.charAt(0).toUpperCase() + listing.category.slice(1).replace('-', ' ');
+
+            card.innerHTML = `
+                <div class="img-frame">
+                    <span class="cat-badge">${displayCategory}</span>
+                    <img src="${imageUrl}" onerror="this.onerror=null;this.src='https://placehold.co/400x300/6e0b0f/f8f9fa?text=Image+Unavailable';" alt="${listing.title}" />
+                </div>
+                <div class="card-body">
+                    <div class="card-title">${listing.title}</div>
+                    <div class="card-desc">${listing.description || 'No description.'}</div>
+                    <div class="card-footer">
+                        <div class="price">${listing.price === 0 ? 'FREE' : `$${(listing.price || 0).toFixed(2)}`}</div>
+                        <button class="btn-view">View</button>
                     </div>
-                `;
-                productGrid.appendChild(card);
-            });
-            // end forEach
+                </div>
+            `;
+            productGrid.appendChild(card);
+        });
+    }
+    
+    // --- Filter and Search Logic ---
+    
+    function fetchListings() {
+        if (!isAuthReady || !db) return;
+
+        loadingIndicator.textContent = 'Loading listings...';
+        loadingIndicator.style.display = 'block';
+        productGrid.innerHTML = '';
+        
+        const listingsRef = collection(db, `artifacts/${appId}/public/data/listings`);
+        let conditions = [];
+        
+        // 1. Category Filter (Server-side, equality check)
+        if (currentCategory) {
+            conditions.push(where('category', '==', currentCategory));
         }
         
-        // --- Filter and Search Logic ---
+        // 2. Combine conditions and order by creation date
+        const q = query(listingsRef, ...conditions, orderBy('createdAt', 'desc'));
         
-        // Function to create and run the Firestore query based on current filters
-        function fetchListings() {
-            if (!isAuthReady || !db) return;
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            let listings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-            loadingIndicator.textContent = 'Loading listings...';
-            loadingIndicator.style.display = 'block';
-            productGrid.innerHTML = '';
-            
-            // NOTE: Firestore queries can only use one field for range comparisons unless that field is the one specified in the orderBy clause.
-            // Since we must order by `createdAt` to get the latest items, we must perform multi-property filtering (like price range) client-side.
-            // We only use the single `where` clause for the category filter, which is an equality check.
-            
-            const listingsRef = collection(db, `artifacts/${appId}/public/data/listings`);
-            let q;
-            let conditions = [];
-            
-            // 1. Category Filter (Equality check, safe to use with orderBy)
-            if (currentCategory) {
-                conditions.push(where('category', '==', currentCategory));
-            }
-            
-            // 2. Combine conditions and order by creation date
-            // The query will fetch all data matching the category, ordered by date.
-            // Other filters (price, search) will be applied after the data is received.
-            q = query(listingsRef, ...conditions, orderBy('createdAt', 'desc'));
-            
-            const unsubscribe = onSnapshot(q, (snapshot) => {
-                let listings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            // 3. Client-Side Price Filter
+            if (currentPriceRange) {
+                
+                listings = listings.filter(listing => {
+                    const price = listing.price || 0; // Default to 0 if price is missing/null
 
-                // 3. Client-Side Price Filter
-                if (currentPriceRange) {
+                    if (currentPriceRange === 'free') {
+                        return price === 0;
+                    }
+                    
                     const [min, max] = currentPriceRange.split('-');
                     const minPrice = parseFloat(min);
                     const maxPrice = max === 'inf' ? Infinity : parseFloat(max);
-                    
-                    listings = listings.filter(listing => {
-                        const price = listing.price || 0; // Default to 0 if price is missing/null
 
-                        if (currentPriceRange === 'free') {
-                            return price === 0;
-                        }
-                        
-                        // Apply range filter
-                        return price >= minPrice && price <= maxPrice;
-                    });
-                }
+                    // Apply range filter
+                    return price >= minPrice && price <= maxPrice;
+                });
+            }
 
 
-                // 4. Client-Side Search Filter
-                if (currentSearchTerm) {
-                    const searchLower = currentSearchTerm.toLowerCase();
-                    listings = listings.filter(listing => 
-                        (listing.title && listing.title.toLowerCase().includes(searchLower)) || 
-                        (listing.description && listing.description.toLowerCase().includes(searchLower))
-                    );
-                }
-                
-                // Keep a reference to the latest listings so click handlers can look them up
-                window.currentListings = listings;
-                renderListings(listings);
-            }, (error) => {
-                console.error("Error listening to listings:", error);
-                loadingIndicator.textContent = `Error loading listings: ${error.message}`;
-            });
+            // 4. Client-Side Search Filter
+            if (currentSearchTerm) {
+                const searchLower = currentSearchTerm.toLowerCase();
+                listings = listings.filter(listing => 
+                    (listing.title && listing.title.toLowerCase().includes(searchLower)) || 
+                    (listing.description && listing.description.toLowerCase().includes(searchLower))
+                );
+            }
             
-            // Clean up old subscription if it exists
+            // Keep a reference to the latest listings so click handlers can look them up
+            window.currentListings = listings;
+            renderListings(listings);
+        }, (error) => {
+            console.error("Error listening to listings:", error);
+            loadingIndicator.textContent = `Error loading listings: ${error.message}`;
+        });
+        
+        // Clean up old subscription if it exists
+        if (window.unsubscribeListings) {
+            window.unsubscribeListings();
+        }
+        window.unsubscribeListings = unsubscribe; // Store new unsubscribe function
+    }
+    
+    function handleFilterChange() {
+        currentCategory = filterCategory.value;
+        currentPriceRange = filterPrice.value;
+        currentSearchTerm = searchInput.value.trim();
+        fetchListings();
+    }
+
+    // --- Initialization Helpers ---
+    
+    function getInitialFilters() {
+        const params = new URLSearchParams(window.location.search);
+        const categoryParam = params.get('category');
+        const searchParam = params.get('search');
+
+        if (categoryParam) {
+            currentCategory = categoryParam;
+            filterCategory.value = categoryParam;
+            // Update page title to reflect the category filter
+            pageTitle.textContent = `Listings - ${categoryParam.charAt(0).toUpperCase() + categoryParam.slice(1).replace('-', ' ')}`;
+        }
+        if (searchParam) {
+            currentSearchTerm = searchParam;
+            searchInput.value = searchParam;
+        }
+    }
+    
+    async function setupFirebaseAndListeners() {
+        getInitialFilters();
+
+        if (!firebaseConfig.apiKey) {
+            console.error("Firebase configuration is missing.");
+            loadingIndicator.textContent = 'App configuration error. Cannot connect to services.';
+            return;
+        }
+
+        // Initialize Firebase
+        app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
+
+        // Authentication setup
+        // Uses the initialAuthToken if available, otherwise signs in anonymously
+        onAuthStateChanged(auth, (user) => {
+            isAuthReady = true;
+            if (user) {
+                userId = user.uid;
+            } else {
+                userId = null;
+                signInAnonymously(auth).catch(e => {
+                     console.error("Anonymous Sign-In failed:", e);
+                });
+            }
+            // Call fetchListings only after the initial auth check is complete
+            fetchListings(); 
+        });
+        
+        // --- Event Listeners for Filters/Search ---
+        filterCategory.addEventListener('change', handleFilterChange);
+        filterPrice.addEventListener('change', handleFilterChange);
+        searchInput.addEventListener('input', handleFilterChange); 
+        document.getElementById('btn-apply').addEventListener('click', handleFilterChange); // Manual apply button
+
+        // --- Event Listeners for Navigation ---
+        document.getElementById('sellButton').addEventListener('click', (e) => {
+             e.preventDefault();
+             window.location.href = 'sell.html'; 
+        });
+        
+        window.addEventListener('beforeunload', () => {
             if (window.unsubscribeListings) {
                 window.unsubscribeListings();
             }
-            window.unsubscribeListings = unsubscribe; // Store new unsubscribe function
-        }
-        
-        function handleFilterChange() {
-            currentCategory = filterCategory.value;
-            currentPriceRange = filterPrice.value;
-            currentSearchTerm = searchInput.value.trim();
-            fetchListings();
-        }
-
-        // --- Initialization ---
-        
-        // Parse URL parameters for initial filter
-        function getInitialFilters() {
-            const params = new URLSearchParams(window.location.search);
-            const categoryParam = params.get('category');
-            const searchParam = params.get('search');
-
-            if (categoryParam) {
-                currentCategory = categoryParam;
-                filterCategory.value = categoryParam;
-                pageTitle.textContent = `De Anza Listings - ${categoryParam.charAt(0).toUpperCase() + categoryParam.slice(1).replace('-', ' & ')}`;
-            }
-            if (searchParam) {
-                currentSearchTerm = searchParam;
-                searchInput.value = searchParam;
-            }
-        }
-        
-        async function setupFirebaseAndListeners() {
-            getInitialFilters();
-
-            if (!firebaseConfig) {
-                console.error("Firebase configuration is missing.");
-                loadingIndicator.textContent = 'App configuration error. Cannot connect to services.';
-                return;
-            }
-
-            // Initialize Firebase
-            app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app);
-
-            // Authentication setup
-            try {
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (error) {
-                 console.error("Authentication setup failed:", error);
-                 loadingIndicator.textContent = 'Authentication failed. Please check the console.';
-            }
-
-
-            // Set up auth state listener to ensure we only fetch data when ready
-            onAuthStateChanged(auth, (user) => {
-                isAuthReady = true;
-                if (user) {
-                    userId = user.uid;
-                    console.log("User authenticated:", userId);
-                } else {
-                    userId = null;
-                    console.log("No user authenticated.");
-                }
-                // Call fetchListings only after the initial auth check is complete
-                fetchListings(); 
-            });
-            
-            // --- Event Listeners for Filters/Search ---
-            filterCategory.addEventListener('change', handleFilterChange);
-            filterPrice.addEventListener('change', handleFilterChange);
-            searchInput.addEventListener('input', handleFilterChange); // Real-time search/filter
-
-            // --- Event Listeners for Navigation ---
-            document.getElementById('userIcon').addEventListener('click', () => {
-                 onAuthStateChanged(auth, (user) => {
-                    // Redirect to dashboard if logged in (by email/password), or login page otherwise
-                    window.location.href = user && user.email ? 'dashboard.html' : 'login.html';
-                }, { once: true });
-            });
-            
-            document.getElementById('sellButton').addEventListener('click', () => {
-                window.location.href = 'sell.html'; 
-            });
-            
-            document.getElementById('buyButton').addEventListener('click', () => {
-                window.location.href = 'marketplace.html'; // Go back to category selection
-            });
-            
-            window.addEventListener('beforeunload', () => {
-                if (window.unsubscribeListings) {
-                    window.unsubscribeListings();
-                }
-            });
-        }
-        
-        // --- Modal & Interaction Helpers ---
-        // Chat functionality removed: no chat ID helper required anymore.
-
-        function openListingModal(listing) {
-            const modal = document.getElementById('listing-modal');
-            document.getElementById('modal-image').src = listing.image || 'https://placehold.co/800x600/4f090c/f0ce55?text=No+Image';
-            document.getElementById('modal-title').textContent = listing.title || '';
-            document.getElementById('modal-category').textContent = listing.category ? listing.category.charAt(0).toUpperCase() + listing.category.slice(1).replace('-', ' & ') : '';
-            document.getElementById('modal-description').textContent = listing.description || 'No description provided.';
-            document.getElementById('modal-price').textContent = listing.price === 0 ? 'FREE' : `$${(listing.price || 0).toFixed(2)}`;
-            document.getElementById('modal-seller').textContent = listing.userId ? `Seller: ${listing.userId}` : '';
-            // Attach contact info to the action button so clicking it shows the seller contact details
-            const actionBtn = document.getElementById('modal-action');
-            actionBtn.dataset.id = listing.id;
-            actionBtn.dataset.contactEmail = listing.contactEmail || '';
-            actionBtn.dataset.contactPhone = listing.contactPhone || '';
-            actionBtn.textContent = 'Show Contact Info';
-            modal.style.display = 'flex';
-            modal.setAttribute('aria-hidden', 'false');
-        }
-
-        function closeListingModal() {
-            const modal = document.getElementById('listing-modal');
-            modal.style.display = 'none';
-            modal.setAttribute('aria-hidden', 'true');
-        }
-
-        // Open modal when clicking anywhere on a listing card
-        productGrid.addEventListener('click', (e) => {
-            const card = e.target.closest && e.target.closest('.listing-card');
-            if (!card) return;
-            const id = card.dataset.id;
-            const listing = (window.currentListings || []).find(l => String(l.id) === String(id));
-            if (!listing) return;
-
-            // Open listing modal (no chat functionality)
-            openListingModal(listing);
         });
+    }
+    
+    // --- Modal & Interaction Helpers ---
 
-        // Modal close handlers
-        document.addEventListener('click', (e) => {
-            const modal = document.getElementById('listing-modal');
-            if (!modal) return;
-            if (e.target.id === 'listing-modal-close') {
-                closeListingModal();
-            }
-            // close when clicking outside modal-content
-            if (e.target === modal) {
-                closeListingModal();
-            }
-        });
+    function openListingModal(listing) {
+        const modal = document.getElementById('listing-modal');
+        const imgUrl = listing.image || 'https://placehold.co/800x600/6e0b0f/f8f9fa?text=No+Image';
 
-        // Primary modal action: show seller contact info in a popup
-        document.getElementById('modal-action').addEventListener('click', (e) => {
-            const id = e.target.dataset.id;
-            const listing = (window.currentListings || []).find(l => String(l.id) === String(id));
-            if (!listing) return;
+        document.getElementById('modal-image').src = imgUrl;
+        document.getElementById('modal-title').textContent = listing.title || '';
+        document.getElementById('modal-category').textContent = listing.category ? listing.category.charAt(0).toUpperCase() + listing.category.slice(1).replace('-', ' ') : '';
+        document.getElementById('modal-description').textContent = listing.description || 'No description provided.';
+        document.getElementById('modal-price').textContent = listing.price === 0 ? 'FREE' : `$${(listing.price || 0).toFixed(2)}`;
+        // Display seller ID (first 8 chars) for verification, but not full contact info yet
+        document.getElementById('modal-seller-id').textContent = listing.userId ? listing.userId.substring(0, 8) + '...' : 'N/A';
+        
+        // Attach contact info to the action button for click handler
+        const actionBtn = document.getElementById('modal-action');
+        actionBtn.dataset.id = listing.id;
+        actionBtn.dataset.contactEmail = listing.contactEmail || 'Not provided';
+        actionBtn.dataset.contactPhone = listing.contactPhone || 'Not provided';
+        actionBtn.textContent = 'Show Contact Info';
 
-            const email = e.target.dataset.contactEmail || listing.contactEmail || 'Not provided';
-            const phone = e.target.dataset.contactPhone || listing.contactPhone || 'Not provided';
+        modal.style.display = 'flex';
+        modal.setAttribute('aria-hidden', 'false');
+    }
 
-            // Simple popup with contact info
-            alert(`Contact Information:\n\nEmail: ${email}\nPhone: ${phone}`);
-        });
+    function closeListingModal() {
+        const modal = document.getElementById('listing-modal');
+        modal.style.display = 'none';
+        modal.setAttribute('aria-hidden', 'true');
+    }
 
-        // --- Initialization ---
-        window.onload = setupFirebaseAndListeners;
+    // Modal close handlers
+    document.getElementById('listing-modal-close').addEventListener('click', closeListingModal);
+    
+    // Close modal when clicking on the overlay (parent)
+    document.getElementById('listing-modal').addEventListener('click', (e) => {
+        if (e.target.id === 'listing-modal') {
+            closeListingModal();
+        }
+    });
 
-    </script>
+
+    // Primary modal action: show seller contact info in a popup
+    document.getElementById('modal-action').addEventListener('click', (e) => {
+        const email = e.target.dataset.contactEmail;
+        const phone = e.target.dataset.contactPhone;
+
+        // Simple popup with contact info
+        alert(`Contact Information:\n\nEmail: ${email}\nPhone: ${phone}`);
+    });
+
+    // --- Initialization ---
+    window.onload = setupFirebaseAndListeners;
+
+  </script>
 </body>
 </html>

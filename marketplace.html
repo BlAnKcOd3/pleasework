@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>De Anza Marketplace</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body data-page="marketplace">
+  <header class="header">
+    <h1>De Anza Marketplace</h1>
+    <div class="icon" title="Your account"><i class="fas fa-user-circle"></i></div>
+  </header>
+
+  <div class="container">
+    <div class="action-bar">
+      <div class="pill" onclick="location.href='sell.html'">Sell</div>
+      <div class="pill" onclick="location.href='listings.html'">Buy</div>
+
+      <div class="search-container" style="margin-left:10px;">
+        <input id="search-input" placeholder="Search items..." />
+        <i id="search-toggle" class="fas fa-search search-icon" onclick="toggleSearch()"></i>
+      </div>
+    </div>
+
+    <div class="category-grid">
+      <div class="category-item" data-cat="textbooks">
+        <div class="icon-box" data-cat="textbooks"><i class="fas fa-book color-red"></i></div>
+        <div class="cat-label">Textbooks</div>
+      </div>
+
+      <div class="category-item" data-cat="study-supplies">
+        <div class="icon-box" data-cat="study-supplies"><i class="fas fa-pencil-ruler color-gold"></i></div>
+        <div class="cat-label">Study Supplies</div>
+      </div>
+
+      <div class="category-item" data-cat="electronics">
+        <div class="icon-box" data-cat="electronics"><i class="fas fa-laptop color-red"></i></div>
+        <div class="cat-label">Electronics</div>
+      </div>
+
+      <div class="category-item" data-cat="bikes">
+        <div class="icon-box" data-cat="bikes"><i class="fas fa-bicycle color-red"></i></div>
+        <div class="cat-label">Bikes & Outdoors</div>
+      </div>
+
+      <div class="category-item" data-cat="housing">
+        <div class="icon-box" data-cat="housing"><i class="fas fa-home color-brown"></i></div>
+        <div class="cat-label">Housing & Roommates</div>
+      </div>
+
+      <div class="category-item" data-cat="services">
+        <div class="icon-box" data-cat="services"><i class="fas fa-tools color-red"></i></div>
+        <div class="cat-label">Services & Rentals</div>
+      </div>
+
+      <div class="category-item" data-cat="jobs">
+        <div class="icon-box" data-cat="jobs"><i class="fas fa-briefcase color-brown"></i></div>
+        <div class="cat-label">Student Jobs</div>
+      </div>
+
+      <div class="category-item" data-cat="events">
+        <div class="icon-box" data-cat="events"><i class="fas fa-bell color-gold"></i></div>
+        <div class="cat-label">Events & Campus Activities</div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <a href="index.html"><img src="https://i.ibb.co/wNYjZG9k/Image-11-21-25-at-2-05-PM.png" alt="logo"></a>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

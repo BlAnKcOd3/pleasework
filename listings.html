@@ -246,7 +246,6 @@
         import { getFirestore, collection, query, where, onSnapshot, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Global variables (provided by Canvas environment)
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
@@ -258,7 +257,7 @@
         const headerTitle = document.getElementById('headerTitle');
         const pageTitle = document.getElementById('pageTitle');
         
-        // Map category keys to display names
+        // Map category keys to display names - Removed 'misc'
         const categoryMap = {
             'textbooks': 'Textbooks',
             'study-supplies': 'Study Supplies',
@@ -267,8 +266,7 @@
             'housing': 'Housing & Roommates',
             'services': 'Services & Rentals',
             'jobs': 'Student Jobs',
-            'events': 'Events & Campus Activities',
-            'misc': 'Miscellaneous'
+            'events': 'Events & Campus Activities'
         };
 
         // --- Utility Functions ---
@@ -321,6 +319,17 @@
         /**
          * Sets up Firebase, signs in, and starts listening for listings.
          */
+
+         // --- Firebase Configuration ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyBJJYUOM8EBEuT39DX2F_HtxgEbHDRH-Zc",
+            authDomain: "deanzahacks11-21-2025.firebaseapp.com",
+            projectId: "deanzahacks11-21-2025",
+            storageBucket: "deanzahacks11-21-2025.firebasestorage.app",
+            messagingSenderId: "253702257130",
+            appId: "1:253702257130:web:9ea8e3ee1bd291f1801a93",
+            measurementId: "G-5B84R81S31"
+        };
         async function setupFirebaseAndListeners() {
             if (!firebaseConfig) {
                 loadingIndicator.textContent = 'Configuration Error.';
@@ -376,7 +385,7 @@
                 orderBy('createdAt', 'desc')
             );
             
-            // --- NEW: Apply Category Filter ---
+            // Apply Category Filter
             if (currentCategory) {
                 console.log(`Filtering by category: ${currentCategory}`);
                 // Add the WHERE clause for the category
@@ -441,7 +450,7 @@
             window.location.href = 'listings.html'; 
         });
         
-        // --- Initialization ---
+        // --- Initialization ---\
         window.onload = setupFirebaseAndListeners;
 
     </script>

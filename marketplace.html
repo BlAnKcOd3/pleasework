@@ -10,11 +10,7 @@
 <body data-page="marketplace">
   <header class="header">
     <h1>De Anza Marketplace</h1>
-<<<<<<< HEAD
-    <a class="icon" title="Your account" href="dashboard.html"><i class="fas fa-user-circle"></i></a>
-=======
     <div id="userIcon" class="icon" title="Your account"><i class="fas fa-user-circle"></i></div>
->>>>>>> 53dac26318dc5226e1bc3559532d4896c16c2b68
   </header>
 
   <div class="container">
@@ -68,11 +64,6 @@
         <div class="icon-box" data-cat="events"><i class="fas fa-bell color-gold"></i></div>
         <div class="cat-label">Events & Campus Activities</div>
       </div>
-      
-      <div class="category-item" data-cat="misc">
-        <div class="icon-box" data-cat="misc"><i class="fas fa-ellipsis-h color-brown"></i></div>
-        <div class="cat-label">Miscellaneous</div>
-      </div>
     </div>
   </div>
 
@@ -88,7 +79,10 @@
     const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
     
     let auth;
-    // --- Firebase Configuration ---
+
+    // --- Firebase Setup ---
+
+// --- Firebase Configuration ---
         const firebaseConfig = {
             apiKey: "AIzaSyBJJYUOM8EBEuT39DX2F_HtxgEbHDRH-Zc",
             authDomain: "deanzahacks11-21-2025.firebaseapp.com",
@@ -98,7 +92,7 @@
             appId: "1:253702257130:web:9ea8e3ee1bd291f1801a93",
             measurementId: "G-5B84R81S31"
         };
-    // --- Firebase Setup ---
+
     function setupFirebase() {
         if (!firebaseConfig) {
             console.error("Firebase configuration is missing. Cannot initialize app.");

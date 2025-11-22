@@ -3,160 +3,16 @@
 <head>
   <meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Sell Item - De Anza</title>
-  <!-- Load FontAwesome for Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
-  <!-- Combined Styles (Assuming styles.css content is in the snippet below for single-file mandate) -->
-  <style>
-    /* Reusing Styles from other pages for consistency */
-    body {
-        background-color: #6e0b0f; /* Maroon color */
-        margin: 0;
-        font-family: 'Helvetica', sans-serif;
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
-    }
-
-    .header {
-        background-color: #ebc034; /* Gold */
-        height: 80px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: relative;
-        color: #6e0b0f; /* Maroon text */
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-    }
-    .header h1 {
-        margin: 0;
-        font-size: 2.5rem;
-    }
-
-    .container {
-        flex-grow: 1;
-        padding: 20px;
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-        background-color: #f0ce55; /* Gold/Mustard background */
-    }
-
-    .form {
-        background-color: white;
-        padding: 20px;
-        border-radius: 15px;
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-        max-width: 600px;
-        width: 100%;
-        border: 3px solid black;
-    }
-
-    .row {
-        display: flex;
-        gap: 15px;
-        flex-wrap: wrap;
-    }
-
-    .row > div {
-        flex: 1;
-        min-width: 150px;
-    }
-
-    label.small {
-        display: block;
-        font-weight: bold;
-        margin-bottom: 5px;
-        color: #4f090c;
-        font-size: 0.9rem;
-    }
-
-    .input, textarea {
-        width: 100%;
-        padding: 10px;
-        border: 2px solid #ccc;
-        border-radius: 8px;
-        box-sizing: border-box;
-        margin-bottom: 10px;
-        font-size: 1rem;
-    }
-
-    textarea {
-        resize: vertical;
-        min-height: 100px;
-    }
-
-    .btn {
-        padding: 12px 25px;
-        border: 3px solid black;
-        border-radius: 25px;
-        font-size: 1.1rem;
-        font-weight: bold;
-        cursor: pointer;
-        text-decoration: none;
-        text-align: center;
-        transition: background-color 0.2s, transform 0.1s;
-        box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-        flex: 1;
-        background-color: #6e0b0f;
-        color: white;
-    }
-    
-    .btn:active {
-        transform: translateY(1px);
-        box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
-    }
-    
-    .btn.secondary {
-        background: #fff;
-        color: #000;
-    }
-
-    .media-preview {
-        margin-top: 10px;
-        border: 1px dashed #ccc;
-        padding: 10px;
-        min-height: 50px;
-        text-align: center;
-        color: #666;
-    }
-    
-    /* Message Box Styling */
-    #message-box {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        background-color: #3b82f6;
-        color: white;
-        padding: 15px;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        display: none; /* Hidden by default */
-        z-index: 1000;
-        min-width: 250px;
-        text-align: center;
-    }
-    
-    #message-box.error {
-        background-color: #dc2626;
-    }
-    
-    @media (max-width: 600px) {
-        .row {
-            flex-direction: column;
-            gap: 0;
-        }
-        .row > div {
-            min-width: 100%;
-        }
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body data-page="sell">
   <header class="header"><h1>Sell / Publish</h1></header>
 
   <div class="container">
     <div class="form">
+      <!-- Success/Error Message Box -->
+      <div id="message-box" class="message-box" style="display: none;"></div>
+      
       <form id="sell-form">
         <div class="row">
           <div style="flex:1">
@@ -166,55 +22,87 @@
           <div style="width:160px">
             <label class="small">Category</label>
             <select class="input" name="category" required>
-              <!-- These values match the data-cat attributes in marketplace.html -->
+              <option value="" disabled selected>Select a category</option>
               <option value="textbooks">Textbooks</option>
               <option value="study-supplies">Study Supplies</option>
               <option value="electronics">Electronics</option>
-              <option value="bikes">Bikes</option>
-              <option value="housing">Housing</option>
-              <option value="services">Services</option>
-              <option value="jobs">Jobs</option>
-              <option value="events">Events</option>
-              <option value="misc">Other</option>
+              <option value="bikes">Bikes & Outdoors</option>
+              <option value="housing">Housing & Roommates</option>
+              <option value="services">Services & Rentals</option>
+              <option value="jobs">Student Jobs</option>
+              <option value="events">Events & Campus Activities</option>
             </select>
           </div>
         </div>
 
         <label class="small" style="margin-top:12px">Description</label>
-        <textarea name="description" placeholder="Add details, condition, pickup info..." required></textarea>
+        <textarea name="description" placeholder="Add details, condition, pickup info..."></textarea>
 
         <div class="row" style="margin-top:12px">
           <div style="flex:1">
             <label class="small">Price ($)</label>
-            <input class="input" type="number" name="price" step="0.01" min="0" placeholder="0 for free or job listing" required />
+            <input class="input" type="number" name="price" step="0.01" placeholder="0 for free or job listing" />
           </div>
           <div style="width:220px">
-            <label class="small">Image URL (Optional)</label>
-            <input class="input" type="url" name="image-url" placeholder="Paste a public image link" />
+            <label class="small">Add photos & videos</label>
+            <input id="media" class="input" type="file" name="media" accept="image/*,video/*" multiple />
           </div>
         </div>
-        
+
+        <div id="media-preview" class="media-preview"></div>
+
         <div style="margin-top:14px;display:flex;gap:12px">
-          <button class="btn" type="submit" id="publish-btn">Publish</button>
-          <a class="btn secondary" href="marketplace.html">Back to Marketplace</a>
+          <button class="btn" type="submit">Publish</button>
+          <a class="btn" href="listings.html" style="background:#fff;color:#000">View listings</a>
         </div>
       </form>
     </div>
   </div>
 
-  <div id="message-box"></div>
-  
+  <footer class="site-footer">
+    <p>&copy; 2025 De Anza Marketplace</p>
+  </footer>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
-    // Global variables for Firebase
-    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-    //const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+    // Global variables (provided by Canvas environment)
+
     const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-    
-    // --- Firebase Configuration ---
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+    let auth;
+    let db;
+    let storage;
+    let userId = null;
+
+    const sellForm = document.getElementById('sell-form');
+    const mediaInput = document.getElementById('media');
+    const mediaPreview = document.getElementById('media-preview');
+    const messageBox = document.getElementById('message-box');
+    const publishButton = sellForm.querySelector('button[type="submit"]');
+
+    // --- Utility Functions ---
+
+    function displayMessage(type, message) {
+        messageBox.textContent = message;
+        messageBox.style.display = 'block';
+        messageBox.style.backgroundColor = type === 'success' ? '#4CAF50' : '#f44336';
+        messageBox.style.color = 'white';
+        messageBox.style.padding = '10px';
+        messageBox.style.borderRadius = '8px';
+        messageBox.style.marginBottom = '20px';
+        // Hide after 5 seconds
+        setTimeout(() => {
+            messageBox.style.display = 'none';
+        }, 5000);
+    }
+
+    // --- Firebase Setup ---
+// --- Firebase Configuration ---
         const firebaseConfig = {
             apiKey: "AIzaSyBJJYUOM8EBEuT39DX2F_HtxgEbHDRH-Zc",
             authDomain: "deanzahacks11-21-2025.firebaseapp.com",
@@ -224,118 +112,152 @@
             appId: "1:253702257130:web:9ea8e3ee1bd291f1801a93",
             measurementId: "G-5B84R81S31"
         };
-
-
-    let auth, db, userId;
-    const form = document.getElementById('sell-form');
-    const publishBtn = document.getElementById('publish-btn');
-    const messageBox = document.getElementById('message-box');
-
-    // --- Utility Functions ---
-
-    function showMessage(message, type = 'info') {
-        messageBox.textContent = message;
-        messageBox.className = type === 'error' ? 'error' : 'info';
-        messageBox.style.display = 'block';
-        setTimeout(() => {
-            messageBox.style.display = 'none';
-        }, 3000);
-    }
-
-
-    // --- Firebase Setup ---
-
-
     function setupFirebase() {
         if (!firebaseConfig) {
-            console.error("Firebase configuration is missing.");
-            showMessage("Application error: Firebase not configured.", 'error');
+            console.error("Firebase configuration is missing. Cannot initialize app.");
+            displayMessage('error', 'App configuration error. Cannot publish.');
             return;
         }
-
         const app = initializeApp(firebaseConfig);
-        db = getFirestore(app);
         auth = getAuth(app);
-        
-        // Ensure authentication before allowing listing creation
-        onAuthStateChanged(auth, (user) => {
+        db = getFirestore(app);
+        storage = getStorage(app);
+
+        // Initial sign-in for Canvas environment
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
                 userId = user.uid;
-                console.log("User authenticated:", userId);
+                console.log(`User authenticated. UID: ${userId}`);
             } else {
-                 // Sign in anonymously if not already signed in
-                 signInAnonymously(auth).then(anonUser => {
-                    userId = anonUser.user.uid;
-                    console.log("Signed in anonymously:", userId);
-                 }).catch(e => {
-                    console.error("Anonymous Sign-In failed:", e);
-                    showMessage("Cannot authenticate for publishing.", 'error');
-                    publishBtn.disabled = true;
-                 });
+                // If the user isn't logged in (shouldn't happen on a page after marketplace, but as fallback)
+                // Sign in anonymously if initial token failed or is absent
+                try {
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                    userId = auth.currentUser.uid;
+                } catch (e) {
+                    console.error("Authentication failed:", e);
+                    displayMessage('error', 'Could not authenticate user. Please refresh.');
+                }
             }
         });
-
-        // Initial custom token sign-in if available (Canvas environment)
-        if (initialAuthToken) {
-            signInWithCustomToken(auth, initialAuthToken).catch(e => {
-                console.error("Custom Auth Token Sign-In failed:", e);
-            });
-        }
     }
+    
+    // --- Upload and Save Logic ---
 
-
-    // --- Form Submission Handler ---
-
-    async function handleSubmit(event) {
+    async function handleFormSubmit(event) {
         event.preventDefault();
         
         if (!userId) {
-            showMessage("Please wait for user authentication to complete.", 'error');
+            displayMessage('error', 'Authentication in progress. Please wait a moment and try again.');
             return;
         }
 
-        publishBtn.disabled = true;
-        publishBtn.textContent = 'Publishing...';
-        
-        const formData = new FormData(form);
-        const listingData = {
-            title: formData.get('title'),
-            category: formData.get('category'),
-            description: formData.get('description'),
-            // Convert price to number
-            price: parseFloat(formData.get('price')),
-            // Use provided URL or a placeholder
-            imageUrl: formData.get('image-url') || 'https://placehold.co/400x200/ccc/000?text=No+Image',
-            sellerId: userId,
-            // Use serverTimestamp for consistent creation time
-            createdAt: serverTimestamp(), 
-            // Add a friendly version of price for display (optional)
-            priceDisplay: `$${parseFloat(formData.get('price')).toFixed(2)}`
-        };
+        publishButton.disabled = true;
+        publishButton.textContent = 'Publishing...';
+        messageBox.style.display = 'none';
+
+        const formData = new FormData(sellForm);
+        const title = formData.get('title').trim();
+        const description = formData.get('description').trim();
+        const category = formData.get('category').trim();
+        const price = parseFloat(formData.get('price')) || 0;
+        const mediaFiles = mediaInput.files;
+        let imageUrl = null; // We only store the URL of the first image
 
         try {
-            // Firestore path: /artifacts/{appId}/public/data/listings
-            const collectionPath = `artifacts/${appId}/public/data/listings`;
-            
-            // Add the document to the 'listings' collection
-            const docRef = await addDoc(collection(db, collectionPath), listingData);
+            // 1. Upload the first file (if present) to Storage
+            if (mediaFiles.length > 0) {
+                const file = mediaFiles[0];
+                const storageRef = ref(storage, `listings/${userId}/${Date.now()}_${file.name}`);
+                const snapshot = await uploadBytes(storageRef, file);
+                imageUrl = await getDownloadURL(snapshot.ref);
+                console.log('File uploaded:', imageUrl);
+            }
 
-            showMessage(`Success! Listing published. ID: ${docRef.id}`, 'info');
-            form.reset(); // Clear the form on success
+            // 2. Save the listing data to Firestore
+            const listingsCollection = collection(db, `artifacts/${appId}/public/data/listings`);
+
+            await addDoc(listingsCollection, {
+                title: title,
+                description: description,
+                category: category,
+                price: price,
+                imageUrl: imageUrl, // Store the URL
+                sellerId: userId,
+                createdAt: serverTimestamp()
+            });
+
+            // 3. Success Feedback
+            displayMessage('success', 'Listing published successfully! Redirecting to marketplace...');
+            sellForm.reset();
+            mediaPreview.innerHTML = ''; // Clear preview
+            
+            // Redirect after success
+            setTimeout(() => {
+                window.location.href = 'listings.html';
+            }, 1500);
 
         } catch (error) {
-            console.error("Error adding document:", error);
-            showMessage(`Error publishing listing: ${error.message}`, 'error');
+            console.error("Error publishing listing:", error);
+            displayMessage('error', `Failed to publish listing: ${error.message}`);
         } finally {
-            publishBtn.disabled = false;
-            publishBtn.textContent = 'Publish';
+            publishButton.disabled = false;
+            publishButton.textContent = 'Publish';
+        }
+    }
+    
+    // --- Media Preview Logic ---
+
+    function handleMediaChange() {
+        mediaPreview.innerHTML = ''; // Clear previous previews
+        const files = mediaInput.files;
+        
+        if (files.length > 0) {
+            const file = files[0]; // Only show the first file in the simple preview
+            const reader = new FileReader();
+
+            reader.onload = (e) => {
+                let element;
+                if (file.type.startsWith('image/')) {
+                    element = document.createElement('img');
+                    element.src = e.target.result;
+                    element.style.maxHeight = '150px';
+                    element.style.objectFit = 'cover';
+                } else if (file.type.startsWith('video/')) {
+                    element = document.createElement('video');
+                    element.src = e.target.result;
+                    element.controls = true;
+                    element.style.maxHeight = '150px';
+                }
+                
+                if (element) {
+                    element.style.borderRadius = '8px';
+                    element.style.marginTop = '10px';
+                    element.style.maxWidth = '100%';
+                    mediaPreview.appendChild(element);
+                }
+                
+                if (files.length > 1) {
+                    const count = document.createElement('p');
+                    count.textContent = `+ ${files.length - 1} more file(s) attached.`;
+                    count.style.fontSize = '0.9em';
+                    count.style.color = '#555';
+                    mediaPreview.appendChild(count);
+                }
+            };
+            reader.readAsDataURL(file);
         }
     }
 
-    // --- Initialization ---
-    form.addEventListener('submit', handleSubmit);
-    setupFirebase();
+    // --- Initialization & Event Listeners ---
+    sellForm.addEventListener('submit', handleFormSubmit);
+    mediaInput.addEventListener('change', handleMediaChange);
 
+    window.onload = setupFirebase;
   </script>
 </body>
 </html>

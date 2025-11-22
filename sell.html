@@ -237,8 +237,9 @@
             <input class="input" type="number" name="price" step="0.01" placeholder="0" required />
           </div>
           <div style="width:220px">
-            <label class="small">Add photos</label>
-            <input id="media" class="input" type="file" name="media" accept="image/*" />
+            <!-- UPDATED: Changed from type="file" to type="url" -->
+            <label class="small">Image Link (URL)</label>
+            <input id="media" class="input" type="url" name="imageUrl" placeholder="E.g., https://placehold.co/400x300" />
           </div>
         </div>
         
@@ -271,21 +272,22 @@
   </footer>
 
   <!--
-    NOTE: In a real environment, __firebase_config and __app_id would be provided
-    by the runtime. Using fallback values for demonstration.
+    NOTE: For VS Code / GitHub Pages, we rely on the placeholder firebaseConfig
+    and simple anonymous sign-in, as environment tokens are not available.
   -->
   <script type="module">
     // Firebase imports (v11)
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, collection, addDoc, serverTimestamp, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+    // NOTE: Removed getStorage and related imports as we now use image links, not file uploads.
     
     // Global Firebase instances
-    let app, auth, db, storage, userId = null;
+    let app, auth, db, userId = null;
     setLogLevel('Debug');
 
     // --- Firebase Configuration Setup ---
+    // Safely check for environment variables and use placeholders if they don't exist.
     const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
         apiKey: "AIzaSyBJJYUOM8EBEuT39DX2F_HtxhEbHDRH-Zc",
         authDomain: "deanzahacks11-21-2025.firebaseapp.com",
@@ -301,7 +303,7 @@
     const sellForm = document.getElementById('sell-form');
     const submitButton = document.getElementById('publish-btn');
     const messageBox = document.getElementById('message-box');
-    const mediaInput = document.getElementById('media');
+    const mediaInput = document.getElementById('media'); // This is now the URL input
     const mediaPreview = document.getElementById('media-preview');
 
     // --- Utility Functions ---
@@ -313,31 +315,8 @@
     }
 
     /**
-     * Uploads an image file to Firebase Storage.
-     * @param {File} file The image file to upload.
-     * @returns {Promise<string|null>} The download URL of the uploaded image, or null on failure.
-     */
-    async function uploadImage(file) {
-        if (!file || !storage || !userId) return null;
-
-        const fileExtension = file.name.split('.').pop();
-        // Use a unique path: artifacts/{appId}/listings/{userId}_{timestamp}.{ext}
-        const fileName = `${userId}_${Date.now()}.${fileExtension}`;
-        const storageRef = ref(storage, `artifacts/${appId}/listings/${fileName}`);
-
-        try {
-            const snapshot = await uploadBytes(storageRef, file);
-            const downloadURL = await getDownloadURL(snapshot.ref);
-            return downloadURL;
-        } catch (error) {
-            console.error("Image upload failed:", error);
-            showMessage(`Image upload failed. Check the file size or format.`, 'error');
-            return null;
-        }
-    }
-
-    /**
      * Handles the form submission to create a new listing.
+     * The image URL is now read directly from the form and saved to Firestore.
      * @param {Event} event The submit event.
      */
     function handleSellForm(event) {
@@ -353,7 +332,8 @@
         const description = formData.get('description').trim();
         const category = formData.get('category');
         const price = parseFloat(formData.get('price'));
-        const file = formData.get('media');
+        // UPDATED: Get the image URL string directly
+        const imageUrl = formData.get('imageUrl').trim(); 
 
         const contactEmail = formData.get('contactEmail').trim();
         const contactPhone = formData.get('contactPhone').trim();
@@ -361,31 +341,23 @@
         submitButton.disabled = true;
         showMessage("Publishing listing, please wait...", 'info');
         
-        let imageUrl = '';
+        // Prepare and save listing data to Firestore (no file upload needed)
+        const listingData = {
+            userId: userId,
+            title: title,
+            description: description,
+            category: category,
+            price: price,
+            image: imageUrl, // Use the provided URL
+            contactEmail: contactEmail,
+            contactPhone: contactPhone,
+            createdAt: serverTimestamp()
+        };
 
-        // 1. Upload the image (if one was selected)
-        const uploadPromise = file.name ? uploadImage(file) : Promise.resolve('');
-
-        uploadPromise
-            .then(url => {
-                imageUrl = url;
-                // 2. Prepare and save listing data to Firestore
-                const listingData = {
-                    userId: userId,
-                    title: title,
-                    description: description,
-                    category: category,
-                    price: price,
-                    image: imageUrl, 
-                    contactEmail: contactEmail,
-                    contactPhone: contactPhone,
-                    createdAt: serverTimestamp()
-                };
-
-                // Public collection path: artifacts/{appId}/public/data/listings
-                const listingsRef = collection(db, `artifacts/${appId}/public/data/listings`);
-                return addDoc(listingsRef, listingData);
-            })
+        // Public collection path: artifacts/{appId}/public/data/listings
+        const listingsRef = collection(db, `artifacts/${appId}/public/data/listings`);
+        
+        addDoc(listingsRef, listingData)
             .then(() => {
                 showMessage("Listing successfully published! Redirecting to marketplace...", 'success');
                 sellForm.reset();
@@ -403,21 +375,22 @@
     }
 
     /**
-     * Handles file selection to display a quick image preview.
-     * @param {Event} event The change event.
+     * Handles link input to display a quick image preview.
      */
-    function handleMediaChange(event) {
+    function handleMediaChange() {
         mediaPreview.innerHTML = '';
-        const file = event.target.files[0];
-        if (file && file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = document.createElement('img');
-                img.src = e.target.result;
-                img.alt = 'Image Preview';
-                mediaPreview.appendChild(img);
+        const url = mediaInput.value.trim();
+        
+        if (url) {
+            const img = document.createElement('img');
+            img.src = url;
+            img.alt = 'Image Preview';
+            img.onerror = () => {
+                 // Fallback image if the provided link is broken
+                 img.src = 'https://placehold.co/80x80/6e0b0f/fff?text=Link+Error';
+                 img.alt = 'Image Link Error';
             };
-            reader.readAsDataURL(file);
+            mediaPreview.appendChild(img);
         }
     }
 
@@ -429,28 +402,32 @@
             app = initializeApp(firebaseConfig);
             auth = getAuth(app);
             db = getFirestore(app);
-            storage = getStorage(app); 
 
-            // 2. Authentication setup
+            // 2. Authentication: Sign in anonymously immediately.
+            // This is crucial for local/static hosting (GitHub Pages) to ensure a userId is available.
+            signInAnonymously(auth).then(userCredential => {
+                userId = userCredential.user.uid;
+                console.log("User authenticated anonymously. UID:", userId);
+                showMessage(`Ready to publish. User ID: ${userId.substring(0, 8)}...`, 'info'); 
+                submitButton.disabled = false; // Enable form submission
+            }).catch(e => {
+                console.error("Authentication failed:", e);
+                showMessage('Authentication failed. Publishing is disabled.', 'error');
+                submitButton.disabled = true;
+            });
+
+            // Optional: Listener to handle any later auth state changes
             onAuthStateChanged(auth, (user) => {
                 if (user) {
                     userId = user.uid;
-                    console.log("User authenticated. UID:", userId);
-                    showMessage(`Ready to publish. User ID: ${userId.substring(0, 8)}...`, 'info');
-                    submitButton.disabled = false; // Enable form submission
                 } else {
-                     // Sign in anonymously if no user is found
-                     signInAnonymously(auth).catch(e => {
-                        console.error("Anonymous Sign-In failed:", e);
-                        showMessage('Authentication failed. Publishing is disabled.', 'error');
-                        submitButton.disabled = true;
-                    });
+                    userId = null;
                 }
             });
             
             // 3. Attach event listeners
             sellForm.addEventListener('submit', handleSellForm);
-            mediaInput.addEventListener('change', handleMediaChange);
+            mediaInput.addEventListener('input', handleMediaChange); // Use 'input' for real-time URL preview
 
         } catch (error) {
             console.error("FATAL Firebase Initialization Error:", error);

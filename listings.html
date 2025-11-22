@@ -53,11 +53,18 @@
             listingsContainer.innerHTML = '<p style="color:#888;">Loading listings...</p>';
             try {
                 const res = await fetch('http://localhost:3000/listings');
+                if (!res.ok) {
+                    const errText = await res.text();
+                    listingsContainer.innerHTML = `<p style='color:#c00;'>Error loading listings: ${errText}</p>`;
+                    console.error('Fetch listings error:', errText);
+                    return;
+                }
                 const data = await res.json();
                 allListings = data.listings || [];
                 renderListings(category);
             } catch (err) {
-                listingsContainer.innerHTML = '<p style="color:#c00;">Error loading listings.</p>';
+                listingsContainer.innerHTML = `<p style='color:#c00;'>Error loading listings: ${err.message}</p>`;
+                console.error('Fetch listings error:', err);
             }
         }
 

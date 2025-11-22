@@ -130,6 +130,12 @@
             listingsContainer.innerHTML = '<p style="color:#888;">Loading listings...</p>';
             try {
                 const res = await fetch('http://localhost:3000/listings');
+                if (!res.ok) {
+                    const errText = await res.text();
+                    listingsContainer.innerHTML = `<p style='color:#c00;'>Error loading listings: ${errText}</p>`;
+                    console.error('Fetch listings error:', errText);
+                    return;
+                }
                 const data = await res.json();
                 let listings = data.listings || [];
                 if (filterMy && currentUser) {
@@ -153,7 +159,8 @@
                     listingsContainer.appendChild(div);
                 });
             } catch (err) {
-                listingsContainer.innerHTML = '<p style="color:#c00;">Error loading listings.</p>';
+                listingsContainer.innerHTML = `<p style='color:#c00;'>Error loading listings: ${err.message}</p>`;
+                console.error('Fetch listings error:', err);
             }
         }
 
@@ -204,13 +211,19 @@
                     },
                     body: JSON.stringify(listing)
                 });
-                if (!res.ok) throw new Error('Failed to upload listing');
+                if (!res.ok) {
+                    const errText = await res.text();
+                    showNotification('Error uploading listing: ' + errText);
+                    console.error('Post listing error:', errText);
+                    return;
+                }
                 showNotification('Listing uploaded successfully!');
                 form.reset();
                 preview.style.display = 'none';
                 fetchListings();
             } catch (err) {
-                showNotification('Error uploading listing.');
+                showNotification('Error uploading listing: ' + err.message);
+                console.error('Post listing error:', err);
             }
         }
 
